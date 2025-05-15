@@ -22,19 +22,19 @@ class DashboardController extends Controller
     {
         switch ($role) {
             case 'admin':
-                return view('dashboard.admin');
+                return view('pages.dashboard.admin');
             case 'mahasiswa':
-                return view('dashboard.mahasiswa');
+                return view('pages.dashboard.mahasiswa');
             case 'dosen':
-                return view('dashboard.dosen');
+                return view('pages.dashboard.dosen');
             case 'tendik':
-                return view('dashboard.tendik');
+                return view('pages.dashboard.tendik');
             case 'sarpras':
-                return view('dashboard.sarpras');
+                return view('pages.dashboard.sarpras');
             case 'teknisi':
-                return view('dashboard.teknisi');
+                return view('pages.dashboard.teknisi');
             default:
-                return view('dashboard.default');
+                return view('pages.dashboard.default');
         }
     }
 }

@@ -29,8 +29,8 @@ Route::middleware('auth')->group(function () {
             abort(403, 'Unauthorized action.');
         }
 
-        if (view()->exists("dashboard.{$role}")) {
-            return view("dashboard.{$role}");
+        if (view()->exists("pages.dashboard.{$role}")) {
+            return view("pages.dashboard.{$role}");
         }
 
         return view('dashboard.default');
