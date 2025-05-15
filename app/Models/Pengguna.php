@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Pengguna extends Model
+class Pengguna extends Authenticatable
 {
-    use HasFactory;
+    use Notifiable;
+
     protected $table = 'pengguna';
     protected $primaryKey = 'id_pengguna';
 
@@ -24,7 +25,8 @@ class Pengguna extends Model
         'kata_sandi',
     ];
 
-    protected $casts = [
-        'kata_sandi' => 'hashed',
-    ];
+    public function getAuthPassword()
+    {
+        return $this->kata_sandi;
+    }
 }
