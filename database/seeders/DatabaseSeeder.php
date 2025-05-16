@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             PenggunaSeeder::class,
             GedungSeeder::class,
             PeriodeSeeder::class,
+            RuangSeeder::class,
+            FasilitasSeeder::class,
         ]);
     }
 }
