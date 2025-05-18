@@ -1,125 +1,204 @@
-{{-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SiLapor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    @vite('resources/css/app.css')
+    <style>
+        .macbook-air {
+            display: flex;
+            min-height: 100vh;
+        }
+        .overlap-wrapper {
+            width: 100%;
+        }
+        .overlap {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+        .frame {
+            width: 50%;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .div {
+            max-width: 450px;
+            width: 100%;
+        }
+        .group {
+            margin-bottom: 30px;
+        }
+        .frame-2 {
+            margin-bottom: 30px;
+        }
+        .text-wrapper {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .lorem-ipsum-dolor {
+            color: #666;
+            line-height: 1.5;
+        }
+        .form {
+            width: 100%;
+        }
+        .inputs {
+            margin-bottom: 20px;
+        }
+        .input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .text-wrapper-2 {
+            text-align: right;
+            color: #666;
+            margin-bottom: 24px;
+            cursor: pointer;
+        }
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .button, .button-wrapper {
+            width: 100%;
+        }
+        .button-2 {
+            width: 100%;
+            padding: 12px;
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .button-3 {
+            width: 100%;
+            padding: 12px;
+            background-color: white;
+            color: #3B82F6;
+            border: 1px solid #3B82F6;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .overlap-group-wrapper {
+            width: 50%;
+            background-color: #3B82F6;
+            position: relative;
+            overflow: hidden;
+        }
+        .overlap-2 {
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 40px;
+        }
+        .text-wrapper-3 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        .sistem-manajemen {
+            font-size: 18px;
+            text-align: center;
+            line-height: 1.5;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Login SiLapor</h4>
+<body>
+    <div class="macbook-air">
+        <div class="overlap-wrapper">
+            <div class="overlap">
+                <div class="frame">
+                    <div class="div">
+                        <div class="group">
+                            <div class="overlap-group">
+                                <div class="ellipse"></div>
+                                <div class="layer">
+                                    <div class="overlap-group-2">
+                                        <!-- Image placeholders - add these to your project -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="frame-2">
+                            <div class="text-wrapper">Selamat Datang</div>
+                            <p class="lorem-ipsum-dolor">
+                                Silahkan masuk ke akun Anda untuk mengakses sistem pelaporan dan perbaikan fasilitas kampus.
+                            </p>
+                        </div>
+                        
+                        <div class="form">
+                            @if($errors->any())
+                                <div style="color: #EF4444; margin-bottom: 16px; padding: 12px; background-color: #FEF2F2; border-radius: 8px;">
+                                    <ul style="margin: 0; padding-left: 20px;">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <form method="POST" action="{{ route('login') }}">
+                                @csrf
+                                <div class="inputs">
+                                    <input class="input" 
+                                        placeholder="Nama Pengguna" 
+                                        type="text" 
+                                        id="nama_pengguna" 
+                                        name="nama_pengguna" 
+                                        value="{{ old('nama_pengguna') }}" 
+                                        required 
+                                        autofocus>
+                                    
+                                    <input class="input" 
+                                        placeholder="Kata Sandi" 
+                                        type="password" 
+                                        id="kata_sandi" 
+                                        name="kata_sandi" 
+                                        required>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+                                    <div>
+                                        <input type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                                        <label for="remember">Ingat Saya</label>
+                                    </div>
+                                    <div class="text-wrapper-2">Lupa kata sandi?</div>
+                                </div>
+                                
+                                <div class="actions">
+                                    <button type="submit" class="button-2">Masuk</button>
+                                    <button type="button" class="button-3">Buat Akun Baru</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        @if($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        <form method="POST" action="{{ route('login') }}">
-                            @csrf
-
-                            <div class="mb-3">
-                                <label for="nama_pengguna" class="form-label">Nama Pengguna</label>
-                                <input id="nama_pengguna" type="text" class="form-control @error('nama_pengguna') is-invalid @enderror"
-                                    name="nama_pengguna" value="{{ old('nama_pengguna') }}" required autofocus>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="kata_sandi" class="form-label">Kata Sandi</label>
-                                <input id="kata_sandi" type="password" class="form-control @error('kata_sandi') is-invalid @enderror"
-                                    name="kata_sandi" required>
-                            </div>
-
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="remember">Ingat Saya</label>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Login</button>
-                            </div>
-                        </form>
+                </div>
+                
+                <div class="overlap-group-wrapper">
+                    <div class="overlap-2">
+                        <div class="text-wrapper-3">SiLapor</div>
+                        <p class="sistem-manajemen">Sistem Manajemen Pelaporan <br>dan Perbaikan Fasilitas Kampus</p>
+                        <!-- Image placeholders - add these images to your project -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </body>
-</html> --}}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="globals.css" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="macbook-air">
-      <div class="overlap-wrapper">
-        <div class="overlap">
-          <div class="frame">
-            <div class="div">
-              <div class="group">
-                <div class="overlap-group">
-                  <div class="ellipse"></div>
-                  <div class="layer">
-                    <div class="overlap-group-2">
-                      <img class="g" src="img/g-1026.png" />
-                      <img class="path" src="img/path1240-5-7-9.svg" />
-                      <img class="img" src="img/path1240-5-2-24-6.svg" />
-                      <img class="path-2" src="img/path1230-4-0-9.svg" />
-                      <img class="path-3" src="img/path1232-8-6-33.svg" />
-                    </div>
-                    <img class="rect" src="img/rect-4529.svg" />
-                  </div>
-                </div>
-              </div>
-              <div class="frame-2">
-                <div class="text-wrapper">Welcome</div>
-                <p class="lorem-ipsum-dolor">
-                  Lorem ipsum dolor sit amet consectetur. Aenean <br />consectetur leo dolor a netus eu.
-                </p>
-              </div>
-              <div class="form">
-                <div class="inputs">
-                  <input class="input" placeholder="Email" type="email" id="input-1" />
-                  <div class="placeholder-wrapper"><label class="placeholder" for="input-1">Password</label></div>
-                </div>
-                <div class="text-wrapper-2">Forgot your password?</div>
-                <div class="actions">
-                  <button class="button"><button class="button-2">Sign in</button></button>
-                  <button class="button-wrapper"><button class="button-3">Create new account</button></button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="overlap-group-wrapper">
-            <div class="overlap-2">
-              <div class="overlap-3">
-                <img class="background-complete" src="img/background-complete.png" />
-                <img class="chart" src="img/chart-3.png" />
-                <img class="chart-2" src="img/chart-2.png" />
-                <img class="chart-3" src="img/chart-1.png" />
-                <img class="character" src="img/character.png" />
-                <p class="sistem-manajemen">Sistem Manajemen Pelaporan <br />dan Perbaikan Fasilitas Kampus</p>
-              </div>
-              <img class="plant" src="img/plant.png" />
-              <div class="text-wrapper-3">SiLapor</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>
 </html>
