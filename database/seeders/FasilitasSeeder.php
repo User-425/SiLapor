@@ -29,7 +29,7 @@ class FasilitasSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id_ruang' => 4,
+                'id_ruang' => 2,
                 'nama_fasilitas' => 'Papan Tulis',
                 'deskripsi' => 'Papan tulis putih',
                 'created_at' => now(),
