@@ -55,6 +55,17 @@ Route::middleware('auth')->group(function () {
 
 
 // Gedung
+use App\Http\Controllers\GedungController;
+
+Route::prefix('gedung')->group(function () {
+    Route::get('/', [GedungController::class, 'index'])->name('gedung.index');
+    Route::get('/create', [GedungController::class, 'create'])->name('gedung.create');
+    Route::post('/', [GedungController::class, 'store'])->name('gedung.store');
+    Route::get('/{gedung}/edit', [GedungController::class, 'edit'])->name('gedung.edit');
+    Route::put('/{gedung}', [GedungController::class, 'update'])->name('gedung.update');
+    Route::delete('/{gedung}', [GedungController::class, 'destroy'])->name('gedung.destroy');
+});
+
 
 
 // Periode
