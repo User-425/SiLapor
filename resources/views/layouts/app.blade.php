@@ -8,6 +8,9 @@
 
     @vite('resources/css/app.css')
     @yield('styles')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css">
+    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
 </head>
 
 <body class="bg-gray-100">

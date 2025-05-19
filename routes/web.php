@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +37,14 @@ Route::middleware('auth')->group(function () {
 
         return view('dashboard.default');
     })->name('dashboard.role');
+
+    Route::get('/pengguna', [PenggunaController::class, 'index'])->name('users.index');
+    Route::get('/pengguna/create', [PenggunaController::class, 'create'])->name('users.create');
+    Route::post('/pengguna', [PenggunaController::class, 'store'])->name('users.store');
+    Route::get('/pengguna/{pengguna}/edit', [PenggunaController::class, 'edit'])->name('users.edit');
+    Route::put('/pengguna/{pengguna}', [PenggunaController::class, 'update'])->name('users.update');
+    Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'destroy'])->name('users.destroy');
+
 });
 
 // Fasilitas
