@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PeriodeController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -57,6 +58,6 @@ Route::middleware('auth')->group(function () {
 
 
 // Periode
-
+Route::resource('periode', PeriodeController::class);
 
 //
