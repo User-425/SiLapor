@@ -37,3 +37,17 @@ Route::middleware('auth')->group(function () {
         return view('dashboard.default');
     })->name('dashboard.role');
 });
+
+// Fasilitas
+
+
+// Ruang
+
+
+// Gedung
+
+
+// Periode
+
+
+//
