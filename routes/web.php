@@ -5,6 +5,7 @@ use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeriodeController;
+use App\Http\Controllers\RuangController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -52,6 +53,15 @@ Route::middleware('auth')->group(function () {
 
 
 // Ruang
+Route::prefix('ruang')->group(function () {
+    Route::get('/', [RuangController::class, 'index'])->name('ruang.index');
+    Route::get('/create', [RuangController::class, 'create'])->name('ruang.create');
+    Route::post('/', [RuangController::class, 'store'])->name('ruang.store');
+    Route::get('/{ruang}/edit', [RuangController::class, 'edit'])->name('ruang.edit');
+    Route::put('/{ruang}', [RuangController::class, 'update'])->name('ruang.update');
+    Route::delete('/{ruang}', [RuangController::class, 'destroy'])->name('ruang.destroy');
+});
+
 
 
 // Gedung
