@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\RuangController;
+use App\Http\Controllers\FasilitasController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -50,6 +51,14 @@ Route::middleware('auth')->group(function () {
 });
 
 // Fasilitas
+Route::prefix('fasilitas')->group(function () {
+    Route::get('/', [FasilitasController::class, 'index'])->name('fasilitas.index');
+    Route::get('/create', [FasilitasController::class, 'create'])->name('fasilitas.create');
+    Route::post('/', [FasilitasController::class, 'store'])->name('fasilitas.store');
+    Route::get('/{fasilitas}/edit', [FasilitasController::class, 'edit'])->name('fasilitas.edit');
+    Route::put('/{fasilitas}', [FasilitasController::class, 'update'])->name('fasilitas.update');
+    Route::delete('/{fasilitas}', [FasilitasController::class, 'destroy'])->name('fasilitas.destroy');
+});
 
 
 // Ruang
