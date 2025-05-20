@@ -11,9 +11,17 @@ class PeriodeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $periodes = Periode::orderBy('tanggal_mulai', 'desc')->paginate(10);
+        $query = Periode::query();
+
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where('nama_periode', 'like', "%$q%");
+        }
+
+        $periodes = $query->orderBy('tanggal_mulai', 'desc')->paginate(10);
+
         return view('pages.periode.index', compact('periodes'));
     }
 

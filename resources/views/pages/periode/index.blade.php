@@ -11,39 +11,29 @@
 @endif
 
 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-    <div class="flex justify-between items-center mb-4">
-        <h1 class="text-xl font-semibold text-gray-800">Daftar Periode</h1>
-        <button type="button" id="addPeriodBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-            Tambah Periode
-        </button>
-    </div>
+    <h1 class="text-xl font-semibold text-gray-800 mb-4">Daftar Periode</h1>
 
-    <!-- Search and Filter -->
-    <div class="flex flex-col md:flex-row justify-between mb-4">
-        <div class="w-full md:w-64 mb-4 md:mb-0">
+    <!-- Search & Add Button in one row -->
+    <div class="flex justify-between items-center mb-4">
+        <form id="searchForm" method="GET" action="{{ route('periode.index') }}" class="w-full max-w-xs">
             <div class="relative">
-                <input type="text" placeholder="Cari periode..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ request('q') }}"
+                    placeholder="Cari periode..."
+                    class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
             </div>
-        </div>
-
-        <div class="flex space-x-2">
-            <select class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Semua Tahun</option>
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-            </select>
-            <select class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Status</option>
-                <option value="active">Aktif</option>
-                <option value="inactive">Tidak Aktif</option>
-            </select>
-        </div>
+        </form>
+        <button type="button" id="addPeriodBtn" class="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Tambah Periode
+        </button>
     </div>
 
     <!-- Periods Table -->
@@ -51,26 +41,26 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Periode</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-left">Nama Periode</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Tanggal Mulai</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Tanggal Selesai</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody id="periodeTableBody" class="bg-white divide-y divide-gray-200">
                 @forelse($periodes as $periode)
-                <tr class="text-center align-middle">
-                    <td class="px-6 py-4 whitespace-nowrap align-middle">
-                        <div class="text-sm text-left font-medium text-gray-900">{{ $periode->nama_periode }}</div>
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
+                        <div class="text-sm font-medium text-left text-gray-900">{{ $periode->nama_periode }}</div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap align-middle">
+                    <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
                         <div class="text-sm text-gray-900">{{ date('d-m-Y', strtotime($periode->tanggal_mulai)) }}</div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap align-middle">
+                    <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
                         <div class="text-sm text-gray-900">{{ date('d-m-Y', strtotime($periode->tanggal_selesai)) }}</div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap align-middle text-sm font-medium">
-                        <div class="flex items-center justify-center space-x-2">
+                    <td class="px-6 py-4 whitespace-nowrap align-middle text-sm font-medium text-center">
+                        <div class="flex justify-center space-x-2">
                             <button class="edit-btn text-indigo-600 hover:text-indigo-900" data-id="{{ $periode->id }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -109,7 +99,7 @@
             @endif
         </div>
         <div>
-            {{ $periodes->links() }}
+            {{ $periodes->appends(['q' => request('q')])->links() }}
         </div>
     </div>
 </div>
@@ -213,6 +203,32 @@
                     });
             });
         });
+    });
+
+    // Debounce search form submission
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('input[name="q"]');
+        const tableBody = document.getElementById('periodeTableBody');
+        let timeout = null;
+
+        if (searchInput && tableBody) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(timeout);
+                timeout = setTimeout(function () {
+                    fetch(`{{ route('periode.index') }}?q=${encodeURIComponent(searchInput.value)}`)
+                        .then(response => response.text())
+                        .then(html => {
+                            // Ambil tbody dari response HTML
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newTbody = doc.getElementById('periodeTableBody');
+                            if (newTbody) {
+                                tableBody.innerHTML = newTbody.innerHTML;
+                            }
+                        });
+                }, 500);
+            });
+        }
     });
 </script>
 @endsection
