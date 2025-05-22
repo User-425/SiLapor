@@ -15,21 +15,18 @@ class FasilitasSeeder extends Seeder
     {
          $fasilitas = [
             [
-                'id_ruang' => 3,
                 'nama_fasilitas' => 'Proyektor',
                 'deskripsi' => 'Proyektor Epson',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_ruang' => 3,
                 'nama_fasilitas' => 'AC',
                 'deskripsi' => 'AC LG',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_ruang' => 2,
                 'nama_fasilitas' => 'Papan Tulis',
                 'deskripsi' => 'Papan tulis putih',
                 'created_at' => now(),

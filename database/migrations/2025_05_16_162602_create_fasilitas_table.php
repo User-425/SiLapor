@@ -13,12 +13,9 @@ return new class extends Migration
     {
         Schema::create('fasilitas', function (Blueprint $table) {
             $table->id('id_fasilitas');
-            $table->unsignedBigInteger('id_ruang');
             $table->string('nama_fasilitas', 100);
             $table->text('deskripsi')->nullable();
             $table->timestamps();
-
-            $table->foreign('id_ruang')->references('id_ruang')->on('ruang');
         });
     }
 

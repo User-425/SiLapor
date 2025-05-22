@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             PeriodeSeeder::class,
             RuangSeeder::class,
             FasilitasSeeder::class,
+            FasRuangSeeder::class,
+            LaporanKerusakanSeeder::class,
         ]);
     }
 }
