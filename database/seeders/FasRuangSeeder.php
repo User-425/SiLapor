@@ -14,42 +14,42 @@ class FasRuangSeeder extends Seeder
     {
         $fasilitasRuang = [
             [
-                'id_fasilitas' => 1, 
-                'id_ruang' => 1, 
+                'id_fasilitas' => 1,
+                'id_ruang' => 1,
                 'kode_fasilitas' => 'PRJ-RT01-01',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_fasilitas' => 1, 
-                'id_ruang' => 1, 
+                'id_fasilitas' => 1,
+                'id_ruang' => 1,
                 'kode_fasilitas' => 'PRJ-RT01-02',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id_fasilitas' => 2,
-                'id_ruang' => 1, 
+                'id_ruang' => 1,
                 'kode_fasilitas' => 'AC-RT01-01',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id_fasilitas' => 2,
-                'id_ruang' => 2, 
+                'id_ruang' => 2,
                 'kode_fasilitas' => 'AC-RT02-01',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_fasilitas' => 2,
+                'id_fasilitas' => 3,
                 'id_ruang' => 2,
                 'kode_fasilitas' => 'PT-RT03-01',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
         ];
-        
+
         DB::table('fasilitas_ruang')->insert($fasilitasRuang);
     }
 }
