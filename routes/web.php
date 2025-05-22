@@ -7,7 +7,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\RuangController;
 use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\GedungController;
 use Illuminate\Support\Facades\Auth;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -74,7 +76,6 @@ Route::prefix('ruang')->group(function () {
 
 
 // Gedung
-use App\Http\Controllers\GedungController;
 
 Route::prefix('gedung')->group(function () {
     Route::get('/', [GedungController::class, 'index'])->name('gedung.index');
