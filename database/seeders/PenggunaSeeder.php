@@ -32,6 +32,15 @@ class PenggunaSeeder extends Seeder
         ]);
 
         Pengguna::create([
+            'nama_pengguna' => 'Dosen',
+            'kata_sandi' => Hash::make('password'),
+            'peran' => 'dosen',
+            'nama_lengkap' => 'Dosen Ngoding',
+            'email' => 'dosen@silapor.com',
+            'nomor_telepon' => '081234567891',
+        ]);
+
+        Pengguna::create([
             'nama_pengguna' => 'SarPras',
             'kata_sandi' => Hash::make('password'),
             'peran' => 'sarpras',
