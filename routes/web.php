@@ -50,6 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengguna/{pengguna}/edit', [PenggunaController::class, 'edit'])->name('users.edit');
     Route::put('/pengguna/{pengguna}', [PenggunaController::class, 'update'])->name('users.update');
     Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'destroy'])->name('users.destroy');
+    Route::get('/profile', [PenggunaController::class, 'profile'])->name('profile');
+    Route::post('/profile', [PenggunaController::class, 'updateProfile'])->name('profile.update');
+   
 
     // laporan
     Route::resource('laporan', LaporanKerusakanController::class);

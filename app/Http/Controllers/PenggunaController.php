@@ -6,6 +6,8 @@ use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class PenggunaController extends Controller
 {
@@ -22,10 +24,10 @@ class PenggunaController extends Controller
         // Search functionality
         if ($request->has('search') && !empty($request->search)) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_lengkap', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('email', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('nama_pengguna', 'LIKE', "%{$searchTerm}%");
+                    ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('nama_pengguna', 'LIKE', "%{$searchTerm}%");
             });
         }
 
@@ -130,5 +132,49 @@ class PenggunaController extends Controller
     {
         $pengguna->delete();
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus!');
+    }
+
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('pages.profile', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $authUser = Auth::user();
+        $user = Pengguna::where('id_pengguna', $authUser->id_pengguna)->firstOrFail();
+
+        $request->validate([
+            'nama_lengkap' => 'required|string|max:100',
+            'email' => ['required', 'string', 'email', 'max:100', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
+            'nama_pengguna' => ['required', 'string', 'max:50', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
+            'kata_sandi' => 'nullable|string|min:8|confirmed',
+            'nomor_telepon' => 'nullable|string|max:15',
+            'img_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $data = [
+            'nama_lengkap' => $request->nama_lengkap,
+            'email' => $request->email,
+            'nama_pengguna' => $request->nama_pengguna,
+            'nomor_telepon' => $request->nomor_telepon,
+        ];
+
+        if ($request->filled('kata_sandi')) {
+            $data['kata_sandi'] = Hash::make($request->kata_sandi);
+        }
+
+        if ($request->hasFile('img_url')) {
+            // Delete old photo if exists
+            if ($user->img_url && Storage::disk('public')->exists($user->img_url)) {
+                Storage::disk('public')->delete($user->img_url);
+            }
+            $data['img_url'] = $request->file('img_url')->store('profile_photos', 'public');
+        }
+
+        $user->update($data);
+
+        return redirect()->route('profile')->with('success', 'Profil berhasil diperbarui!');
     }
 }

@@ -23,7 +23,7 @@
                 <span class="ml-3">Dashboard</span>
             </a>
             @auth
-    @if(auth()->user()->peran === 'admin')
+            @if(auth()->user()->peran === 'admin')
             <a href="{{ route('users.index') }}"
                 class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('users.*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -65,30 +65,15 @@
             </a>
             @endif
 
- @if(auth()->user()->peran === 'mahasiswa' || auth()->user()->peran === 'dosen' || auth()->user()->peran === 'tendik')
-                <a href="/laporan" class="flex items-center mt-4 py-3 px-4 {{ request()->is('laporan*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+            @if(auth()->user()->peran === 'mahasiswa' || auth()->user()->peran === 'dosen' || auth()->user()->peran === 'tendik')
+            <a href="/laporan" class="flex items-center mt-4 py-3 px-4 {{ request()->is('laporan*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" />
                 </svg>
                 <span class="ml-3">Laporan</span>
             </a>
- @endif
-@endauth
-
-            <form method="POST" action="{{ route('logout') }}" class="mt-4">
-                @csrf
-                <button type="submit"
-                    class="flex w-full items-center py-3 px-4 text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="ml-3">Sign Out</span>
-                </button>
-            </form>
-
+            @endif
+            @endauth
         </div>
     </nav>
 </div>
