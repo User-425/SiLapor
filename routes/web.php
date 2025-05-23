@@ -60,14 +60,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [App\Http\Controllers\LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
 });
 
-// Fasilitas
-Route::prefix('fasilitas')->group(function () {
-    Route::get('/', [FasilitasController::class, 'index'])->name('fasilitas.index');
-    Route::get('/create', [FasilitasController::class, 'create'])->name('fasilitas.create');
-    Route::post('/', [FasilitasController::class, 'store'])->name('fasilitas.store');
-    Route::get('/{fasilitas}/edit', [FasilitasController::class, 'edit'])->name('fasilitas.edit');
-    Route::put('/{fasilitas}', [FasilitasController::class, 'update'])->name('fasilitas.update');
-    Route::delete('/{fasilitas}', [FasilitasController::class, 'destroy'])->name('fasilitas.destroy');
+// Tipe Fasilitas
+Route::prefix('tipe_fasilitas')->group(function () {
+    Route::get('/', [FasilitasController::class, 'index'])->name('tipe_fasilitas.index');
+    Route::get('/create', [FasilitasController::class, 'create'])->name('tipe_fasilitas.create');
+    Route::post('/', [FasilitasController::class, 'store'])->name('tipe_fasilitas.store');
+    Route::get('/{fasilitas}/edit', [FasilitasController::class, 'edit'])->name('tipe_fasilitas.edit');
+    Route::put('/{fasilitas}', [FasilitasController::class, 'update'])->name('tipe_fasilitas.update');
+    Route::delete('/{fasilitas}', [FasilitasController::class, 'destroy'])->name('tipe_fasilitas.destroy');
 });
 
 

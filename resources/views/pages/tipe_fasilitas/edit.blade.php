@@ -36,18 +36,6 @@
                 @method('PUT')
 
                 <div class="mb-4">
-                    <label for="id_ruang" class="block text-gray-700 text-sm font-bold mb-2">Nama Ruang</label>
-                    <select id="id_ruang" name="id_ruang" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
-                        <option value="" disabled>Pilih Ruang</option>
-                        @foreach($ruangs as $ruang)
-                            <option value="{{ $ruang->id_ruang }}" {{ $fasilitas->id_ruang == $ruang->id_ruang ? 'selected' : '' }}>
-                                {{ $ruang->nama_ruang }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="mb-4">
                     <label for="nama_fasilitas" class="block text-gray-700 text-sm font-bold mb-2">Nama Fasilitas</label>
                     <input type="text" id="nama_fasilitas" name="nama_fasilitas" value="{{ old('nama_fasilitas', $fasilitas->nama_fasilitas) }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
