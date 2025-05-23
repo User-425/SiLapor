@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\RuangController;
 use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\FasRuangController;
 use App\Http\Controllers\LaporanKerusakanController;
 use App\Http\Controllers\GedungController;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'destroy'])->name('users.destroy');
     Route::get('/profile', [PenggunaController::class, 'profile'])->name('profile');
     Route::post('/profile', [PenggunaController::class, 'updateProfile'])->name('profile.update');
-   
+
+    // Fasilitas
+    Route::prefix('fasilitas')->group(function () {
+        Route::get('/', [FasRuangController::class, 'index'])->name('fasilitas.index');
+        Route::get('/create', [FasRuangController::class, 'create'])->name('fasilitas.create');
+        Route::post('/', [FasRuangController::class, 'store'])->name('fasilitas.store');
+        Route::get('/{fasRuang}/edit', [FasRuangController::class, 'edit'])->name('fasilitas.edit');
+        Route::put('/{fasRuang}', [FasRuangController::class, 'update'])->name('fasilitas.update');
+        Route::delete('/{fasRuang}', [FasRuangController::class, 'destroy'])->name('fasilitas.destroy');
+    });
 
     // laporan
     Route::resource('laporan', LaporanKerusakanController::class);
@@ -69,6 +79,7 @@ Route::prefix('tipe_fasilitas')->group(function () {
     Route::put('/{fasilitas}', [FasilitasController::class, 'update'])->name('tipe_fasilitas.update');
     Route::delete('/{fasilitas}', [FasilitasController::class, 'destroy'])->name('tipe_fasilitas.destroy');
 });
+
 
 
 // Ruang
