@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\RuangController;
 use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\LaporanKerusakanController;
 use App\Http\Controllers\GedungController;
 use Illuminate\Support\Facades\Auth;
 
@@ -50,6 +51,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/pengguna/{pengguna}', [PenggunaController::class, 'update'])->name('users.update');
     Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'destroy'])->name('users.destroy');
 
+    // laporan
+    Route::resource('laporan', LaporanKerusakanController::class);
+    Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [App\Http\Controllers\LaporanKerusakanController::class, 'getFasilitasByRuang']);
+    Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [App\Http\Controllers\LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
 });
 
 // Fasilitas
@@ -86,9 +91,5 @@ Route::prefix('gedung')->group(function () {
     Route::delete('/{gedung}', [GedungController::class, 'destroy'])->name('gedung.destroy');
 });
 
-
-
 // Periode
 Route::resource('periode', PeriodeController::class);
-
-//
