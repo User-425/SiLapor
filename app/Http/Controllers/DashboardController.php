@@ -22,7 +22,13 @@ class DashboardController extends Controller
     {
         switch ($role) {
             case 'admin':
-                return view('pages.dashboard.admin');
+                $stats = [
+                    'users' => \App\Models\Pengguna::count(),
+                    'facilities' => \App\Models\Fasilitas::count(),
+                    'buildings' => \App\Models\Gedung::count(),
+                    'rooms' => \App\Models\Ruang::count(),
+                ];
+                return view('pages.dashboard.admin', compact('stats'));
             case 'mahasiswa':
                 return view('pages.dashboard.mahasiswa');
             case 'dosen':
@@ -40,15 +46,6 @@ class DashboardController extends Controller
 
     public function showByRole($role)
     {
-        $user = Auth::user();
-        if ($user->peran !== $role && $role !== 'default') {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if (view()->exists("pages.dashboard.{$role}")) {
-            return view("pages.dashboard.{$role}");
-        }
-
-        return view('pages.dashboard.default');
+        return $this->redirectToDashboard($role);
     }
 }
