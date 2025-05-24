@@ -37,4 +37,18 @@ class DashboardController extends Controller
                 return view('pages.dashboard.default');
         }
     }
+
+    public function showByRole($role)
+    {
+        $user = Auth::user();
+        if ($user->peran !== $role && $role !== 'default') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (view()->exists("pages.dashboard.{$role}")) {
+            return view("pages.dashboard.{$role}");
+        }
+
+        return view('pages.dashboard.default');
+    }
 }

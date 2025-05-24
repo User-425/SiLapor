@@ -32,19 +32,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    Route::get('/dashboard/{role}', function ($role) {
-        if (Auth::user()->peran !== $role && $role !== 'default') {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if (view()->exists("pages.dashboard.{$role}")) {
-            return view("pages.dashboard.{$role}");
-        }
-
-        return view('dashboard.default');
-    })->name('dashboard.role');
-
+    Route::get('/dashboard/{role}', [DashboardController::class, 'showByRole'])->name('dashboard.role');
     Route::get('/pengguna', [PenggunaController::class, 'index'])->name('users.index');
     Route::get('/pengguna/create', [PenggunaController::class, 'create'])->name('users.create');
     Route::post('/pengguna', [PenggunaController::class, 'store'])->name('users.store');
