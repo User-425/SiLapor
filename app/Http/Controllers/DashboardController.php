@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\LaporanKerusakan;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -30,7 +32,7 @@ class DashboardController extends Controller
                 ];
                 return view('pages.dashboard.admin', compact('stats'));
             case 'mahasiswa':
-                return view('pages.dashboard.mahasiswa');
+                return $this->mahasiswaDashboard();
             case 'dosen':
                 return view('pages.dashboard.dosen');
             case 'tendik':
@@ -47,5 +49,31 @@ class DashboardController extends Controller
     public function showByRole($role)
     {
         return $this->redirectToDashboard($role);
+    }
+
+    public function mahasiswaDashboard()
+    {
+        $userId = Auth::id();
+
+        $totalLaporan = LaporanKerusakan::where('id_pengguna', $userId)->count();
+        $prosesLaporan = LaporanKerusakan::where('id_pengguna', $userId)
+            ->where('status', 'proses')
+            ->count();
+        $selesaiLaporan = LaporanKerusakan::where('id_pengguna', $userId)
+            ->where('status', 'selesai')
+            ->count();
+
+        $recentReports = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang'])
+            ->where('id_pengguna', $userId)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('pages.dashboard.mahasiswa', compact(
+            'totalLaporan',
+            'prosesLaporan',
+            'selesaiLaporan',
+            'recentReports'
+        ));
     }
 }
