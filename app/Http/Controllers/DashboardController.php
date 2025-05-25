@@ -24,13 +24,7 @@ class DashboardController extends Controller
     {
         switch ($role) {
             case 'admin':
-                $stats = [
-                    'users' => \App\Models\Pengguna::count(),
-                    'facilities' => \App\Models\Fasilitas::count(),
-                    'buildings' => \App\Models\Gedung::count(),
-                    'rooms' => \App\Models\Ruang::count(),
-                ];
-                return view('pages.dashboard.admin', compact('stats'));
+                return $this->adminDashboard();
             case 'mahasiswa':
                 return $this->mahasiswaDashboard();
             case 'dosen':
@@ -49,6 +43,16 @@ class DashboardController extends Controller
     public function showByRole($role)
     {
         return $this->redirectToDashboard($role);
+    }
+       public function adminDashboard()
+    {
+        $stats = [
+            'users' => \App\Models\Pengguna::count(),
+            'facilities' => \App\Models\Fasilitas::count(),
+            'buildings' => \App\Models\Gedung::count(),
+            'rooms' => \App\Models\Ruang::count(),
+        ];
+        return view('pages.dashboard.admin', compact('stats'));
     }
 
     public function mahasiswaDashboard()
