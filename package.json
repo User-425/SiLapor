@@ -5,7 +5,8 @@
         "artisan": "php artisan serve",
         "watch": "vite",
         "dev": "concurrently \"npm run watch\" \"npm run artisan\"",
-        "build": "vite build"
+        "build": "vite build",
+        "reset": "php artisan migrate:fresh --seed"
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.1.7",
