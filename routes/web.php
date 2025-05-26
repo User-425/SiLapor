@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
 
     // laporan
     Route::resource('laporan', LaporanKerusakanController::class);
-    Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [App\Http\Controllers\LaporanKerusakanController::class, 'getFasilitasByRuang']);
-    Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [App\Http\Controllers\LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
+    Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
+    Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
+    Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
 });

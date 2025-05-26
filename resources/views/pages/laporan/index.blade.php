@@ -74,10 +74,10 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
                         <button class="detail-btn text-blue-600 hover:text-blue-900 mr-2" data-id="{{ $laporan->id_laporan }}">
-                            Detail
+                            <i class="fas fa-eye"></i> Detail
                         </button>
                         <button class="edit-btn text-green-600 hover:text-green-900" data-id="{{ $laporan->id_laporan }}">
-                            Edit
+                            <i class="fas fa-edit"></i> Edit
                         </button>
                     </td>
                 </tr>
@@ -123,297 +123,310 @@
     </div>
 </div>
 
-<!-- Modal Tambah/Edit Laporan -->
-<div id="laporanModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+<!-- Modal Tambah Laporan -->
+<div id="addLaporanModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900" id="laporanModalTitle">Tambah Laporan</h3>
-            <div class="mt-2 px-7 py-3">
-                <form id="laporanForm" action="{{ route('laporan.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div id="laporan-method-field"></div>
-                    <div class="mb-4">
-                        <label for="ruang_id" class="block text-sm font-medium text-gray-700 text-left">Ruang</label>
-                        <select id="ruang_id" name="ruang_id" class="mt-1 block w-full border-gray-300 rounded-md" required>
+        <div class="mt-3">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Tambah Laporan</h3>
+            <form id="addLaporanForm" action="{{ route('laporan.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <label for="add_ruang_id" class="block text-sm font-medium text-gray-700">Ruang</label>
+                        <select id="add_ruang_id" name="ruang_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                             <option value="">Pilih Ruang</option>
                             @foreach(\App\Models\Ruang::all() as $ruang)
                                 <option value="{{ $ruang->id_ruang }}">{{ $ruang->nama_ruang }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="mb-4">
-                        <label for="fasilitas_id" class="block text-sm font-medium text-gray-700 text-left">Fasilitas</label>
-                        <select id="fasilitas_id" class="mt-1 block w-full border-gray-300 rounded-md" required>
+
+                    <div>
+                        <label for="add_fasilitas_id" class="block text-sm font-medium text-gray-700">Fasilitas</label>
+                        <select id="add_fasilitas_id" name="fasilitas_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                             <option value="">Pilih Fasilitas</option>
-                            {{-- Akan diisi oleh JS --}}
                         </select>
                     </div>
-                    <!-- Kode Fasilitas -->
-                    <div class="mb-4">
-                        <label for="id_fas_ruang" class="block text-sm font-medium text-gray-700 text-left">Kode Fasilitas</label>
-                        <select name="id_fas_ruang" id="id_fas_ruang" class="mt-1 block w-full border-gray-300 rounded-md" required>
+
+                    <div>
+                        <label for="add_id_fas_ruang" class="block text-sm font-medium text-gray-700">Kode Fasilitas</label>
+                        <select id="add_id_fas_ruang" name="id_fas_ruang" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                             <option value="">Pilih Kode Fasilitas</option>
-                            {{-- Akan diisi oleh JS --}}
                         </select>
-                        <!-- Hidden input untuk mengirim value saat disabled -->
-                        <input type="hidden" id="hidden_id_fas_ruang" name="id_fas_ruang">
                     </div>
-                    <div class="mb-4">
-                        <label for="deskripsi" class="block text-sm font-medium text-gray-700 text-left">Deskripsi</label>
-                        <textarea name="deskripsi" id="deskripsi" class="mt-1 block w-full border-gray-300 rounded-md" required></textarea>
-                        <p id="deskripsi-note" class="hidden text-xs text-gray-500 mt-1">Deskripsi tidak dapat diubah saat mengedit laporan.</p>
+
+                    <div>
+                        <label for="add_deskripsi" class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                        <textarea id="add_deskripsi" name="deskripsi" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required></textarea>
                     </div>
-                    <div class="mb-4">
-                        <label for="url_foto" class="block text-sm font-medium text-gray-700 text-left">Foto (opsional)</label>
-                        <input type="file" name="url_foto" id="url_foto" class="mt-1 block w-full border-gray-300 rounded-md" accept="image/*">
-                        <img id="previewFotoLama" src="" alt="Foto Sebelumnya" class="mt-2 rounded shadow max-h-40" style="display:none;">
+
+                    <div>
+                        <label for="add_url_foto" class="block text-sm font-medium text-gray-700">Foto (opsional)</label>
+                        <input type="file" id="add_url_foto" name="url_foto" class="mt-1 block w-full" accept="image/*">
                     </div>
-                    <div class="flex items-center justify-between mt-4">
-                        <button type="button" id="closeLaporanModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" class="close-modal px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                             Batal
                         </button>
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             Simpan
                         </button>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<!-- Modal Edit Laporan -->
+<div id="editLaporanModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Edit Laporan</h3>
+            <form id="editLaporanForm" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit_ruang_id" class="block text-sm font-medium text-gray-700">Ruang</label>
+                        <input type="text" id="edit_ruang_display" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100" readonly>
+                        <input type="hidden" id="edit_ruang_id" name="ruang_id">
+                    </div>
+
+                    <div>
+                        <label for="edit_fasilitas_id" class="block text-sm font-medium text-gray-700">Fasilitas</label>
+                        <input type="text" id="edit_fasilitas_display" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100" readonly>
+                        <input type="hidden" id="edit_fasilitas_id" name="fasilitas_id">
+                    </div>
+
+                    <div>
+                        <label for="edit_id_fas_ruang" class="block text-sm font-medium text-gray-700">Kode Fasilitas</label>
+                        <input type="text" id="edit_fas_ruang_display" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100" readonly>
+                        <input type="hidden" id="edit_id_fas_ruang" name="id_fas_ruang">
+                    </div>
+
+                    <div>
+                        <label for="edit_deskripsi" class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                        <textarea id="edit_deskripsi" name="deskripsi" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required></textarea>
+                    </div>
+
+                    <div>
+                        <label for="edit_url_foto" class="block text-sm font-medium text-gray-700">Foto Baru (opsional)</label>
+                        <input type="file" id="edit_url_foto" name="url_foto" class="mt-1 block w-full" accept="image/*">
+                        <div id="current_photo" class="mt-2">
+                            <p class="text-sm text-gray-500">Foto Saat Ini:</p>
+                            <img id="edit_photo_preview" src="" alt="Foto Current" class="mt-2 max-h-40 rounded shadow">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" class="close-modal px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Update
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Modal logic
-    const modal = document.getElementById('detailModal');
-    const closeModal = document.getElementById('closeDetailModal');
-    const modalDeskripsi = document.getElementById('modalDeskripsi');
-    const modalGambar = document.getElementById('modalGambar');
+    // Modal Elements
+    const detailModal = document.getElementById('detailModal');
+    const addLaporanModal = document.getElementById('addLaporanModal');
+    const editLaporanModal = document.getElementById('editLaporanModal');
+
+    // Detail View Elements
     const modalRuang = document.getElementById('modalRuang');
     const modalFasilitas = document.getElementById('modalFasilitas');
     const modalKode = document.getElementById('modalKode');
-    const modalContent = document.getElementById('modalContent');
+    const modalDeskripsi = document.getElementById('modalDeskripsi');
+    const modalGambar = document.getElementById('modalGambar');
 
-    // Show detail
+    // Detail Button Handler
     document.querySelectorAll('.detail-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', async function() {
             const id = this.dataset.id;
-            fetch(`/laporan/${id}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+            try {
+                const response = await fetch(`/laporan/detail/${id}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                // Update modal content
+                document.getElementById('modalRuang').textContent = data.fasilitas_ruang?.ruang?.nama_ruang || '-';
+                document.getElementById('modalFasilitas').textContent = data.fasilitas_ruang?.fasilitas?.nama_fasilitas || '-';
+                document.getElementById('modalKode').textContent = data.fasilitas_ruang?.kode_fasilitas || '-';
+                document.getElementById('modalDeskripsi').textContent = data.deskripsi || '-';
+
+                const modalGambar = document.getElementById('modalGambar');
+                if (data.url_foto) {
+                    modalGambar.src = data.url_foto.startsWith('http') ?
+                        data.url_foto : `/storage/${data.url_foto}`;
+                    modalGambar.style.display = 'block';
+                } else {
+                    modalGambar.style.display = 'none';
                 }
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error('Failed to fetch details');
-                    return res.json();
-                })
-                .then(data => {
-                    console.log('Received data:', data); // Debug to see actual response structure
-                    // Populate modal with data
-                    modalRuang.textContent = data.fasilitasRuang?.ruang?.nama_ruang || '-';
-                    modalFasilitas.textContent = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
-                    modalKode.textContent = data.fasilitasRuang?.kode_fasilitas || '-';
-                    modalDeskripsi.textContent = data.deskripsi || '-';
-                    if (data.url_foto) {
-                        // Check if the URL is absolute (starts with http:// or https://)
-                        if (data.url_foto.startsWith('http://') || data.url_foto.startsWith('https://')) {
-                            modalGambar.src = data.url_foto;
-                        } else {
-                            // For relative paths stored using Laravel's storage system
-                            modalGambar.src = `/storage/${data.url_foto}`;
-                        }
-                        modalGambar.style.display = 'block';
-                    } else {
-                        modalGambar.style.display = 'none';
-                    }
-                    modal.classList.remove('hidden');
-                })
-                .catch(error => {
-                    console.error('Error fetching laporan details:', error);
-                    alert('Gagal memuat detail laporan.');
-                });
+
+                document.getElementById('detailModal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal memuat detail laporan');
+            }
         });
     });
 
-    closeModal.addEventListener('click', function() {
-        modal.classList.add('hidden');
+    // Close Detail Modal
+    document.getElementById('closeDetailModal').addEventListener('click', () => {
+        detailModal.classList.add('hidden');
     });
 
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.classList.add('hidden');
+    // Edit Button Handler with Fixed Form Submission
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            try {
+                const response = await fetch(`/laporan/detail/${id}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                // Set form action
+                const editForm = document.getElementById('editLaporanForm');
+                editForm.action = `/laporan/${id}`;
+
+                // Set form values
+                document.getElementById('edit_ruang_display').value = data.fasilitas_ruang?.ruang?.nama_ruang || '-';
+                document.getElementById('edit_fasilitas_display').value = data.fasilitas_ruang?.fasilitas?.nama_fasilitas || '-';
+                document.getElementById('edit_fas_ruang_display').value = data.fasilitas_ruang?.kode_fasilitas || '-';
+                document.getElementById('edit_deskripsi').value = data.deskripsi || '';
+                document.getElementById('edit_id_fas_ruang').value = data.fasilitas_ruang?.id_fas_ruang;
+
+                // Handle photo preview
+                const currentPhotoDiv = document.getElementById('current_photo');
+                const photoPreview = document.getElementById('edit_photo_preview');
+
+                if (data.url_foto) {
+                    photoPreview.src = data.url_foto.startsWith('http') ?
+                        data.url_foto : `/storage/${data.url_foto}`;
+                    currentPhotoDiv.style.display = 'block';
+                } else {
+                    currentPhotoDiv.style.display = 'none';
+                }
+
+                document.getElementById('editLaporanModal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal memuat data laporan');
+            }
+        });
+    });
+
+    // Edit form submission handler
+    document.getElementById('editLaporanForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        formData.append('_method', 'PUT');
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const result = await response.json();
+
+            if (result.success) {
+                window.location.reload();
+            } else {
+                throw new Error(result.message || 'Update failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message || 'Gagal mengupdate laporan');
         }
     });
 
-    // Modal Tambah Laporan
+    // Modal Controls
     const addLaporanBtn = document.getElementById('addPeriodBtn');
-    const laporanModal = document.getElementById('laporanModal');
-    const closeLaporanModal = document.getElementById('closeLaporanModal');
-    const laporanForm = document.getElementById('laporanForm');
-    const laporanMethodField = document.getElementById('laporan-method-field');
-    const laporanModalTitle = document.getElementById('laporanModalTitle');
 
-    function setFormMode(isEditMode) {
-        const ruangSelect = document.getElementById('ruang_id');
-        const fasilitasSelect = document.getElementById('fasilitas_id');
-        const kodeSelect = document.getElementById('id_fas_ruang');
-        const hiddenKode = document.getElementById('hidden_id_fas_ruang');
+    // Add Form Elements
+    const addForm = document.getElementById('addLaporanForm');
+    const addRuangSelect = document.getElementById('add_ruang_id');
+    const addFasilitasSelect = document.getElementById('add_fasilitas_id');
+    const addKodeSelect = document.getElementById('add_id_fas_ruang');
 
-        if (isEditMode) {
-            ruangSelect.disabled = true;
-            fasilitasSelect.disabled = true;
-            kodeSelect.disabled = true;
-            // Set hidden input value
-            hiddenKode.value = kodeSelect.value;
-        } else {
-            ruangSelect.disabled = false;
-            fasilitasSelect.disabled = false;
-            kodeSelect.disabled = false;
-            hiddenKode.value = '';
+    // Edit Form Elements
+    const editForm = document.getElementById('editLaporanForm');
+    const editRuangDisplay = document.getElementById('edit_ruang_display');
+    const editFasilitasDisplay = document.getElementById('edit_fasilitas_display');
+    const editKodeDisplay = document.getElementById('edit_fas_ruang_display');
+
+    // Modal Controls
+    addLaporanBtn.addEventListener('click', () => {
+        addLaporanModal.classList.remove('hidden');
+        resetAddForm();
+    });
+
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            addLaporanModal.classList.add('hidden');
+            editLaporanModal.classList.add('hidden');
+        });
+    });
+
+    // Add Form Dynamic Dropdowns
+    addRuangSelect.addEventListener('change', function() {
+        updateFasilitasDropdown(this.value, addFasilitasSelect);
+    });
+
+    addFasilitasSelect.addEventListener('change', function() {
+        if (addRuangSelect.value && this.value) {
+            updateKodeDropdown(addRuangSelect.value, this.value, addKodeSelect);
+        }
+    });
+
+    // Utility Functions
+    function resetAddForm() {
+        addForm.reset();
+        addFasilitasSelect.innerHTML = '<option value="">Pilih Fasilitas</option>';
+        addKodeSelect.innerHTML = '<option value="">Pilih Kode Fasilitas</option>';
+    }
+
+    function updateFasilitasDropdown(ruangId, select) {
+        select.innerHTML = '<option value="">Memuat fasilitas...</option>';
+        if (ruangId) {
+            fetch(`/laporan/fasilitas-by-ruang/${ruangId}`)
+                .then(res => res.json())
+                .then(data => {
+                    select.innerHTML = '<option value="">Pilih Fasilitas</option>' +
+                        data.map(item => `<option value="${item.id_fasilitas}">${item.nama_fasilitas}</option>`).join('');
+                });
         }
     }
 
-    addLaporanBtn.addEventListener('click', function() {
-        laporanModal.classList.remove('hidden');
-        laporanModalTitle.textContent = 'Tambah Laporan';
-        laporanForm.reset();
-        laporanForm.action = "{{ route('laporan.store') }}";
-        laporanMethodField.innerHTML = '';
-        setFormMode(false); // Set to add mode
-    });
-
-    closeLaporanModal.addEventListener('click', function() {
-        laporanModal.classList.add('hidden');
-    });
-
-    window.addEventListener('click', function(event) {
-        if (event.target === laporanModal) {
-            laporanModal.classList.add('hidden');
-        }
-    });
-
-    // Dropdown dinamis fasilitas berdasarkan ruang
-    const ruangSelect = document.getElementById('ruang_id');
-    const fasilitasSelect = document.getElementById('fasilitas_id');
-    const kodeSelect = document.getElementById('id_fas_ruang');
-
-    ruangSelect.addEventListener('change', function() {
-        fasilitasSelect.innerHTML = '<option value="">Memuat fasilitas...</option>';
-        kodeSelect.innerHTML = '<option value="">Pilih Kode Fasilitas</option>';
-        if (this.value) {
-            fetch(`/laporan/fasilitas-by-ruang/${this.value}`)
-                .then(res => res.json())
-                .then(data => {
-                    let options = '<option value="">Pilih Fasilitas</option>';
-                    data.forEach(item => {
-                        options += `<option value="${item.id_fasilitas}">${item.nama_fasilitas}</option>`;
-                    });
-                    fasilitasSelect.innerHTML = options;
-                });
-        } else {
-            fasilitasSelect.innerHTML = '<option value="">Pilih Fasilitas</option>';
-        }
-    });
-
-    fasilitasSelect.addEventListener('change', function() {
-        kodeSelect.innerHTML = '<option value="">Memuat kode...</option>';
-        if (ruangSelect.value && this.value) {
-            fetch(`/laporan/kode-by-ruang-fasilitas/${ruangSelect.value}/${this.value}`)
-                .then(res => res.json())
-                .then(data => {
-                    let options = '<option value="">Pilih Kode Fasilitas</option>';
-                    data.forEach(item => {
-                        options += `<option value="${item.id_fas_ruang}">${item.kode_fasilitas}</option>`;
-                    });
-                    kodeSelect.innerHTML = options;
-                });
-        } else {
-            kodeSelect.innerHTML = '<option value="">Pilih Kode Fasilitas</option>';
-        }
-    });
-
-    // Edit laporan
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.dataset.id;
-
-            // Reset form
-            laporanForm.reset();
-
-            // Update form action and title
-            laporanModalTitle.textContent = 'Edit Laporan';
-            laporanForm.action = `/laporan/${id}`;
-
-            // Add method PUT for update
-            laporanMethodField.innerHTML = '<input type="hidden" name="_method" value="PUT">';
-
-            // Fetch laporan data for editing
-            fetch(`/laporan/${id}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
+    function updateKodeDropdown(ruangId, fasilitasId, select) {
+        select.innerHTML = '<option value="">Memuat kode...</option>';
+        fetch(`/laporan/kode-by-ruang-fasilitas/${ruangId}/${fasilitasId}`)
             .then(res => res.json())
             .then(data => {
-                console.log('Edit data:', data);
-
-                // Set ruang_id and trigger change event to load fasilitas
-                if (data.fasilitasRuang?.ruang?.id_ruang) {
-                    ruangSelect.value = data.fasilitasRuang.ruang.id_ruang;
-
-                    // Trigger the change event to load fasilitas dropdown
-                    const changeEvent = new Event('change');
-                    ruangSelect.dispatchEvent(changeEvent);
-
-                    // Wait a bit for fasilitas to load, then set fasilitas_id
-                    setTimeout(() => {
-                        if (data.fasilitasRuang?.fasilitas?.id_fasilitas) {
-                            fasilitasSelect.value = data.fasilitasRuang.fasilitas.id_fasilitas;
-
-                            // Trigger change to load kode fasilitas
-                            fasilitasSelect.dispatchEvent(changeEvent);
-
-                            // Set the id_fas_ruang after another small delay
-                            setTimeout(() => {
-                                if (data.fasilitasRuang?.id_fas_ruang) {
-                                    kodeSelect.value = data.fasilitasRuang.id_fas_ruang;
-                                    document.getElementById('hidden_id_fas_ruang').value = kodeSelect.value;
-                            }
-                        }, 500);
-                        }
-                    }, 500);
-                }
-
-                // Set deskripsi
-                const deskripsiField = document.getElementById('deskripsi');
-                deskripsiField.value = data.deskripsi || '';
-                deskripsiField.readOnly = false; // BISA diedit
-
-                // Tampilkan foto lama
-                const previewFotoLama = document.getElementById('previewFotoLama');
-                if (data.url_foto) {
-                    if (data.url_foto.startsWith('http://') || data.url_foto.startsWith('https://')) {
-                        previewFotoLama.src = data.url_foto;
-                    } else {
-                        previewFotoLama.src = `/storage/${data.url_foto}`;
-                    }
-                    previewFotoLama.style.display = 'block';
-                } else {
-                    previewFotoLama.style.display = 'none';
-                }
-
-                // Show the modal
-                laporanModal.classList.remove('hidden');
-                setFormMode(true);
-            })
-            .catch(error => {
-                console.error('Error fetching laporan for edit:', error);
-                alert('Gagal memuat data laporan untuk diedit.');
+                select.innerHTML = '<option value="">Pilih Kode Fasilitas</option>' +
+                    data.map(item => `<option value="${item.id_fas_ruang}">${item.kode_fasilitas}</option>`).join('');
             });
-        });
-    });
+    }
 });
 </script>
 @endsection
