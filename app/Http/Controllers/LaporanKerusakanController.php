@@ -32,7 +32,7 @@ class LaporanKerusakanController extends Controller
         $request->validate([
             'id_fas_ruang' => 'required|integer',
             'deskripsi' => 'required|string',
-            'url_foto' => 'nullable|file|image|max:2048', // max 2MB
+            'url_foto' => 'required|file|image|max:2048', // Changed from nullable to required
         ]);
 
         $data = $request->only(['id_fas_ruang', 'deskripsi']);
@@ -105,19 +105,36 @@ class LaporanKerusakanController extends Controller
 
         $data = $request->only(['id_fas_ruang', 'deskripsi']);
 
-        if ($request->hasFile('url_foto')) {
-            if ($laporan->url_foto && !filter_var($laporan->url_foto, FILTER_VALIDATE_URL)) {
-                Storage::disk('public')->delete($laporan->url_foto);
+        try {
+            if ($request->hasFile('url_foto')) {
+                // Delete old image if exists
+                if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
+                    Storage::disk('public')->delete($laporan->url_foto);
+                }
+                // Store new image
+                $data['url_foto'] = $request->file('url_foto')->store('laporan_foto', 'public');
             }
-            $data['url_foto'] = $request->file('url_foto')->store('laporan_foto', 'public');
-        }
 
-        $laporan->update($data);
+            $laporan->update($data);
 
-        if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Laporan berhasil diupdate'
+                ]);
+            }
+
+            return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diupdate.');
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengupdate laporan'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Gagal mengupdate laporan.');
         }
-        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diupdate.');
     }
 
     // Hapus laporan
@@ -150,5 +167,11 @@ class LaporanKerusakanController extends Controller
             ->where('id_fasilitas', $fasilitas_id)
             ->get(['id_fas_ruang', 'kode_fasilitas']);
         return response()->json($kode);
+    }
+
+    public function getDetail(LaporanKerusakan $laporan)
+    {
+        $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']);
+        return response()->json($laporan);
     }
 }
