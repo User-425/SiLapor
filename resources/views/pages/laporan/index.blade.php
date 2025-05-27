@@ -161,8 +161,20 @@
                     </div>
 
                     <div>
-                        <label for="add_url_foto" class="block text-sm font-medium text-gray-700">Foto (opsional)</label>
-                        <input type="file" id="add_url_foto" name="url_foto" class="mt-1 block w-full" accept="image/*">
+                        <label for="add_url_foto" class="block text-sm font-medium text-gray-700">
+                            Foto <span class="text-red-600">*</span>
+                        </label>
+                        <input
+                            type="file"
+                            id="add_url_foto"
+                            name="url_foto"
+                            class="mt-1 block w-full"
+                            accept="image/*"
+                            required
+                        >
+                        <p class="mt-1 text-sm text-gray-500">
+                            Wajib mengunggah foto kerusakan (Maks. 2MB)
+                        </p>
                     </div>
 
                     <div class="flex justify-end space-x-3">
@@ -350,7 +362,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
 
             if (result.success) {
-                window.location.reload();
+                // Create success message element
+                const successMessage = document.createElement('div');
+                successMessage.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4';
+                successMessage.innerHTML = `<p>${result.message}</p>`;
+
+                // Insert message at the top of the content
+                const content = document.querySelector('.bg-white.rounded-lg');
+                content.insertBefore(successMessage, content.firstChild);
+
+                // Hide modal
+                document.getElementById('editLaporanModal').classList.add('hidden');
+
+                // Reload page after short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
             } else {
                 throw new Error(result.message || 'Update failed');
             }
