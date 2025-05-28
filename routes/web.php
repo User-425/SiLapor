@@ -10,6 +10,7 @@ use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\FasRuangController;
 use App\Http\Controllers\LaporanKerusakanController;
 use App\Http\Controllers\GedungController;
+use App\Http\Controllers\TugasController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -52,4 +53,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
     Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
+
+    // Routes untuk Sarpras
+    Route::middleware(['peran:sarpras'])->group(function () {
+        Route::get('/tugas', [TugasController::class, 'index'])->name('tugas.index');
+        Route::get('/tugas/create/{id_laporan}', [TugasController::class, 'create'])->name('tugas.create');
+        Route::post('/tugas', [TugasController::class, 'store'])->name('tugas.store');
+        Route::get('/tugas/{id}', [TugasController::class, 'show'])->name('tugas.show');
+        Route::get('/tugas/{id}/edit', [TugasController::class, 'edit'])->name('tugas.edit');
+        Route::put('/tugas/{id}', [TugasController::class, 'update'])->name('tugas.update');
+        Route::delete('/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy');
+    });
 });
