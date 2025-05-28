@@ -13,17 +13,6 @@ use App\Http\Controllers\GedungController;
 use Illuminate\Support\Facades\Auth;
 
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
 Route::get('/', [AuthController::class, 'showLoginForm']);
 Route::post('/', action: [AuthController::class, 'login']);
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -47,9 +36,18 @@ Route::middleware('auth')->group(function () {
         Route::resource('periode', PeriodeController::class);
     });
 
-    // laporan
+    // Laporan
     Route::resource('laporan', LaporanKerusakanController::class);
     Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
-    Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
+    Route::get('/laporan_ids/fasilitas-laporan_by_ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasilitasByRuang']);
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
+    // Tambahan rute untuk sarpras dan teknisi
+    Route::middleware(['peran:sarpras'])->group(function () {
+        Route::post('/laporan/{laporan}/verifikasi', [LaporanKerusakanController::class, 'verifikasi'])->name('laporan.verifikasi');
+        Route::post('/laporan/batch-update-status', [LaporanKerusakanController::class, 'batch-updateStatus'])->name('laporan.batchUpdateStatus');
+        Route::get('/laporan/export', [LaporanKerusakanController::class, 'export'])->name('laporan.export');
+    });
+    Route::middleware(['peran:sarpras,teknisi'])->group(function () {
+        Route::post('/laporan/{laporan}/status', [LaporanKerusakanController::class, 'updateStatus'])->name('laporan.updateStatus');
+    });
 });

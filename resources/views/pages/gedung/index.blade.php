@@ -1,23 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Gedung')
+@section('title', 'Manajemen Gedung')
 
 @section('content')
     <!-- Page Heading -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Daftar Gedung</h1>
-        <a href="{{ route('gedung.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm flex items-center shadow-sm hover:bg-blue-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Tambah Gedung
-        </a>
-    </div>
+    
 
     <!-- Content -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 class="font-semibold text-lg text-gray-800">Daftar Gedung</h2>
+            <a href="{{ route('gedung.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm flex items-center shadow-sm hover:bg-blue-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Tambah Gedung
+            </a>
         </div>
 
         <div class="p-6">
