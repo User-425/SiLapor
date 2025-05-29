@@ -5,22 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="mb-6">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Daftar Laporan Kerusakan</h1>
-                <p class="text-gray-600">Kelola laporan kerusakan fasilitas Anda</p>
-            </div>
-            <div>
-                <a href="{{ route('laporan.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center transition duration-200">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Tambah Laporan
-                </a>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Alert Success -->
     @if (session('success'))
@@ -38,14 +23,21 @@
     <!-- Main Content Card -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <!-- Card Header -->
-        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-gray-900">
-                    Daftar Laporan ({{ $laporans->total() ?? $laporans->count() }} total)
-                </h2>
-            </div>
-        </div>
+<div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+    <div class="flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-gray-900">
+            Daftar Laporan ({{ $laporans->total() ?? $laporans->count() }} total)
+        </h2>
+        <a href="{{ route('laporan.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center transition duration-200">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Tambah Laporan
+        </a>
+    </div>
+</div>
 
+        
         <!-- Table -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
