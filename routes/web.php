@@ -42,6 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
     Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
+     Route::get('/fasilitas/{id}/qr', [FasRuangController::class, 'generateQR'])
+        ->name('fasilitas.qr')
+        ->middleware('peran:admin,sarpras');
+        
+    Route::get('/laporan/quick/{code}', [LaporanKerusakanController::class, 'quickReport'])
+        ->name('laporan.quick');
 
     // Routes untuk Sarpras 
     Route::middleware(['peran:sarpras'])->group(function () {
@@ -62,4 +68,5 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['peran:sarpras,teknisi'])->group(function () {
         Route::post('/laporan/{laporan}/status', [LaporanKerusakanController::class, 'updateStatus'])->name('laporan.updateStatus');
     });
+
 });

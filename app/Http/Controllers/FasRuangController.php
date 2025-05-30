@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\FasRuang;
 use App\Models\Fasilitas;
 use App\Models\Ruang;
 use Illuminate\Http\Request;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class FasRuangController extends Controller
 {
@@ -62,5 +64,29 @@ class FasRuangController extends Controller
 
         return redirect()->route('fasilitas.index')
             ->with('success', 'Fasilitas ruang berhasil dihapus.');
+    }
+
+    public function generateQR($id)
+    {
+        try {
+            $fasRuang = FasRuang::with(['fasilitas', 'ruang.gedung'])->findOrFail($id);
+            
+            $baseUrl = config('app.url');
+            $code = base64_encode($id);
+            $url = rtrim($baseUrl, '/') . '/laporan/quick/' . $code;
+             // $url = route('laporan.quick', ['code' => base64_encode($id)]);
+            $qrcode = QrCode::size(300)
+                ->margin(2)
+                ->generate($url);
+
+            return view('pages.fasilitas.qr', [
+                'fasRuang' => $fasRuang,
+                'qrcode' => $qrcode,
+                'url' => $url
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('fasilitas.index')
+                ->with('error', 'Gagal generate QR Code');
+        }
     }
 }

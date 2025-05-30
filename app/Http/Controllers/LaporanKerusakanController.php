@@ -58,7 +58,7 @@ class LaporanKerusakanController extends Controller
         $laporans = $query->latest()->paginate(15);
 
         $laporans->getCollection()->transform(function ($laporan) {
-            $laporan->status_badge_class = match($laporan->status) {
+            $laporan->status_badge_class = match ($laporan->status) {
                 'menunggu_verifikasi' => 'bg-warning text-dark',
                 'diproses' => 'bg-info text-white',
                 'diperbaiki' => 'bg-primary text-white',
@@ -149,6 +149,7 @@ class LaporanKerusakanController extends Controller
                 'id_fas_ruang' => $request->id_fas_ruang,
                 'deskripsi' => $request->deskripsi,
             ];
+
             if ($request->hasFile('url_foto')) {
                 if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
                     Storage::disk('public')->delete($laporan->url_foto);
@@ -164,7 +165,6 @@ class LaporanKerusakanController extends Controller
                 'message' => 'Laporan berhasil diupdate.',
                 'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -193,7 +193,7 @@ class LaporanKerusakanController extends Controller
             ->where('id_ruang', $ruang_id)
             ->get()
             ->groupBy('id_fasilitas')
-            ->map(function($items) {
+            ->map(function ($items) {
                 $first = $items->first();
                 return [
                     'id_fasilitas' => $first->id_fasilitas,
@@ -219,7 +219,7 @@ class LaporanKerusakanController extends Controller
         }
 
         $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
-        
+
         return response()->json([
             'id_laporan' => $laporan->id_laporan,
             'deskripsi' => $laporan->deskripsi,
@@ -328,5 +328,21 @@ class LaporanKerusakanController extends Controller
         }
 
         return Excel::download(new LaporanKerusakanExport($query->get()), 'laporan_kerusakan_' . now()->format('Ymd_His') . '.xlsx');
+    }
+
+    public function quickReport($code)
+    {
+        try {
+            $id = base64_decode($code);
+            $fasRuang = FasRuang::with(['fasilitas', 'ruang.gedung'])
+                ->findOrFail($id);
+
+            return view('pages.laporan.quick-report', [ // Changed view path
+                'fasRuang' => $fasRuang
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('laporan.create')
+                ->with('error', 'QR Code tidak valid. Silakan laporkan secara manual.');
+        }
     }
 }
