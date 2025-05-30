@@ -4,15 +4,7 @@
 
 @section('content')
     <!-- Page Heading -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Data Fasilitas</h1>
-        <a href="{{ route('fasilitas.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm flex items-center shadow-sm hover:bg-blue-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Tambah Fasilitas
-        </a>
-    </div>
+   
 
     <!-- Flash Messages -->
     @if(session('success'))
@@ -29,7 +21,16 @@
 
     <!-- Content -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto p-4">
+            <div class="flex justify-between items-center mb-6">
+                <div></div> <!-- Placeholder untuk menyeimbangkan layout -->
+                <a href="{{ route('fasilitas.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm flex items-center shadow-sm hover:bg-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Tambah Fasilitas
+                </a>
+            </div>
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
