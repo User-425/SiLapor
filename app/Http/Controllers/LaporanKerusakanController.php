@@ -26,7 +26,7 @@ class LaporanKerusakanController extends Controller
 
         // Jika bukan sarpras atau teknisi, hanya tampilkan laporan milik pengguna
         if (!in_array($user->peran, ['sarpras', 'teknisi'])) {
-            $query->where('id_pengguna', $user->id);
+            $query->where('id_pengguna', $user->id_pengguna);
             $laporans = $query->latest()->paginate(10);
             return view('pages.laporan.index', compact('laporans'));
         }
