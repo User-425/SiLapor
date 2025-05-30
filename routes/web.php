@@ -40,10 +40,10 @@ Route::middleware('auth')->group(function () {
     // Laporan
     Route::resource('laporan', LaporanKerusakanController::class);
     Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
-    Route::get('/laporan_ids/fasilitas-laporan_by_ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasilitasByRuang']);
+    Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
 
-    // Routes untuk Sarpras
+    // Routes untuk Sarpras 
     Route::middleware(['peran:sarpras'])->group(function () {
         Route::get('/tugas', [TugasController::class, 'index'])->name('tugas.index');
         Route::get('/tugas/create/{id_laporan}', [TugasController::class, 'create'])->name('tugas.create');

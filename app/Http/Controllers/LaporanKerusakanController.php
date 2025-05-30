@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
+use function Laravel\Prompts\error;
+
 class LaporanKerusakanController extends Controller
 {
     public function __construct()
