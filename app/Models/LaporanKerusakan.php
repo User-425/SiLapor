@@ -35,4 +35,10 @@ class LaporanKerusakan extends Model
     {
         return 'id_laporan';
     }
+
+    public function tugas()
+    {
+    return $this->hasOne(\App\Models\Tugas::class, 'id_laporan');
+    }
+
 }

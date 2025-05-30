@@ -73,6 +73,16 @@
             </a>
             @endif
 
+            @if(auth()->user()->peran === 'sarpras')
+            <a href="{{ route('tugas.index') }}"
+                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('tugas.*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zm4-3a1 1 0 00-1 1v1h2V4a1 1 0 00-1-1zM7.707 10.293a1 1 0 10-1.414 1.414L8.586 14l-2.293 2.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L11.414 14l2.293-2.293a1 1 0 00-1.414-1.414L10 12.586l-2.293-2.293z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-3">Tugaskan Teknisi</span>
+            </a>
+            @endif
+            
             @if(auth()->user()->peran === 'mahasiswa' || auth()->user()->peran === 'dosen' || auth()->user()->peran === 'tendik')
             <a href="/laporan" class="flex items-center mt-4 py-3 px-4 {{ request()->is('laporan*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
