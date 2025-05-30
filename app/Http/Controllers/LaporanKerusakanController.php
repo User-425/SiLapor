@@ -135,44 +135,41 @@ class LaporanKerusakanController extends Controller
     public function update(Request $request, LaporanKerusakan $laporan)
     {
         if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
-            abort(403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $request->validate([
             'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
-            'deskripsi' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
             'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $data = $request->only(['id_fas_ruang', 'deskripsi']);
-
         try {
+            $data = [
+                'id_fas_ruang' => $request->id_fas_ruang,
+                'deskripsi' => $request->deskripsi,
+            ];
             if ($request->hasFile('url_foto')) {
                 if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
                     Storage::disk('public')->delete($laporan->url_foto);
                 }
-                $data['url_foto'] = $request->file('url_foto')->store('laporan_foto', 'public');
+                $path = $request->file('url_foto')->store('laporan-photos', 'public');
+                $data['url_foto'] = $path;
             }
 
             $laporan->update($data);
 
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Laporan berhasil diupdate'
-                ]);
-            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Laporan berhasil diupdate.',
+                'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
+            ]);
 
-            return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diupdate.');
         } catch (\Exception $e) {
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Gagal mengupdate laporan.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -222,30 +219,34 @@ class LaporanKerusakanController extends Controller
         }
 
         $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
-
+        
         return response()->json([
             'id_laporan' => $laporan->id_laporan,
             'deskripsi' => $laporan->deskripsi,
-            'url_foto' => $laporan->url_foto ? Storage::url($laporan->url_foto) : null,
+            'url_foto' => asset('storage/' . $laporan->url_foto), // Fix the URL
             'status' => $laporan->status,
             'ranking' => $laporan->ranking,
             'created_at' => $laporan->created_at->format('d/m/Y H:i'),
             'updated_at' => $laporan->updated_at->format('d/m/Y H:i'),
-            'pengguna' => [
-                'nama' => $laporan->pengguna->nama_lengkap,
-                'email' => $laporan->pengguna->email,
-            ],
             'fasilitasRuang' => [
+                'id_fas_ruang' => $laporan->fasilitasRuang->id_fas_ruang,
                 'kode_fasilitas' => $laporan->fasilitasRuang->kode_fasilitas,
                 'fasilitas' => [
+                    'id_fasilitas' => $laporan->fasilitasRuang->fasilitas->id_fasilitas,
                     'nama_fasilitas' => $laporan->fasilitasRuang->fasilitas->nama_fasilitas,
                 ],
                 'ruang' => [
+                    'id_ruang' => $laporan->fasilitasRuang->ruang->id_ruang,
                     'nama_ruang' => $laporan->fasilitasRuang->ruang->nama_ruang,
                     'gedung' => [
+                        'id_gedung' => $laporan->fasilitasRuang->ruang->gedung->id_gedung,
                         'nama_gedung' => $laporan->fasilitasRuang->ruang->gedung->nama_gedung,
                     ],
                 ],
+            ],
+            'pengguna' => [
+                'nama' => $laporan->pengguna->nama_lengkap,
+                'email' => $laporan->pengguna->email,
             ],
         ]);
     }

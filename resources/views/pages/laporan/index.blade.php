@@ -272,22 +272,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
 
-                // Update modal content
-                document.getElementById('modalRuang').textContent = data.fasilitas_ruang?.ruang?.nama_ruang || '-';
-                document.getElementById('modalFasilitas').textContent = data.fasilitas_ruang?.fasilitas?.nama_fasilitas || '-';
-                document.getElementById('modalKode').textContent = data.fasilitas_ruang?.kode_fasilitas || '-';
-                document.getElementById('modalDeskripsi').textContent = data.deskripsi || '-';
+                // Update modal content with complete location info
+                const locationText = [
+                    data.fasilitasRuang?.ruang?.gedung?.nama_gedung,
+                    data.fasilitasRuang?.ruang?.nama_ruang
+                ].filter(Boolean).join(' - ');
 
-                const modalGambar = document.getElementById('modalGambar');
+                modalRuang.textContent = locationText || '-';
+                modalFasilitas.textContent = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
+                modalKode.textContent = data.fasilitasRuang?.kode_fasilitas || '-';
+                modalDeskripsi.textContent = data.deskripsi || '-';
+                
+                // Update image with proper URL handling
                 if (data.url_foto) {
-                    modalGambar.src = data.url_foto.startsWith('http') ?
-                        data.url_foto : `/storage/${data.url_foto}`;
+                    modalGambar.src = data.url_foto;
                     modalGambar.style.display = 'block';
                 } else {
                     modalGambar.style.display = 'none';
                 }
 
-                document.getElementById('detailModal').classList.remove('hidden');
+                detailModal.classList.remove('hidden');
             } catch (error) {
                 console.error('Error:', error);
                 alert('Gagal memuat detail laporan');
@@ -300,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
         detailModal.classList.add('hidden');
     });
 
-    // Edit Button Handler with Fixed Form Submission
+    // Edit Button Handler
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -313,26 +317,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 const editForm = document.getElementById('editLaporanForm');
                 editForm.action = `/laporan/${id}`;
 
-                // Set form values
-                document.getElementById('edit_ruang_display').value = data.fasilitas_ruang?.ruang?.nama_ruang || '-';
-                document.getElementById('edit_fasilitas_display').value = data.fasilitas_ruang?.fasilitas?.nama_fasilitas || '-';
-                document.getElementById('edit_fas_ruang_display').value = data.fasilitas_ruang?.kode_fasilitas || '-';
-                document.getElementById('edit_deskripsi').value = data.deskripsi || '';
-                document.getElementById('edit_id_fas_ruang').value = data.fasilitas_ruang?.id_fas_ruang;
+                // Set complete location info
+                const locationText = [
+                    data.fasilitasRuang?.ruang?.gedung?.nama_gedung,
+                    data.fasilitasRuang?.ruang?.nama_ruang
+                ].filter(Boolean).join(' - ');
 
-                // Handle photo preview
-                const currentPhotoDiv = document.getElementById('current_photo');
+                // Set form values
+                document.getElementById('edit_ruang_display').value = locationText || '-';
+                document.getElementById('edit_fasilitas_display').value = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
+                document.getElementById('edit_fas_ruang_display').value = data.fasilitasRuang?.kode_fasilitas || '-';
+                document.getElementById('edit_deskripsi').value = data.deskripsi || '';
+                document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang;
+
+                // Handle photo preview with proper URL
                 const photoPreview = document.getElementById('edit_photo_preview');
+                const currentPhotoDiv = document.getElementById('current_photo');
 
                 if (data.url_foto) {
-                    photoPreview.src = data.url_foto.startsWith('http') ?
-                        data.url_foto : `/storage/${data.url_foto}`;
+                    photoPreview.src = data.url_foto;
                     currentPhotoDiv.style.display = 'block';
                 } else {
                     currentPhotoDiv.style.display = 'none';
                 }
 
-                document.getElementById('editLaporanModal').classList.remove('hidden');
+                editLaporanModal.classList.remove('hidden');
             } catch (error) {
                 console.error('Error:', error);
                 alert('Gagal memuat data laporan');
@@ -353,37 +362,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData,
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin' // Include cookies
             });
 
-            if (!response.ok) throw new Error('Network response was not ok');
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Server response was not JSON');
+            }
 
             const result = await response.json();
 
+            if (!response.ok) {
+                throw new Error(result.message || 'Update failed');
+            }
+
             if (result.success) {
-                // Create success message element
+                // Show success message
                 const successMessage = document.createElement('div');
                 successMessage.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4';
                 successMessage.innerHTML = `<p>${result.message}</p>`;
 
-                // Insert message at the top of the content
                 const content = document.querySelector('.bg-white.rounded-lg');
                 content.insertBefore(successMessage, content.firstChild);
 
-                // Hide modal
+                // Close modal and reload page
                 document.getElementById('editLaporanModal').classList.add('hidden');
-
-                // Reload page after short delay
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 throw new Error(result.message || 'Update failed');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(error.message || 'Gagal mengupdate laporan');
+            alert('Gagal mengupdate laporan: ' + error.message);
         }
     });
 
