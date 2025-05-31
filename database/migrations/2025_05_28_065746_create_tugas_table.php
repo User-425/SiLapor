@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('batas_waktu')->nullable();
             $table->text('catatan')->nullable();
             $table->enum('status', ['ditugaskan', 'dikerjakan', 'selesai'])->default('ditugaskan');
+            $table->timestamp('tanggal_selesai')->nullable();
             $table->timestamps();
 
             // Relasi antar tabel
