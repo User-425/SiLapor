@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LaporanKerusakan;
+use App\Models\Tugas;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -34,7 +35,7 @@ class DashboardController extends Controller
             case 'sarpras':
                 return view('pages.dashboard.sarpras');
             case 'teknisi':
-                return view('pages.dashboard.teknisi');
+                return $this->teknisiDashboard();
             default:
                 return view('pages.dashboard.default');
         }
@@ -80,4 +81,23 @@ class DashboardController extends Controller
             'recentReports'
         ));
     }
+
+    public function teknisiDashboard()
+{
+    $teknisiId = Auth::user()->id_pengguna;
+
+    $ditugaskan = Tugas::where('id_pengguna', $teknisiId)->where('status', 'ditugaskan')->count();
+    $dikerjakan = Tugas::where('id_pengguna', $teknisiId)->where('status', 'dikerjakan')->count();
+    $selesai = Tugas::where('id_pengguna', $teknisiId)->where('status', 'selesai')->count();
+
+    $tugasAktif = Tugas::with('laporan.fasilitasRuang.fasilitas', 'laporan.fasilitasRuang.ruang')
+        ->where('id_pengguna', $teknisiId)
+        ->whereIn('status', ['ditugaskan', 'dikerjakan'])
+        ->latest()
+        ->take(5)
+        ->get();
+
+    return view('pages.dashboard.teknisi', compact('ditugaskan', 'dikerjakan', 'selesai', 'tugasAktif'));
+}
+
 }

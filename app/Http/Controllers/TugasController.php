@@ -50,4 +50,24 @@ class TugasController extends Controller
 
         return redirect()->route('pages.laporan.index')->with('success', 'Tugas berhasil ditambahkan!');
     }
+
+    public function update(Request $request, $id)
+{
+    $tugas = Tugas::findOrFail($id);
+    $tugas->catatan = $request->catatan;
+    $tugas->status = $request->status;
+
+    if ($request->hasFile('foto_setelah')) {
+        $file = $request->file('foto_setelah');
+        $path = $file->store('public/foto_perbaikan');
+        $tugas->url_foto = str_replace('public/', 'storage/', $path);
+    }
+
+    $tugas->tanggal_selesai = now(); // jika statusnya selesai
+    $tugas->save();
+
+    // Notifikasi bisa ditambahkan di sini jika perlu
+    return redirect()->route('teknisi.index')->with('success', 'Tugas diperbarui');
+}
+
 }
