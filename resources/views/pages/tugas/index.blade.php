@@ -1,13 +1,15 @@
 @extends('layouts.app')
 
+@section('title', 'Penugasan Teknisi')
+
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-6">
+        {{-- <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-800">Tugaskan Teknisi</h1>
             <p class="text-gray-600 mt-2">Daftar laporan kerusakan yang belum ditugaskan ke teknisi</p>
-        </div>
+        </div> --}}
 
         <!-- Alert Success -->
         @if(session('success'))

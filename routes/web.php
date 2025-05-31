@@ -13,9 +13,8 @@ use App\Http\Controllers\GedungController;
 use App\Http\Controllers\TugasController;
 use Illuminate\Support\Facades\Auth;
 
-
 Route::get('/', [AuthController::class, 'showLoginForm']);
-Route::post('/', action: [AuthController::class, 'login']);
+Route::post('/', [AuthController::class, 'login']);
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -43,8 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
 
-    // Routes untuk Sarpras 
+    // Routes untuk Sarpras
     Route::middleware(['peran:sarpras'])->group(function () {
+        Route::post('/laporan/{laporan}/verifikasi', [LaporanKerusakanController::class, 'verifikasi'])->name('laporan.verifikasi');
+        Route::post('/laporan/batch-update-status', [LaporanKerusakanController::class, 'batchUpdateStatus'])->name('laporan.batchUpdateStatus');
+        Route::get('/laporan/export', [LaporanKerusakanController::class, 'export'])->name('laporan.export');
+
         Route::get('/tugas', [TugasController::class, 'index'])->name('tugas.index');
         Route::get('/tugas/create/{id_laporan}', [TugasController::class, 'create'])->name('tugas.create');
         Route::post('/tugas', [TugasController::class, 'store'])->name('tugas.store');
@@ -53,12 +56,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/tugas/{id}', [TugasController::class, 'update'])->name('tugas.update');
         Route::delete('/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy');
     });
-    // Tambahan rute untuk sarpras dan teknisi
-    Route::middleware(['peran:sarpras'])->group(function () {
-        Route::post('/laporan/{laporan}/verifikasi', [LaporanKerusakanController::class, 'verifikasi'])->name('laporan.verifikasi');
-        Route::post('/laporan/batch-update-status', [LaporanKerusakanController::class, 'batch-updateStatus'])->name('laporan.batchUpdateStatus');
-        Route::get('/laporan/export', [LaporanKerusakanController::class, 'export'])->name('laporan.export');
-    });
+
+    // Update status untuk sarpras dan teknisi
     Route::middleware(['peran:sarpras,teknisi'])->group(function () {
         Route::post('/laporan/{laporan}/status', [LaporanKerusakanController::class, 'updateStatus'])->name('laporan.updateStatus');
     });
