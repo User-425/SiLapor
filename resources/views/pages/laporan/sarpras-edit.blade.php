@@ -27,24 +27,27 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tingkat Kerusakan (Sarpras)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tingkat Kerusakan</label>
                         <input type="range" min="1" max="5" value="3" id="tingkat_kerusakan_sarpras" name="tingkat_kerusakan_sarpras" class="w-full">
                         <div class="text-xs flex justify-between">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span>Sedikit Rusak</span>
+                            <span>Sangat Rusak</span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Dampak Akademik (Sarpras)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Dampak Akademik</label>
                         <input type="range" min="1" max="5" value="3" id="dampak_akademik_sarpras" name="dampak_akademik_sarpras" class="w-full">
                         <div class="text-xs flex justify-between">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span>Sedikit Berdampak</span>
+                            <span>Sangat Berdampak</span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kebutuhan (Sarpras)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah yang Membutuhkan</label>
                         <input type="range" min="1" max="5" value="3" id="kebutuhan_sarpras" name="kebutuhan_sarpras" class="w-full">
                         <div class="text-xs flex justify-between">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span>Sedikit Orang</span>
+                            <span>Banyak Orang</span>
                         </div>
                     </div>
 

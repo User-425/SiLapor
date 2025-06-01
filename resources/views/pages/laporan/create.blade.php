@@ -63,24 +63,27 @@
                 </div>
                 <div id="step2" class="space-y-6 hidden">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tingkat Kerusakan (Pelapor)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tingkat Kerusakan</label>
                         <input type="range" min="1" max="5" value="3" id="tingkat_kerusakan_pelapor" name="tingkat_kerusakan_pelapor" class="w-full">
                         <div class="text-xs flex justify-between">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span>Sedikit Rusak</span>
+                            <span>Sangat Rusak</span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Dampak Akademik (Pelapor)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Dampak Akademik</label>
                         <input type="range" min="1" max="5" value="3" id="dampak_akademik_pelapor" name="dampak_akademik_pelapor" class="w-full">
                         <div class="text-xs flex justify-between">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span>Sedikit Berdampak</span>
+                            <span>Sangat Berdampak</span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kebutuhan (Pelapor)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah yang Membutuhkan</label>
                         <input type="range" min="1" max="5" value="3" id="kebutuhan_pelapor" name="kebutuhan_pelapor" class="w-full">
                         <div class="text-xs flex justify-between">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                            <span>Sedikit Orang</span>
+                            <span>Banyak Orang</span>
                         </div>
                     </div>
                     <div class="flex justify-end space-x-3">
