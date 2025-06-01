@@ -25,14 +25,6 @@
             </a>
             
             @auth
-            <a href="{{ route('profile') }}"
-                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('profile*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                </svg>
-                <span class="ml-3">Profile</span>
-            </a>
-
             <!-- Admin Menus -->
             @if(auth()->user()->peran === 'admin')
             <a href="{{ route('users.index') }}"
