@@ -17,17 +17,104 @@
                     placeholder="Search here...">
             </div>
 
-            <div class="relative">
-                <button class="flex items-center focus:outline-none">
+            <div class="relative" x-data="{ open: false, notifications: [], count: 0 }" 
+                 @click.away="open = false"
+                 x-init="
+                    fetch('/notifications/unread')
+                        .then(response => response.json())
+                        .then(data => {
+                            notifications = data.notifications;
+                            count = data.count;
+                        });
+                 ">
+                <button @click="open = !open" class="flex items-center focus:outline-none">
                     <div class="relative">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500"
                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
-                        <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                        <span x-show="count > 0" 
+                              x-text="count > 9 ? '9+' : count" 
+                              class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        </span>
                     </div>
                 </button>
+                
+                <!-- Dropdown menu -->
+                <div x-show="open" 
+                     x-transition:enter="transition ease-out duration-100" 
+                     x-transition:enter-start="transform opacity-0 scale-95" 
+                     x-transition:enter-end="transform opacity-100 scale-100" 
+                     x-transition:leave="transition ease-in duration-75" 
+                     x-transition:leave-start="transform opacity-100 scale-100" 
+                     x-transition:leave-end="transform opacity-0 scale-95"
+                     class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50">
+                    <div class="px-4 py-2 border-b border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-gray-700">Notifications</h3>
+                            <button @click="
+                                fetch('/notifications/read-all', { 
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                                    }
+                                })
+                                .then(() => {
+                                    count = 0;
+                                    notifications.forEach(n => n.read = true);
+                                });
+                            " 
+                            class="text-xs text-indigo-600 hover:text-indigo-800">Mark all as read</button>
+                        </div>
+                    </div>
+                    
+                    <div class="max-h-64 overflow-y-auto">
+                        <template x-if="notifications.length === 0">
+                            <div class="px-4 py-3 text-sm text-gray-500 text-center">
+                                No new notifications
+                            </div>
+                        </template>
+                        
+                        <template x-for="notification in notifications" :key="notification.id">
+                            <a @click.prevent="
+                                fetch('/notifications/' + notification.id + '/read', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                                    }
+                                })
+                                .then(() => {
+                                    count = Math.max(0, count - 1);
+                                    window.location.href = '/laporan/' + notification.data.id_laporan;
+                                })
+                             "
+                             href="#" 
+                             class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="ml-3 w-0 flex-1">
+                                        <p class="font-medium text-gray-900" x-text="notification.data.title"></p>
+                                        <p class="text-sm text-gray-500" x-text="notification.data.message"></p>
+                                        <p class="text-xs text-gray-400 mt-1" x-text="notification.created_at"></p>
+                                    </div>
+                                </div>
+                            </a>
+                        </template>
+                    </div>
+                    
+                    <div class="px-4 py-2 border-t border-gray-100 text-center">
+                        <a href="{{ route('notifications.index') }}" class="text-sm text-indigo-600 hover:text-indigo-800">View all notifications</a>
+                    </div>
+                </div>
             </div>
 
             <div x-data="{ isOpen: false }" class="relative ml-4">

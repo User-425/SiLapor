@@ -13,6 +13,7 @@ use App\Http\Controllers\SarprasLaporanController;
 use App\Http\Controllers\GedungController;
 use App\Http\Controllers\TugasController;
 use App\Http\Controllers\TeknisiController;
+use App\Http\Controllers\NotificationController;
 
 // Authentication Routes
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -76,4 +77,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/teknisi/tugas/{id}', [TeknisiController::class, 'updateTugas'])->name('teknisi.updateTugas');
         Route::get('/teknisi/riwayat', [TeknisiController::class, 'riwayatPerbaikan'])->name('teknisi.riwayat');
     });
+
+    // Notifications Routes
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 });

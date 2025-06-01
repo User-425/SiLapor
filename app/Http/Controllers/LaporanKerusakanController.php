@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exports\LaporanKerusakanExport;
+use App\Notifications\NewReportNotification;
+use App\Models\Pengguna;
 use App\Models\LaporanKerusakan;
 use App\Models\FasRuang;
 use Illuminate\Http\Request;
@@ -135,6 +137,11 @@ class LaporanKerusakanController extends Controller
         'created_at' => now(),
         'updated_at' => now(),
     ]);
+    
+    $sarprasUsers = Pengguna::where('peran', 'sarpras')->get();
+    foreach ($sarprasUsers as $user) {
+        $user->notify(new NewReportNotification($laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang', 'pengguna'])));
+    }
 
     return redirect()->route('laporan.index')->with('success', 'Laporan berhasil ditambahkan.');
 }
