@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Tugas;
 use App\Models\LaporanKerusakan;
 use App\Models\Pengguna;
+use App\Notifications\TechnicianAssignedNotification;
+use App\Notifications\StatusChangedNotification;
 
 class TugasController extends Controller
 {
@@ -39,7 +41,7 @@ class TugasController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        Tugas::create([
+        $tugas = Tugas::create([
             'id_laporan' => $request->id_laporan,
             'id_pengguna' => $request->id_pengguna,
             'prioritas' => $request->prioritas,
@@ -48,7 +50,26 @@ class TugasController extends Controller
             'status' => 'ditugaskan'
         ]);
 
-        return redirect()->route('pages.laporan.index')->with('success', 'Tugas berhasil ditambahkan!');
+        // Update laporan status
+        $laporan = LaporanKerusakan::find($request->id_laporan);
+        $oldStatus = $laporan->status;
+        $laporan->update(['status' => 'diproses']);
+
+        // Send notification to technician
+        $teknisi = Pengguna::find($request->id_pengguna);
+        $teknisi->notify(new TechnicianAssignedNotification($tugas->load('laporan.fasilitasRuang.fasilitas', 'laporan.fasilitasRuang.ruang')));
+
+        // Send notification to report creator about status change
+        $laporan->pengguna->notify(
+            new StatusChangedNotification(
+                $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']),
+                $oldStatus,
+                'diproses'
+            )
+        );
+
+        return redirect()->route('tugas.index')
+            ->with('success', 'Tugas berhasil ditambahkan dan notifikasi telah dikirim ke teknisi.');
     }
 
     public function update(Request $request, $id)

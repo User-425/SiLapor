@@ -77,10 +77,77 @@
                                 </p>
                             </div>
                         </div>
+                        <div id="image-preview" class="mt-2 hidden">
+                            <img src="" alt="Preview" class="w-full max-h-48 object-contain">
+                        </div>
+                    </div>
+
+                    <!-- Kriteria Laporan Fields -->
+                    <div class="mt-6 border-t pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Penilaian Kerusakan</h3>
+                        
+                        <div class="space-y-6">
+                            <!-- Tingkat Kerusakan -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tingkat Kerusakan</label>
+                                <input 
+                                    type="range" 
+                                    min="1" 
+                                    max="5" 
+                                    value="3" 
+                                    id="tingkat_kerusakan_pelapor" 
+                                    name="tingkat_kerusakan_pelapor" 
+                                    class="w-full"
+                                >
+                                <div class="text-xs flex justify-between mt-1">
+                                    <span>Sedikit Rusak</span>
+                                    <span>Sangat Rusak</span>
+                                </div>
+                                <div class="text-center text-sm font-medium mt-1 hidden" id="tingkat-value">3</div>
+                            </div>
+
+                            <!-- Dampak Akademik -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Dampak Akademik</label>
+                                <input 
+                                    type="range" 
+                                    min="1" 
+                                    max="5" 
+                                    value="3" 
+                                    id="dampak_akademik_pelapor" 
+                                    name="dampak_akademik_pelapor" 
+                                    class="w-full"
+                                >
+                                <div class="text-xs flex justify-between mt-1">
+                                    <span>Sedikit Berdampak</span>
+                                    <span>Sangat Berdampak</span>
+                                </div>
+                                <div class="text-center text-sm font-medium mt-1 hidden" id="dampak-value">3</div>
+                            </div>
+
+                            <!-- Jumlah yang Membutuhkan -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah yang Membutuhkan</label>
+                                <input 
+                                    type="range" 
+                                    min="1" 
+                                    max="5" 
+                                    value="3" 
+                                    id="kebutuhan_pelapor" 
+                                    name="kebutuhan_pelapor" 
+                                    class="w-full"
+                                >
+                                <div class="text-xs flex justify-between mt-1">
+                                    <span>Sedikit Orang</span>
+                                    <span>Banyak Orang</span>
+                                </div>
+                                <div class="text-center text-sm font-medium mt-1 hidden" id="kebutuhan-value">3</div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Submit Button -->
-                    <div class="flex justify-end space-x-3">
+                    <div class="flex justify-end space-x-3 mt-8">
                         <a href="{{ url()->previous() }}" 
                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                             Batal
@@ -95,4 +162,39 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    // Image preview functionality
+    document.getElementById('url_foto').addEventListener('change', function(e) {
+        const preview = document.getElementById('image-preview');
+        const img = preview.querySelector('img');
+        const file = this.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
+            reader.readAsDataURL(file);
+        } else {
+            preview.classList.add('hidden');
+        }
+    });
+
+    // Display current value of sliders
+    document.getElementById('tingkat_kerusakan_pelapor').addEventListener('input', function(e) {
+        document.getElementById('tingkat-value').textContent = this.value;
+    });
+    
+    document.getElementById('dampak_akademik_pelapor').addEventListener('input', function(e) {
+        document.getElementById('dampak-value').textContent = this.value;
+    });
+    
+    document.getElementById('kebutuhan_pelapor').addEventListener('input', function(e) {
+        document.getElementById('kebutuhan-value').textContent = this.value;
+    });
+</script>
+@endpush
 @endsection
