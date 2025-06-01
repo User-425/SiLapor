@@ -83,8 +83,8 @@ class FasRuangController extends Controller
             $baseUrl = config('app.url');
             $code = base64_encode($id);
         
-            $development_host = "http://192.168.31.38:8000";
-            $url = rtrim($development_host, '/') . '/laporan/quick/' . $code;
+            // $development_host = "http://192.168.31.38:8000";
+            $url = rtrim($baseUrl, '/') . '/laporan/quick/' . $code;
             // $url = route('laporan.quick', ['code' => base64_encode($id)]);
             $qrcode = QrCode::size(300)
                 ->margin(2)
