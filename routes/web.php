@@ -11,6 +11,7 @@ use App\Http\Controllers\FasRuangController;
 use App\Http\Controllers\LaporanKerusakanController;
 use App\Http\Controllers\GedungController;
 use App\Http\Controllers\TugasController;
+use App\Http\Controllers\TeknisiController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -68,4 +69,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['peran:sarpras,teknisi'])->group(function () {
         Route::post('/laporan/{laporan}/status', [LaporanKerusakanController::class, 'updateStatus'])->name('laporan.updateStatus');
     });
+
+    // Routes untuk teknisi
+    Route::middleware(['auth', 'peran:teknisi'])->group(function () {
+    Route::get('/teknisi/tugas', [TeknisiController::class, 'index'])->name('teknisi.index');
+    Route::put('/teknisi/tugas/{id}', [TeknisiController::class, 'updateTugas'])->name('teknisi.updateTugas');
+    Route::get('/teknisi/riwayat', [TeknisiController::class, 'riwayatPerbaikan'])->name('teknisi.riwayat');
+});
 });
