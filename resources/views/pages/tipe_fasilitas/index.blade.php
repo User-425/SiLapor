@@ -3,8 +3,6 @@
 @section('title', 'Data Fasilitas')
 
 @section('content')
-    <!-- Page Heading -->
-   
 
     <!-- Flash Messages -->
     @if(session('success'))
