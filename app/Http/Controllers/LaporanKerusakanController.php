@@ -8,6 +8,8 @@ use App\Models\FasRuang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 use function Laravel\Prompts\error;
@@ -94,13 +96,16 @@ class LaporanKerusakanController extends Controller
         'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
         'deskripsi' => 'required|string|max:255',
         'url_foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        'tingkat_kerusakan_pelapor' => 'required|integer|min:1|max:5',
+        'dampak_akademik_pelapor' => 'required|integer|min:1|max:5',
+        'kebutuhan_pelapor' => 'required|integer|min:1|max:5',
     ]);
 
     // Pastikan folder laporan_foto ada
     $directory = storage_path('app/public/laporan_foto');
     if (!file_exists($directory)) {
         mkdir($directory, 0755, true);
-        \Log::info('Folder laporan_foto dibuat di: ' . $directory);
+        Log::info('Folder laporan_foto dibuat di: ' . $directory);
     }
 
     $data = [
@@ -114,14 +119,22 @@ class LaporanKerusakanController extends Controller
     if ($request->hasFile('url_foto')) {
         $file = $request->file('url_foto');
         $path = $file->store('laporan_foto', 'public');
-        \Log::info('File tersimpan di: ' . $path);
         $data['url_foto'] = $path;
     } else {
-        \Log::error('Tidak ada file yang diunggah untuk url_foto');
         return redirect()->back()->with('error', 'Gagal mengunggah foto.');
     }
 
-    LaporanKerusakan::create($data);
+    $laporan = LaporanKerusakan::create($data);
+
+    // Simpan kriteria pelapor ke tabel kriteria_laporan
+    DB::table('kriteria_laporan')->insert([
+        'id_laporan' => $laporan->id_laporan,
+        'tingkat_kerusakan_pelapor' => $request->tingkat_kerusakan_pelapor,
+        'dampak_akademik_pelapor' => $request->dampak_akademik_pelapor,
+        'kebutuhan_pelapor' => $request->kebutuhan_pelapor,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
 
     return redirect()->route('laporan.index')->with('success', 'Laporan berhasil ditambahkan.');
 }
@@ -152,9 +165,11 @@ class LaporanKerusakanController extends Controller
         }
 
         $request->validate([
-            'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
             'deskripsi' => 'required|string',
             'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'tingkat_kerusakan_sarpras' => 'required|integer|min:1|max:5',
+            'dampak_akademik_sarpras' => 'required|integer|min:1|max:5',
+            'kebutuhan_sarpras' => 'required|integer|min:1|max:5',
         ]);
 
         try {
@@ -172,6 +187,16 @@ class LaporanKerusakanController extends Controller
             }
 
         $laporan->update($data);
+
+            // Update kriteria sarpras di tabel kriteria_laporan
+            DB::table('kriteria_laporan')
+                ->where('id_laporan', $laporan->id_laporan)
+                ->update([
+                    'tingkat_kerusakan_sarpras' => $request->tingkat_kerusakan_sarpras,
+                    'dampak_akademik_sarpras' => $request->dampak_akademik_sarpras,
+                    'kebutuhan_sarpras' => $request->kebutuhan_sarpras,
+                    'updated_at' => now(),
+                ]);
 
             return response()->json([
                 'success' => true,
@@ -273,7 +298,7 @@ public function getDetail(LaporanKerusakan $laporan)
 
     $laporan->update([
         'status' => $request->status,
-        'ranking' => $request->ranking,
+        'ranking' => $request->ranking ?? 0,
     ]);
 
     $message = "Laporan berhasil diverifikasi dengan status: " . str_replace('_', ' ', ucwords($request->status));

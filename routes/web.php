@@ -9,6 +9,7 @@ use App\Http\Controllers\RuangController;
 use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\FasRuangController;
 use App\Http\Controllers\LaporanKerusakanController;
+use App\Http\Controllers\SarprasLaporanController;
 use App\Http\Controllers\GedungController;
 use App\Http\Controllers\TugasController;
 use App\Http\Controllers\TeknisiController;
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/laporan/{laporan}/verifikasi', [LaporanKerusakanController::class, 'verifikasi'])->name('laporan.verifikasi');
         Route::post('/laporan/batch-update-status', [LaporanKerusakanController::class, 'batchUpdateStatus'])->name('laporan.batchUpdateStatus');
         Route::get('/laporan/export', [LaporanKerusakanController::class, 'export'])->name('laporan.export');
+        Route::put('/laporan/{laporan}/update-sarpras', [LaporanKerusakanController::class, 'update'])->name('laporan.updateSarpras');
 
         Route::get('/tugas', [TugasController::class, 'index'])->name('tugas.index');
         Route::get('/tugas/create/{id_laporan}', [TugasController::class, 'create'])->name('tugas.create');

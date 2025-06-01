@@ -17,6 +17,8 @@
         </div>
     @endif
 
+    <div id="ajax-alert" class="hidden bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded mb-6 relative"></div>
+
     <!-- Main Content Card -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <!-- Card Header -->
@@ -76,7 +78,7 @@
                                 @if($laporan->status === 'menunggu_verifikasi' && Auth::user()->peran === 'sarpras')
                                     <form action="{{ route('laporan.verifikasi', $laporan->id_laporan) }}" method="POST" class="inline verify-form">
                                         @csrf
-                                        <select name="status" class="border-gray-300 rounded-md text-sm">
+                                        <select name="status" class="border-gray-300 rounded-md text-sm" onchange="this.form.submit()">
                                             <option value="" disabled selected>Menunggu Verifikasi</option>
                                             <option value="diproses">Diproses</option>
                                             <option value="ditolak">Ditolak</option>
@@ -94,8 +96,8 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
                                     <!-- Tombol Detail (Mata) -->
-                                    <button onclick="showDetail({{ $laporan->id_laporan }})" 
-                                            class="text-blue-600 hover:text-blue-900 transition duration-200" 
+                                    <button onclick="showDetail({{ $laporan->id_laporan }})"
+                                            class="text-blue-600 hover:text-blue-900 transition duration-200"
                                             title="Detail">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -103,22 +105,23 @@
                                         </svg>
                                     </button>
                                     <!-- Tombol Edit -->
-                                    <a href="{{ route('laporan.edit', $laporan->id_laporan) }}" 
-                                       class="text-yellow-600 hover:text-yellow-900 transition duration-200" 
-                                       title="Edit">
+                                    <button type="button"
+                                        class="edit-sarpras-btn text-yellow-600 hover:text-yellow-900 transition duration-200"
+                                        data-id="{{ $laporan->id_laporan }}"
+                                        title="Edit">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
-                                    </a>
+                                    </button>
                                     <!-- Tombol Delete -->
-                                    <form action="{{ route('laporan.destroy', $laporan->id_laporan) }}" 
-                                          method="POST" 
-                                          class="inline" 
+                                    <form action="{{ route('laporan.destroy', $laporan->id_laporan) }}"
+                                          method="POST"
+                                          class="inline"
                                           onsubmit="return confirm('Yakin hapus laporan ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" 
-                                                class="text-red-600 hover:text-red-900 transition duration-200" 
+                                        <button type="submit"
+                                                class="text-red-600 hover:text-red-900 transition duration-200"
                                                 title="Hapus">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -164,6 +167,8 @@
             </div>
         </div>
     </div>
+
+    @include('pages.laporan.sarpras-edit')
 </div>
 
 @section('scripts')
@@ -219,33 +224,101 @@
 
     // AJAX untuk Verifikasi
     document.querySelectorAll('.verify-form select[name="status"]').forEach(select => {
-        select.form.onsubmit = function(e) {
-            e.preventDefault();
-            fetch(this.action, {
-                method: 'POST',
-                body: new FormData(this),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: data.message,
-                    timer: 2000
-                }).then(() => location.reload());
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Gagal memperbarui status.'
-                });
-            });
+        select.onchange = function() {
+            this.form.requestSubmit(); // submit form via JS
         };
+    });
+
+    // Edit Laporan Sarpras
+    document.querySelectorAll('.edit-sarpras-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            const response = await fetch(`/laporan/detail/${id}`);
+            const data = await response.json();
+
+            // Set action form dengan id laporan
+            document.getElementById('sarprasEditLaporanForm').action = `/laporan/${id}/update-sarpras`;
+
+            // Isi field id_fas_ruang
+            document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
+
+            // Isi field lain seperti sebelumnya...
+            document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
+            document.getElementById('edit_deskripsi').value = data.deskripsi || '';
+            document.getElementById('tingkat_kerusakan_sarpras').value = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
+            document.getElementById('dampak_akademik_sarpras').value = data.kriteria?.dampak_akademik_sarpras ?? 3;
+            document.getElementById('kebutuhan_sarpras').value = data.kriteria?.kebutuhan_sarpras ?? 3;
+            // Foto preview
+            if (data.url_foto) {
+                document.getElementById('edit_photo_preview').src = data.url_foto;
+                document.getElementById('current_photo').style.display = 'block';
+            } else {
+                document.getElementById('current_photo').style.display = 'none';
+            }
+            document.getElementById('foto_lama').value = data.url_foto || '';
+
+            // Tampilkan modal
+            document.getElementById('sarprasEditLaporanModal').classList.remove('hidden');
+        });
+    });
+
+    // Tutup modal
+    document.querySelectorAll('#sarprasEditLaporanModal .close-modal').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('sarprasEditLaporanModal').classList.add('hidden');
+            document.getElementById('sarprasEditLaporanForm').reset();
+        });
+    });
+
+    document.getElementById('sarprasEditLaporanForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const url = form.action;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST', // Laravel expects POST + _method=PUT
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('sarprasEditLaporanModal').classList.add('hidden');
+                // Tampilkan alert di atas tabel
+                const alertBox = document.getElementById('ajax-alert');
+                alertBox.textContent = data.message || 'Data berhasil diupdate!';
+                alertBox.classList.remove('hidden');
+                alertBox.classList.remove('bg-red-100', 'border-red-400');
+                alertBox.classList.add('bg-green-100', 'border-green-400');
+                // Sembunyikan alert setelah 2 detik
+                setTimeout(() => {
+                    alertBox.classList.add('hidden');
+                }, 2000);
+                // Optional: reload table/list, atau update row secara dinamis
+            } else {
+                const alertBox = document.getElementById('ajax-alert');
+                alertBox.textContent = data.message || 'Gagal mengupdate data.';
+                alertBox.classList.remove('hidden');
+                alertBox.classList.remove('bg-green-100', 'border-green-400');
+                alertBox.classList.add('bg-red-100', 'border-red-400');
+                setTimeout(() => {
+                    alertBox.classList.add('hidden');
+                }, 3000);
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Terjadi kesalahan saat mengupdate data.'
+            });
+        }
     });
 </script>
 @endsection

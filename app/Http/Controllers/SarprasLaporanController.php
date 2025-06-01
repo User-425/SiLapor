@@ -10,14 +10,14 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SarprasLaporanController extends Controller
 {
-    
+
 
     public function index(Request $request)
     {
         $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
-        
+
         $status = $request->get('status', 'menunggu_verifikasi');
-        
+
         if ($status !== 'semua') {
             $query->where('status', $status);
         }
@@ -127,6 +127,7 @@ class SarprasLaporanController extends Controller
         ]);
 
         $laporan->update([
+            'id_fas_ruang' => $request->id_fas_ruang,
             'status' => $request->status,
             'ranking' => $request->ranking,
         ]);

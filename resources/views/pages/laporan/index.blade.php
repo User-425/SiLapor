@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalFasilitas.textContent = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
                 modalKode.textContent = data.fasilitasRuang?.kode_fasilitas || '-';
                 modalDeskripsi.textContent = data.deskripsi || '-';
-                
+
                 // Update image with proper URL handling
                 if (data.url_foto) {
                     modalGambar.src = data.url_foto;
@@ -318,6 +318,37 @@ document.addEventListener('DOMContentLoaded', function() {
             updateKodeDropdown(addRuangSelect.value, this.value, addKodeSelect);
         }
     });
+
+    // Step Form Logic
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const nextStepBtn = document.getElementById('nextStepBtn');
+    const prevStepBtn = document.getElementById('prevStepBtn');
+
+    if (nextStepBtn) {
+        nextStepBtn.addEventListener('click', function() {
+            // Validasi minimal: semua field step1 harus terisi
+            const ruang = document.getElementById('add_ruang_id').value;
+            const fasilitas = document.getElementById('add_fasilitas_id').value;
+            const kode = document.getElementById('add_id_fas_ruang').value;
+            const deskripsi = document.getElementById('add_deskripsi').value;
+            const foto = document.getElementById('add_url_foto').files.length > 0;
+
+            if (!ruang || !fasilitas || !kode || !deskripsi || !foto) {
+                alert('Mohon lengkapi semua data dan upload foto!');
+                return;
+            }
+            step1.classList.add('hidden');
+            step2.classList.remove('hidden');
+        });
+    }
+
+    if (prevStepBtn) {
+        prevStepBtn.addEventListener('click', function() {
+            step2.classList.add('hidden');
+            step1.classList.remove('hidden');
+        });
+    }
 
     // Utility Functions
     function resetAddForm() {

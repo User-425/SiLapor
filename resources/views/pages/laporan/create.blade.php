@@ -5,7 +5,7 @@
             <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Tambah Laporan</h3>
             <form id="addLaporanForm" action="{{ route('laporan.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="space-y-4">
+                <div id="step1" class="space-y-4">
                     <div>
                         <label for="add_ruang_id" class="block text-sm font-medium text-gray-700">Ruang</label>
                         <select id="add_ruang_id" name="ruang_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
@@ -55,6 +55,37 @@
                     <div class="flex justify-end space-x-3">
                         <button type="button" class="close-modal px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                             Batal
+                        </button>
+                        <button type="button" id="nextStepBtn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Next
+                        </button>
+                    </div>
+                </div>
+                <div id="step2" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tingkat Kerusakan (Pelapor)</label>
+                        <input type="range" min="1" max="5" value="3" id="tingkat_kerusakan_pelapor" name="tingkat_kerusakan_pelapor" class="w-full">
+                        <div class="text-xs flex justify-between">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Dampak Akademik (Pelapor)</label>
+                        <input type="range" min="1" max="5" value="3" id="dampak_akademik_pelapor" name="dampak_akademik_pelapor" class="w-full">
+                        <div class="text-xs flex justify-between">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kebutuhan (Pelapor)</label>
+                        <input type="range" min="1" max="5" value="3" id="kebutuhan_pelapor" name="kebutuhan_pelapor" class="w-full">
+                        <div class="text-xs flex justify-between">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="prevStepBtn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            Sebelumnya
                         </button>
                         <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             Simpan
