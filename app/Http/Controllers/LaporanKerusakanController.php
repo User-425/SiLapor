@@ -89,29 +89,42 @@ class LaporanKerusakanController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
-            'deskripsi' => 'required|string|max:255',
-            'url_foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+{
+    $request->validate([
+        'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
+        'deskripsi' => 'required|string|max:255',
+        'url_foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
 
-        $data = [
-            'id_pengguna' => Auth::id(),
-            'id_fas_ruang' => $request->id_fas_ruang,
-            'deskripsi' => $request->deskripsi,
-            'status' => 'menunggu_verifikasi',
-            'ranking' => 0,
-        ];
-
-        if ($request->hasFile('url_foto')) {
-            $data['url_foto'] = $request->file('url_foto')->store('laporan_foto', 'public');
-        }
-
-        LaporanKerusakan::create($data);
-
-        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil ditambahkan.');
+    // Pastikan folder laporan_foto ada
+    $directory = storage_path('app/public/laporan_foto');
+    if (!file_exists($directory)) {
+        mkdir($directory, 0755, true);
+        \Log::info('Folder laporan_foto dibuat di: ' . $directory);
     }
+
+    $data = [
+        'id_pengguna' => Auth::id(),
+        'id_fas_ruang' => $request->id_fas_ruang,
+        'deskripsi' => $request->deskripsi,
+        'status' => 'menunggu_verifikasi',
+        'ranking' => 0,
+    ];
+
+    if ($request->hasFile('url_foto')) {
+        $file = $request->file('url_foto');
+        $path = $file->store('laporan_foto', 'public');
+        \Log::info('File tersimpan di: ' . $path);
+        $data['url_foto'] = $path;
+    } else {
+        \Log::error('Tidak ada file yang diunggah untuk url_foto');
+        return redirect()->back()->with('error', 'Gagal mengunggah foto.');
+    }
+
+    LaporanKerusakan::create($data);
+
+    return redirect()->route('laporan.index')->with('success', 'Laporan berhasil ditambahkan.');
+}
 
     public function show(LaporanKerusakan $laporan)
     {
@@ -158,7 +171,7 @@ class LaporanKerusakanController extends Controller
                 $data['url_foto'] = $path;
             }
 
-            $laporan->update($data);
+        $laporan->update($data);
 
             return response()->json([
                 'success' => true,
@@ -212,13 +225,13 @@ class LaporanKerusakanController extends Controller
         return response()->json($kode);
     }
 
-    public function getDetail(LaporanKerusakan $laporan)
-    {
-        if ($laporan->id_pengguna !== Auth::id() && !in_array(Auth::user()->peran, ['sarpras', 'teknisi'])) {
-            abort(403);
-        }
+public function getDetail(LaporanKerusakan $laporan)
+{
+    if ($laporan->id_pengguna !== Auth::id() && !in_array(Auth::user()->peran, ['sarpras', 'teknisi'])) {
+        abort(403);
+    }
 
-        $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
+    $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
 
         return response()->json([
             'id_laporan' => $laporan->id_laporan,
@@ -252,24 +265,24 @@ class LaporanKerusakanController extends Controller
     }
 
     public function verifikasi(Request $request, LaporanKerusakan $laporan)
-    {
-        $request->validate([
-            'status' => 'required|in:diproses,selesai,ditolak',
-            'ranking' => 'nullable|integer|min:0|max:5',
-        ]);
+{
+    $request->validate([
+        'status' => 'required|in:diproses,ditolak',
+        'ranking' => 'nullable|integer|min:0|max:5',
+    ]);
 
-        $laporan->update([
-            'status' => $request->status,
-            'ranking' => $request->ranking,
-        ]);
+    $laporan->update([
+        'status' => $request->status,
+        'ranking' => $request->ranking,
+    ]);
 
-        $message = "Laporan berhasil diverifikasi dengan status: " . str_replace('_', ' ', ucwords($request->status));
-        if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => $message]);
-        }
-
-        return redirect()->route('laporan.index')->with('success', $message);
+    $message = "Laporan berhasil diverifikasi dengan status: " . str_replace('_', ' ', ucwords($request->status));
+    if ($request->ajax()) {
+        return response()->json(['success' => true, 'message' => $message]);
     }
+
+    return redirect()->route('laporan.index')->with('success', $message);
+}
 
     public function updateStatus(Request $request, LaporanKerusakan $laporan)
     {

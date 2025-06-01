@@ -4,12 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    
-
     <!-- Alert Success -->
     @if (session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 relative">
+        <div class="bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded mb-6 relative">
             <span class="block sm:inline">{{ session('success') }}</span>
             <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
                 <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -23,21 +20,14 @@
     <!-- Main Content Card -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <!-- Card Header -->
-<div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-    <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-gray-900">
-            Daftar Laporan ({{ $laporans->total() ?? $laporans->count() }} total)
-        </h2>
-        <a href="{{ route('laporan.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center transition duration-200">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Tambah Laporan
-        </a>
-    </div>
-</div>
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    Daftar Laporan ({{ $laporans->total() ?? $laporans->count() }} total)
+                </h2>
+            </div>
+        </div>
 
-        
         <!-- Table -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -78,44 +68,41 @@
                                 {{ $laporan->fasilitasRuang->ruang->nama_ruang ?? 'N/A' }}
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900 max-w-xs truncate" title="{{ $laporan->deskripsi }}">
-                                    {{ $laporan->deskripsi }}
+                                <div class="text-sm text-gray-900 max-w-xs overflow-hidden whitespace-nowrap text-ellipsis" title="{{ $laporan->deskripsi }}">
+                                    {{ Str::limit($laporan->deskripsi, 15, '...') }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @php
-                                    $statusClasses = [
-                                        'menunggu_verifikasi' => 'bg-yellow-100 text-yellow-800',
-                                        'diproses' => 'bg-blue-100 text-blue-800',
-                                        'diperbaiki' => 'bg-indigo-100 text-indigo-800',
-                                        'selesai' => 'bg-green-100 text-green-800',
-                                        'ditolak' => 'bg-red-100 text-red-800'
-                                    ];
-                                    $statusLabels = [
-                                        'menunggu_verifikasi' => 'Menunggu Verifikasi',
-                                        'diproses' => 'Diproses',
-                                        'diperbaiki' => 'Diperbaiki',
-                                        'selesai' => 'Selesai',
-                                        'ditolak' => 'Ditolak'
-                                    ];
-                                @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses[$laporan->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                    {{ $statusLabels[$laporan->status] ?? ucwords(str_replace('_', ' ', $laporan->status)) }}
-                                </span>
+                                @if($laporan->status === 'menunggu_verifikasi' && Auth::user()->peran === 'sarpras')
+                                    <form action="{{ route('laporan.verifikasi', $laporan->id_laporan) }}" method="POST" class="inline verify-form">
+                                        @csrf
+                                        <select name="status" class="border-gray-300 rounded-md text-sm">
+                                            <option value="" disabled selected>Menunggu Verifikasi</option>
+                                            <option value="diproses">Diproses</option>
+                                            <option value="ditolak">Ditolak</option>
+                                        </select>
+                                    </form>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $laporan->status_badge_class }}">
+                                        {{ $laporan->status_label }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $laporan->created_at->format('d/m/Y H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
-                                    <a href="{{ route('laporan.show', $laporan->id_laporan) }}" 
-                                       class="text-blue-600 hover:text-blue-900 transition duration-200" 
-                                       title="Detail">
+                                    <!-- Tombol Detail (Mata) -->
+                                    <button onclick="showDetail({{ $laporan->id_laporan }})" 
+                                            class="text-blue-600 hover:text-blue-900 transition duration-200" 
+                                            title="Detail">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                         </svg>
-                                    </a>
+                                    </button>
+                                    <!-- Tombol Edit -->
                                     <a href="{{ route('laporan.edit', $laporan->id_laporan) }}" 
                                        class="text-yellow-600 hover:text-yellow-900 transition duration-200" 
                                        title="Edit">
@@ -123,6 +110,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
+                                    <!-- Tombol Delete -->
                                     <form action="{{ route('laporan.destroy', $laporan->id_laporan) }}" 
                                           method="POST" 
                                           class="inline" 
@@ -163,5 +151,102 @@
             </div>
         @endif
     </div>
+
+    <!-- Modal untuk Detail -->
+    <div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
+            <h2 class="text-lg font-semibold mb-4">Detail Laporan</h2>
+            <div id="detailContent" class="space-y-4 max-h-[80vh] overflow-y-auto">
+                <!-- Konten akan diisi via AJAX -->
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeModal()" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Tutup</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // AJAX untuk Detail
+    function showDetail(id) {
+        fetch('{{ url('laporan/detail') }}/' + id, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const content = `
+                <div class="space-y-2">
+                    <p><strong>ID Laporan:</strong> ${data.id_laporan}</p>
+                    <p><strong>Pelapor:</strong> ${data.pengguna.nama}</p>
+                    <p><strong>Email:</strong> ${data.pengguna.email}</p>
+                    <p><strong>Fasilitas:</strong> ${data.fasilitasRuang.fasilitas.nama_fasilitas}</p>
+                    <p><strong>Ruang:</strong> ${data.fasilitasRuang.ruang.nama_ruang}</p>
+                    <p><strong>Gedung:</strong> ${data.fasilitasRuang.ruang.gedung.nama_gedung}</p>
+                    <p><strong>Status:</strong> ${data.status.replace('_', ' ').toUpperCase()}</p>
+                    <p><strong>Tanggal Dibuat:</strong> ${data.created_at}</p>
+                    <p class="mt-4"><strong>Deskripsi:</strong></p>
+                    <div class="border border-gray-300 rounded-md p-4 bg-gray-50 text-sm text-gray-900 max-h-40 overflow-y-auto">
+                        ${data.deskripsi}
+                    </div>
+                    ${data.url_foto ? `
+                    <p class="mt-4"><strong>Foto:</strong></p>
+                    <img src="${data.url_foto}" alt="Foto Kerusakan" class="max-w-xs max-h-64 mt-2 object-contain">
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('detailContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Gagal memuat detail laporan.'
+            });
+        });
+    }
+
+    function closeModal() {
+        document.getElementById('detailModal').classList.add('hidden');
+        document.getElementById('detailContent').innerHTML = '';
+    }
+
+    // AJAX untuk Verifikasi
+    document.querySelectorAll('.verify-form select[name="status"]').forEach(select => {
+        select.form.onsubmit = function(e) {
+            e.preventDefault();
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: data.message,
+                    timer: 2000
+                }).then(() => location.reload());
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: 'Gagal memperbarui status.'
+                });
+            });
+        };
+    });
+</script>
+@endsection
 @endsection
