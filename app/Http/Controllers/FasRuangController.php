@@ -174,7 +174,7 @@ class FasRuangController extends Controller
             $allText = strtolower($allText);
             
             // Remove common words in Indonesian
-            $commonWords = ['yang', 'dan', 'di', 'ke', 'dari', 'untuk', 'dengan', 'tidak', 'ini', 'itu'];
+            $commonWords = ['yang', 'dan', 'di', 'ke', 'dari', 'untuk', 'dengan', 'tidak', 'ini', 'itu', 'adalah', 'pada', 'saya', 'kami', 'kita', 'mereka', 'dia', 'itu', 'juga', 'sudah', 'belum', 'akan', 'bisa', 'harus', 'boleh', 'tidak', 'ada', 'semua', 'beberapa', 'lain', 'lainnya', 'tersebut', 'terkait', 'terutama', 'seperti', 'lebih', 'kurang', 'sangat', 'cukup'];
             foreach ($commonWords as $word) {
                 $allText = str_replace(' ' . $word . ' ', ' ', $allText);
             }
