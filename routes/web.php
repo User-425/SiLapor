@@ -30,8 +30,8 @@ Route::middleware('auth')->group(function () {
     // Middleware for admin
     Route::middleware(['peran:admin'])->group(function () {
         Route::resource('pengguna', PenggunaController::class)->names('users')->except(['show']);
-        Route::resource('fasilitas', FasRuangController::class)->except(['show']);
-        Route::resource('tipe_fasilitas', FasilitasController::class)->except(['show']);
+        Route::resource('fasilitas', FasRuangController::class)->names('fasilitas')->except(['show']);
+        Route::resource('tipe_fasilitas', FasilitasController::class)->names('tipe_fasilitas')->except(['show']);
         Route::resource('ruang', RuangController::class)->except(['show']);
         Route::resource('gedung', GedungController::class)->except(['show']);
         Route::resource('periode', PeriodeController::class);
@@ -68,5 +68,4 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['peran:sarpras,teknisi'])->group(function () {
         Route::post('/laporan/{laporan}/status', [LaporanKerusakanController::class, 'updateStatus'])->name('laporan.updateStatus');
     });
-
 });

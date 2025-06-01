@@ -41,7 +41,7 @@ class FasilitasController extends Controller
             'deskripsi' => $request->deskripsi
         ]);
 
-        return redirect('/tipe_fasilitas')->with('success', 'Data fasilitas berhasil ditambahkan');
+        return redirect()->route('fasilitas.index')->with('success', 'Data fasilitas berhasil ditambahkan');
     }
 
     public function edit($id)
@@ -75,7 +75,7 @@ class FasilitasController extends Controller
             'deskripsi' => $request->deskripsi
         ]);
 
-        return redirect('/tipe_fasilitas')->with('success', 'Data fasilitas berhasil diubah');
+        return redirect()->route('fasilitas.index')->with('success', 'Data fasilitas berhasil diubah');
     }
 
     public function destroy($id)
@@ -83,14 +83,14 @@ class FasilitasController extends Controller
         $fasilitas = Fasilitas::find($id);
 
         if (!$fasilitas) {
-            return redirect('/tipe_fasilitas')->with('error', 'Data fasilitas tidak ditemukan');
+            return redirect()->route('fasilitas.index')->with('error', 'Data fasilitas tidak ditemukan');
         }
 
         try {
             $fasilitas->delete();
-            return redirect('/tipe_fasilitas')->with('success', 'Data fasilitas berhasil dihapus');
+            return redirect()->route('fasilitas.index')->with('success', 'Data fasilitas berhasil dihapus');
         } catch (\Exception $e) {
-            return redirect('/tipe_fasilitas')->with('error', 'Gagal menghapus data fasilitas karena masih terkait dengan data lain');
+            return redirect()->route('fasilitas.index')->with('error', 'Gagal menghapus data fasilitas karena masih terkait dengan data lain');
         }
     }
 }
