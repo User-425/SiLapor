@@ -18,7 +18,7 @@ class LaporanKerusakanSeeder extends Seeder
             [
                 'id_pengguna' => 2,
                 'id_fas_ruang' => 1,
-                'deskripsi' => 'Proyektor tidak menyala ketika disambungkan ke laptop. Sudah coba ganti kabel HDMI tapi masih tidak berfungsi.',
+                'deskripsi' => 'Saat menggunakan proyektor LCD di ruang kelas, gambar yang ditampilkan terlihat buram dan tidak jelas. Kami sudah mencoba mengatur fokusnya, tapi tetap tidak terlalu membaik. Setelah dicek, ternyata lensa proyektornya berdebu. Kemungkinan lain, proyektor terlalu dekat dengan layar, jadi perlu disesuaikan jaraknya. Kami sarankan proyektor dibersihkan dan dicek lebih lanjut oleh teknisi.',
                 'url_foto' => 'https://th.bing.com/th/id/OIP.3UPOY4kffVN6YkeNRAXnJgAAAA?cb=iwc2&rs=1&pid=ImgDetMain',
                 'status' => 'menunggu_verifikasi',
                 'ranking' => 3,
@@ -64,6 +64,26 @@ class LaporanKerusakanSeeder extends Seeder
                 'ranking' => 1,
                 'created_at' => Carbon::now()->subDays(12),
                 'updated_at' => Carbon::now()->subDays(10),
+            ],
+            [
+                'id_pengguna' => 3,
+                'id_fas_ruang' => 1,
+                'deskripsi' => 'Berdasarkan observasi di ruang kuliah 2A, ditemukan gangguan pada proyektor LCD berupa tampilan visual yang buram dan kurang tajam. Penyesuaian fokus secara manual tidak memberikan perbaikan signifikan. Dugaan awal mengarah pada lensa yang tertutup debu, serta kemungkinan degradasi panel LCD akibat penggunaan jangka panjang. Diperlukan tindakan pemeliharaan berkala seperti pembersihan optik dan kalibrasi ulang jarak serta fokus proyektor.',
+                'url_foto' => 'https://th.bing.com/th/id/OIP.3UPOY4kffVN6YkeNRAXnJgAAAA?cb=iwc2&rs=1&pid=ImgDetMain',
+                'status' => 'menunggu_verifikasi',
+                'ranking' => 3,
+                'created_at' => Carbon::now()->subDays(8),
+                'updated_at' => Carbon::now()->subDays(8),
+            ],
+            [
+                'id_pengguna' => 2,
+                'id_fas_ruang' => 1,
+                'deskripsi' => 'Pada saat presentasi kelompok, kami mengalami kendala pada proyektor LCD di ruang 3. Tampilan gambar tampak buram dan sulit dibaca, terutama pada teks berukuran kecil. Penyesuaian fokus telah dilakukan namun tidak memberikan hasil signifikan. Setelah diamati, terdapat lapisan debu pada lensa yang kemungkinan menjadi penyebab utamanya. Disarankan dilakukan pembersihan rutin dan pengecekan posisi proyektor terhadap layar.',
+                'url_foto' => 'https://th.bing.com/th/id/OIP.3UPOY4kffVN6YkeNRAXnJgAAAA?cb=iwc2&rs=1&pid=ImgDetMain',
+                'status' => 'menunggu_verifikasi',
+                'ranking' => 3,
+                'created_at' => Carbon::now()->subDays(3),
+                'updated_at' => Carbon::now()->subDays(3),
             ],
         ];
 
