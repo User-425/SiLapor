@@ -60,26 +60,37 @@ class FasRuangController extends Controller
 
     public function destroy(FasRuang $fasRuang)
     {
-        $fasRuang->delete();
+        try {
+            if ($fasRuang->laporanKerusakan()->count() > 0) {
+                return redirect()->route('fasilitas.index')
+                    ->with('error', 'Tidak dapat menghapus fasilitas ruang karena masih memiliki laporan kerusakan terkait');
+            }
 
-        return redirect()->route('fasilitas.index')
-            ->with('success', 'Fasilitas ruang berhasil dihapus.');
+            $fasRuang->delete();
+            return redirect()->route('fasilitas.index')
+                ->with('success', 'Fasilitas ruang berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('fasilitas.index')
+                ->with('error', 'Gagal menghapus fasilitas ruang: ' . $e->getMessage());
+        }
     }
 
     public function generateQR($id)
     {
         try {
             $fasRuang = FasRuang::with(['fasilitas', 'ruang.gedung'])->findOrFail($id);
-            
+
             $baseUrl = config('app.url');
             $code = base64_encode($id);
-            $url = rtrim($baseUrl, '/') . '/laporan/quick/' . $code;
-             // $url = route('laporan.quick', ['code' => base64_encode($id)]);
+        
+            $development_host = "http://192.168.31.38:8000";
+            $url = rtrim($development_host, '/') . '/laporan/quick/' . $code;
+            // $url = route('laporan.quick', ['code' => base64_encode($id)]);
             $qrcode = QrCode::size(300)
                 ->margin(2)
                 ->generate($url);
 
-            return view('pages.fasilitas.qr', [
+            return view('pages.fasilitas.qr', [ 
                 'fasRuang' => $fasRuang,
                 'qrcode' => $qrcode,
                 'url' => $url
