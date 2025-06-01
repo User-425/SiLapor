@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exports\LaporanKerusakanExport;
 use App\Notifications\NewReportNotification;
+use App\Notifications\StatusChangedNotification;
+use App\Notifications\FeedbackRequestNotification;
 use App\Models\Pengguna;
 use App\Models\LaporanKerusakan;
 use App\Models\FasRuang;
@@ -303,10 +305,21 @@ public function getDetail(LaporanKerusakan $laporan)
         'ranking' => 'nullable|integer|min:0|max:5',
     ]);
 
+    $oldStatus = $laporan->status;
+    
     $laporan->update([
         'status' => $request->status,
         'ranking' => $request->ranking ?? 0,
     ]);
+
+    // Notify the report creator about verification result
+    $laporan->pengguna->notify(
+        new StatusChangedNotification(
+            $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']), 
+            $oldStatus, 
+            $request->status
+        )
+    );
 
     $message = "Laporan berhasil diverifikasi dengan status: " . str_replace('_', ' ', ucwords($request->status));
     if ($request->ajax()) {
@@ -323,10 +336,30 @@ public function getDetail(LaporanKerusakan $laporan)
             'ranking' => 'nullable|integer|min:0|max:5',
         ]);
 
+        $oldStatus = $laporan->status;
+        
         $laporan->update([
             'status' => $request->status,
             'ranking' => $request->ranking,
         ]);
+
+        // Send notification to the report creator about status change
+        $laporan->pengguna->notify(
+            new StatusChangedNotification(
+                $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']), 
+                $oldStatus, 
+                $request->status
+            )
+        );
+
+        // If status changed to 'selesai', send feedback request
+        if ($request->status === 'selesai') {
+            $laporan->pengguna->notify(
+                new FeedbackRequestNotification(
+                    $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang'])
+                )
+            );
+        }
 
         $message = "Status laporan berhasil diperbarui ke: " . str_replace('_', ' ', ucwords($request->status));
         if ($request->ajax()) {
@@ -344,10 +377,40 @@ public function getDetail(LaporanKerusakan $laporan)
             'status' => 'required|in:menunggu_verifikasi,diproses,diperbaiki,selesai,ditolak',
         ]);
 
+        // Get all reports before updating
+        $laporans = LaporanKerusakan::whereIn('id_laporan', $request->laporan_ids)->get();
+        
+        // Update all reports
         LaporanKerusakan::whereIn('id_laporan', $request->laporan_ids)->update([
             'status' => $request->status,
             'updated_at' => now(),
         ]);
+
+        // Send notifications for each report
+        foreach ($laporans as $laporan) {
+            $oldStatus = $laporan->status;
+            
+            // Reload the model to get fresh data
+            $laporan->refresh();
+            
+            // Notify the report creator about status change
+            $laporan->pengguna->notify(
+                new StatusChangedNotification(
+                    $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']), 
+                    $oldStatus, 
+                    $request->status
+                )
+            );
+            
+            // If status changed to 'selesai', send feedback request
+            if ($request->status === 'selesai') {
+                $laporan->pengguna->notify(
+                    new FeedbackRequestNotification(
+                        $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang'])
+                    )
+                );
+            }
+        }
 
         $message = "Berhasil mengupdate status untuk " . count($request->laporan_ids) . " laporan.";
         if ($request->ajax()) {
