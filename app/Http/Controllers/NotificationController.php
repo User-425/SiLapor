@@ -37,16 +37,25 @@ class NotificationController extends Controller
         
         if ($notification) {
             $notification->markAsRead();
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Notifikasi berhasil ditandai sebagai sudah dibaca.'
+            ]);
         }
         
-        return response()->json(['success' => false], 404);
+        return response()->json([
+            'success' => false, 
+            'message' => 'Notifikasi tidak ditemukan.'
+        ], 404);
     }
     
     public function markAllAsRead()
     {
         Auth::user()->unreadNotifications->markAsRead();
         
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Semua notifikasi berhasil ditandai sebagai sudah dibaca.'
+        ]);
     }
 }

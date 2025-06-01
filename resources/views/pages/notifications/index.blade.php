@@ -3,17 +3,32 @@
 @section('title', 'Notifikasi')
 
 @section('content')
+<!-- Success message modal -->
+<div id="successModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+        <div class="flex items-center text-green-600 mb-4">
+            <svg class="h-8 w-8 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 class="text-lg font-medium">Berhasil</h2>
+        </div>
+        <p id="successModalMessage" class="text-gray-700 mb-6">Notifikasi berhasil ditandai sebagai sudah dibaca.</p>
+        <div class="flex justify-end">
+            <button id="closeSuccessModal" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="bg-white rounded-lg shadow-md p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-semibold text-gray-800">Semua Notifikasi</h2>
         
         @if($notifications->where('read_at', null)->count() > 0)
-        <form action="{{ route('notifications.markAllAsRead') }}" method="POST" class="inline">
-            @csrf
-            <button type="submit" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
-                Tandai semua dibaca
-            </button>
-        </form>
+        <button id="markAllAsReadBtn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+            Tandai semua dibaca
+        </button>
         @endif
     </div>
 
@@ -67,12 +82,11 @@
                             @endif
                             
                             @if(!$notification->read_at)
-                                <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST" class="ml-4">
-                                    @csrf
-                                    <button type="submit" class="text-sm text-gray-500 hover:text-gray-700">
-                                        Tandai sudah dibaca
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                   class="ml-4 text-sm text-gray-500 hover:text-gray-700 mark-read-btn"
+                                   data-id="{{ $notification->id }}">
+                                    Tandai sudah dibaca
+                                </button>
                             @endif
                         </div>
                     </div>
@@ -92,4 +106,115 @@
         {{ $notifications->links() }}
     </div>
 </div>
+
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Success modal elements
+    const successModal = document.getElementById('successModal');
+    const successMessage = document.getElementById('successModalMessage');
+    const closeSuccessBtn = document.getElementById('closeSuccessModal');
+    
+    // Close modal function
+    const closeModal = () => {
+        successModal.classList.add('hidden');
+    };
+    
+    // Close button event
+    closeSuccessBtn.addEventListener('click', closeModal);
+    
+    // Show success modal function
+    const showSuccessModal = (message) => {
+        successMessage.textContent = message;
+        successModal.classList.remove('hidden');
+        
+        // Auto close after 3 seconds
+        setTimeout(() => {
+            closeModal();
+        }, 3000);
+    };
+    
+    // Mark as read buttons
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            const notificationElement = this.closest('.border.rounded-md');
+            
+            try {
+                const response = await fetch(`/notifications/${id}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update UI - change background and remove button
+                    notificationElement.classList.remove('bg-blue-50');
+                    notificationElement.classList.add('bg-white');
+                    this.remove();
+                    
+                    // Show success modal
+                    showSuccessModal('Notifikasi berhasil ditandai sebagai sudah dibaca.');
+                    
+                    // Update unread counter in header if exists
+                    const headerCounter = document.querySelector('header span[x-text]');
+                    if (headerCounter) {
+                        // This is just for immediate visual feedback - the actual Alpine.js state 
+                        // would need to be updated through its own mechanisms
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+    
+    // Mark all as read button
+    const markAllBtn = document.getElementById('markAllAsReadBtn');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', async function() {
+            try {
+                const response = await fetch('/notifications/read-all', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update UI - change all backgrounds
+                    document.querySelectorAll('.bg-blue-50').forEach(el => {
+                        el.classList.remove('bg-blue-50');
+                        el.classList.add('bg-white');
+                    });
+                    
+                    // Remove all mark as read buttons
+                    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+                        btn.remove();
+                    });
+                    
+                    // Remove the mark all button itself
+                    this.remove();
+                    
+                    // Show success modal
+                    showSuccessModal('Semua notifikasi berhasil ditandai sebagai sudah dibaca.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+});
+</script>
 @endsection
