@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('periode', PeriodeController::class);
         Route::get('/fasilitas/{id}/qr', [FasRuangController::class, 'generateQR'])
             ->name('fasilitas.qr');
+        Route::get('/fasilitas/{id}/history', [FasRuangController::class, 'history'])->name('fasilitas.history');
     });
 
     // Laporan Routes - All Authenticated Users

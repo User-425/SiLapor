@@ -7,6 +7,8 @@ use App\Models\Fasilitas;
 use App\Models\Ruang;
 use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\LaporanKerusakan;
+use Illuminate\Support\Facades\DB;
 
 class FasRuangController extends Controller
 {
@@ -99,5 +101,104 @@ class FasRuangController extends Controller
             return redirect()->route('fasilitas.index')
                 ->with('error', 'Gagal generate QR Code');
         }
+    }
+
+    public function history($id)
+    {
+        $fasRuang = FasRuang::with(['fasilitas', 'ruang.gedung'])->findOrFail($id);
+        
+        $laporanHistory = LaporanKerusakan::with(['pengguna'])
+            ->where('id_fas_ruang', $id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        
+        // Calculate statistics
+        $totalLaporan = LaporanKerusakan::where('id_fas_ruang', $id)->count();
+        
+        $completedLaporan = LaporanKerusakan::where('id_fas_ruang', $id)
+            ->where('status', 'selesai')
+            ->get();
+        
+        $averageTimeToFix = null;
+        if ($completedLaporan->count() > 0) {
+            $totalDays = 0;
+            foreach ($completedLaporan as $laporan) {
+                $created = new \DateTime($laporan->created_at);
+                $updated = new \DateTime($laporan->updated_at);
+                $diff = $created->diff($updated);
+                $totalDays += $diff->days;
+            }
+            $averageTimeToFix = $completedLaporan->count() > 0 ? 
+                round($totalDays / $completedLaporan->count(), 1) : 0;
+        }
+        
+        $currentMonth = date('m');
+        $currentYear = date('Y');
+        $reportsThisMonth = LaporanKerusakan::where('id_fas_ruang', $id)
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->count();
+        
+        $statusCounts = LaporanKerusakan::where('id_fas_ruang', $id)
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->toArray();
+        
+        // Generate trend data for the last 6 months
+        $lastSixMonths = [];
+        $monthlyReports = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $month = date('m', strtotime("-$i months"));
+            $year = date('Y', strtotime("-$i months"));
+            $monthName = date('M Y', strtotime("-$i months"));
+            
+            $count = LaporanKerusakan::where('id_fas_ruang', $id)
+                ->whereMonth('created_at', $month)
+                ->whereYear('created_at', $year)
+                ->count();
+            
+            $lastSixMonths[] = $monthName;
+            $monthlyReports[] = $count;
+        }
+        
+        // Analyze common issues from descriptions
+        $commonPhrases = [];
+        if ($totalLaporan > 1) {
+            $allDescriptions = LaporanKerusakan::where('id_fas_ruang', $id)
+                ->pluck('deskripsi')
+                ->toArray();
+            
+            $allText = implode(' ', $allDescriptions);
+            $allText = strtolower($allText);
+            
+            // Remove common words in Indonesian
+            $commonWords = ['yang', 'dan', 'di', 'ke', 'dari', 'untuk', 'dengan', 'tidak', 'ini', 'itu'];
+            foreach ($commonWords as $word) {
+                $allText = str_replace(' ' . $word . ' ', ' ', $allText);
+            }
+            
+            // Count word frequency
+            $words = explode(' ', $allText);
+            $wordCount = array_count_values(array_filter($words));
+            arsort($wordCount);
+            
+            // Get the top 5 common words
+            $commonPhrases = array_slice($wordCount, 0, 5, true);
+        }
+        
+        $stats = [
+            'total' => $totalLaporan,
+            'completed' => $completedLaporan->count(),
+            'averageTimeToFix' => $averageTimeToFix,
+            'thisMonth' => $reportsThisMonth,
+            'statusCounts' => $statusCounts,
+            'monthLabels' => $lastSixMonths,
+            'monthlyData' => $monthlyReports,
+            'commonPhrases' => $commonPhrases
+        ];
+        
+        return view('pages.fasilitas.history', compact('fasRuang', 'laporanHistory', 'stats'));
     }
 }
