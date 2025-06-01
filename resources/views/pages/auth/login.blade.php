@@ -8,8 +8,9 @@
 <body class="bg-gray-100">
     <div class="min-h-screen flex flex-col md:flex-row">
         <!-- Left side with image -->
-        <div class="w-full md:w-1/2 bg-indigo-600 relative overflow-hidden">
-            <img src="{{ asset('img/Frame 1.png') }}" alt="SiLapor Illustration" class="w-full h-full object-cover object-center">
+        <div class="w-full md:w-1/2 bg-indigo-600 relative overflow-hidden h-screen">
+            <img src="{{ asset('img/Frame 1.png') }}" alt="SiLapor Illustration" 
+                 class="absolute inset-0 w-full h-full object-cover object-center max-h-screen">
         </div>
         
         <!-- Right side with login form -->
@@ -63,5 +64,5 @@
             </div>
         </div>
     </div>
-  </body>
+</body>
 </html>

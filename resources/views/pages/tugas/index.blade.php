@@ -1,13 +1,15 @@
 @extends('layouts.app')
 
+@section('title', 'Penugasan Teknisi')
+
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-6">
+        {{-- <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-800">Tugaskan Teknisi</h1>
             <p class="text-gray-600 mt-2">Daftar laporan kerusakan yang belum ditugaskan ke teknisi</p>
-        </div>
+        </div> --}}
 
         <!-- Alert Success -->
         @if(session('success'))
@@ -68,23 +70,28 @@
                                                 </span>
                                             </div>
                                             <div>
-                                                <div class="font-medium">{{ $laporan->pengguna->nama ?? 'N/A' }}</div>
+                                                <div class="font-medium">{{ $laporan->pengguna->nama_pengguna?? 'N/A' }}</div>
                                                 <div class="text-gray-500 text-xs">{{ $laporan->pengguna->email ?? 'N/A' }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <div class="flex items-center">
-                                            <svg class="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            </svg>
-                                            <div>
-                                                <div class="font-medium">{{ $laporan->fasilitas->nama_fasilitas ?? 'N/A' }}</div>
-                                                <div class="text-gray-500 text-xs">{{ $laporan->fasilitasRuangan->ruangan->nama_ruang ?? 'N/A' }} - {{ $laporan->fasilitasRuangan->ruangan->gedung->nama_gedung ?? 'N/A' }}</div>
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <div>
+                                            <div class="font-medium">
+                                                {{ $laporan->fasilitasRuang->fasilitas->nama_fasilitas ?? 'N/A' }}
+                                            </div>
+                                            <div class="text-gray-500 text-xs">
+                                                {{ $laporan->fasilitasRuang->ruang->nama_ruang ?? 'N/A' }} - 
+                                                {{ $laporan->fasilitasRuang->ruang->gedung->nama_gedung ?? 'N/A' }}
                                             </div>
                                         </div>
-                                    </td>
+                                    </div>
+                                </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
                                         <div class="max-w-xs">
                                             <div class="truncate" title="{{ $laporan->deskripsi }}">

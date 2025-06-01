@@ -14,6 +14,7 @@
 
     <nav class="mt-6">
         <div class="px-4">
+            <!-- Common menus for all users -->
             <a href="{{ route('dashboard') }}"
                 class="flex items-center py-3 px-4 {{ request()->routeIs('dashboard*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -22,7 +23,17 @@
                 </svg>
                 <span class="ml-3">Dashboard</span>
             </a>
+            
             @auth
+            <a href="{{ route('profile') }}"
+                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('profile*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-3">Profile</span>
+            </a>
+
+            <!-- Admin Menus -->
             @if(auth()->user()->peran === 'admin')
             <a href="{{ route('users.index') }}"
                 class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('users.*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
@@ -73,13 +84,33 @@
             </a>
             @endif
 
+            <!-- User Menus (Mahasiswa, Dosen, Tendik) -->
+            @if(in_array(auth()->user()->peran, ['mahasiswa', 'dosen', 'tendik']))
+            <a href="{{ route('laporan.index') }}" 
+                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('laporan.*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-3">Laporan Kerusakan</span>
+            </a>
+            @endif
+
+            <!-- Sarpras Menus -->
             @if(auth()->user()->peran === 'sarpras')
+            <a href="{{ route('laporan.index') }}" 
+                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('laporan.*') && !request()->routeIs('laporan.export') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-3">Verifikasi Laporan</span>
+            </a>
+
             <a href="{{ route('tugas.index') }}"
                 class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('tugas.*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zm4-3a1 1 0 00-1 1v1h2V4a1 1 0 00-1-1zM7.707 10.293a1 1 0 10-1.414 1.414L8.586 14l-2.293 2.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L11.414 14l2.293-2.293a1 1 0 00-1.414-1.414L10 12.586l-2.293-2.293z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.427z" clip-rule="evenodd" />
                 </svg>
-                <span class="ml-3">Tugaskan Teknisi</span>
+                <span class="ml-3">Penugasan Teknisi</span>
             </a>
 
             <a href="{{ route('laporan.export') }}"
@@ -91,16 +122,9 @@
             </a>
             @endif
 
-            @if(auth()->user()->peran === 'mahasiswa' || auth()->user()->peran === 'dosen' || auth()->user()->peran === 'tendik' || auth()->user()->peran === 'sarpras')
-            <a href="/laporan" class="flex items-center mt-4 py-3 px-4 {{ request()->is('laporan*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" />
-                </svg>
-                <span class="ml-3">Laporan</span>
-            </a>
-            @endif
-
+            <!-- Teknisi Menus -->
             @if(auth()->user()->peran === 'teknisi')
+            
             <a href="{{ route('teknisi.index') }}"
                 class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('teknisi.index') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

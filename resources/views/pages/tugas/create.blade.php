@@ -43,7 +43,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Pelapor</label>
                             <div class="bg-white p-3 rounded-md border border-gray-200">
-                                {{ $laporan->pengguna->nama ?? 'Tidak diketahui' }}
+                                {{ $laporan->pengguna->nama_pengguna ?? 'Tidak diketahui' }}
                                 <div class="text-sm text-gray-500">{{ $laporan->pengguna->email ?? '' }}</div>
                             </div>
                         </div>
@@ -52,10 +52,10 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fasilitas Ruangan</label>
                             <div class="bg-white p-3 rounded-md border border-gray-200">
-                                {{ $laporan->fasilitasRuangan->nama_fasilitas ?? 'Tidak ada fasilitas' }}
+                                {{ $laporan->fasilitasRuang->fasilitas->nama_fasilitas ?? 'N/A' }}
                                 <div class="text-sm text-gray-500">
-                                    {{ $laporan->fasilitasRuangan->ruangan->nama_ruang ?? 'Tidak ada ruang' }} - 
-                                    {{ $laporan->fasilitasRuangan->ruangan->gedung->nama_gedung ?? 'Tidak ada gedung' }}
+                                    {{ $laporan->fasilitasRuang->ruang->nama_ruang ?? 'N/A' }} - 
+                                    {{ $laporan->fasilitasRuang->ruang->gedung->nama_gedung ?? 'N/A' }}
                                 </div>
                             </div>
                         </div>
@@ -162,16 +162,30 @@
                             <label for="batas_waktu" class="block text-sm font-medium text-gray-700 mb-2">
                                 Batas Waktu Pengerjaan
                             </label>
-                            <input type="datetime-local" 
-                                   name="batas_waktu" 
-                                   id="batas_waktu" 
-                                   value="{{ old('batas_waktu') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <input type="datetime-local"
+                                name="batas_waktu"
+                                id="batas_waktu"
+                                value="{{ old('batas_waktu') }}"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             @error('batas_waktu')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                             <p class="mt-1 text-xs text-gray-500">Kosongkan jika tidak ada batas waktu khusus</p>
                         </div>
+
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const now = new Date();
+                            const year = now.getFullYear();
+                            const month = String(now.getMonth() + 1).padStart(2, '0');
+                            const day = String(now.getDate()).padStart(2, '0');
+                            const hours = String(now.getHours()).padStart(2, '0');
+                            const minutes = String(now.getMinutes()).padStart(2, '0');
+                            
+                            const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                            document.getElementById('batas_waktu').min = minDateTime;
+                        });
+                        </script>
 
                         <!-- Catatan Tambahan -->
                         <div class="md:col-span-2">
