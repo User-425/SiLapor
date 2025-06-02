@@ -41,6 +41,11 @@
             @error('nomor_telepon') <div class="text-red-500 text-xs">{{ $message }}</div> @enderror
         </div>
         <div class="mb-4">
+            <label class="block font-medium">Kata Sandi Lama <span class="text-xs text-gray-500">(Wajib diisi jika ingin mengubah kata sandi)</span></label>
+            <input type="password" name="kata_sandi_lama" class="w-full border rounded px-3 py-2">
+            @error('kata_sandi_lama') <div class="text-red-500 text-xs">{{ $message }}</div> @enderror
+        </div>
+        <div class="mb-4">
             <label class="block font-medium">Kata Sandi Baru <span class="text-xs text-gray-500">(Kosongkan jika tidak ingin mengubah)</span></label>
             <input type="password" name="kata_sandi" class="w-full border rounded px-3 py-2">
             @error('kata_sandi') <div class="text-red-500 text-xs">{{ $message }}</div> @enderror
