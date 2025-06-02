@@ -69,72 +69,60 @@ class TeknisiController extends Controller
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+public function updateTugas(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:ditugaskan,dikerjakan,selesai',
+        'catatan' => 'required|string',
+    ]);
 
-    public function updateTugas(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:ditugaskan,dalam_pengerjaan,selesai,ditolak',
-            'keterangan' => 'nullable|string',
-        ]);
+    $tugas = Tugas::findOrFail($id);
+    
+    // Ensure the technician is the assigned one
+    if ($tugas->id_pengguna != Auth::id()) {
+        return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengubah tugas ini');
+    }
 
-        $tugas = Tugas::findOrFail($id);
+    $oldStatus = $tugas->status;
+    
+    // Update tugas
+    $tugas->update([
+        'status' => $request->status,
+        'catatan' => $request->catatan,
+        'tanggal_selesai' => $request->status === 'selesai' ? now() : null,
+    ]);
+
+    // Update laporan status based on task status
+    $laporan = $tugas->laporan;
+    $oldLaporanStatus = $laporan->status;
+    $newLaporanStatus = match($request->status) {
+        'dikerjakan' => 'diperbaiki',
+        'selesai' => 'selesai',
+        default => $laporan->status
+    };
+    
+    if ($oldLaporanStatus != $newLaporanStatus) {
+        $laporan->update(['status' => $newLaporanStatus]);
         
-        // Ensure the technician is the assigned one
-        if ($tugas->id_pengguna != Auth::id()) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $oldStatus = $tugas->status;
-        $tugas->update([
-            'status' => $request->status,
-            'keterangan' => $request->keterangan,
-            'updated_at' => now(),
-        ]);
-
-        // Update report status based on task status
-        $laporan = $tugas->laporan;
-        $oldLaporanStatus = $laporan->status;
-        $newLaporanStatus = match($request->status) {
-            'dalam_pengerjaan' => 'diperbaiki',
-            'selesai' => 'selesai',
-            default => $laporan->status
-        };
-        
-        if ($oldLaporanStatus != $newLaporanStatus) {
-            $laporan->update(['status' => $newLaporanStatus]);
-            
-            // Notify report creator about status change
-            $laporan->pengguna->notify(
-                new StatusChangedNotification(
-                    $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']), 
-                    $oldLaporanStatus, 
-                    $newLaporanStatus
-                )
-            );
-            
-            // If task is completed, request feedback
-            if ($request->status === 'selesai') {
-                $laporan->pengguna->notify(
-                    new FeedbackRequestNotification(
-                        $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang'])
-                    )
-                );
-            }
-        }
-
-        // Notify Sarpras about task status update
-        $sarprasUsers = Pengguna::where('peran', 'sarpras')->get();
-        foreach ($sarprasUsers as $user) {
-            $user->notify(new StatusChangedNotification(
+        // Notify report creator about status change
+        $laporan->pengguna->notify(
+            new StatusChangedNotification(
                 $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']), 
                 $oldLaporanStatus, 
                 $newLaporanStatus
-            ));
+            )
+        );
+        
+        // If task is completed, request feedback
+        if ($request->status === 'selesai') {
+            $laporan->pengguna->notify(
+                new FeedbackRequestNotification(
+                    $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang'])
+                )
+            );
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Status tugas berhasil diperbarui menjadi ' . str_replace('_', ' ', ucwords($request->status)),
-        ]);
     }
+
+    return redirect()->back()->with('success', 'Status tugas berhasil diperbarui menjadi ' . ucfirst($request->status));
+}
 }
