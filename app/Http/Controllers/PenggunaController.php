@@ -145,14 +145,29 @@ class PenggunaController extends Controller
         $authUser = Auth::user();
         $user = Pengguna::where('id_pengguna', $authUser->id_pengguna)->firstOrFail();
 
-        $request->validate([
+        // Validasi dasar
+        $rules = [
             'nama_lengkap' => 'required|string|max:100',
             'email' => ['required', 'string', 'email', 'max:100', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'nama_pengguna' => ['required', 'string', 'max:50', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'kata_sandi' => 'nullable|string|min:8|confirmed',
             'nomor_telepon' => 'nullable|string|max:15',
             'img_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        ];
+
+        // Jika ingin ganti password, wajib isi kata_sandi_lama dan harus benar
+        if ($request->filled('kata_sandi')) {
+            $rules['kata_sandi_lama'] = [
+                'required',
+                function ($attribute, $value, $fail) use ($user) {
+                    if (!\Hash::check($value, $user->kata_sandi)) {
+                        $fail('Kata sandi lama salah.');
+                    }
+                }
+            ];
+        }
+
+        $validated = $request->validate($rules);
 
         $data = [
             'nama_lengkap' => $request->nama_lengkap,
