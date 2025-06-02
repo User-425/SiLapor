@@ -16,12 +16,12 @@
                     Kode Unit: {{ $fasRuang->kode_fasilitas }}
                 </p>
             </div>
-            
+
             <div class="flex flex-col items-center space-y-4">
                 <div class="p-4 bg-white rounded-lg shadow-sm">
                     {!! $qrcode !!}
                 </div>
-                
+
                 <div class="text-center">
                     <p class="text-sm text-gray-600 mb-2">Scan QR code untuk melaporkan kerusakan</p>
                     <button onclick="downloadQR()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
@@ -38,25 +38,36 @@
 @section('scripts')
 <script>
 function downloadQR() {
-    const svg = document.querySelector('svg');
-    const svgData = new XMLSerializer().serializeToString(svg);
-    
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    const img = new Image();
-    img.onload = function() {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        
-        const a = document.createElement('a');
-        a.download = 'qr-{{ $fasRuang->kode_fasilitas }}.png';
-        a.href = canvas.toDataURL('image/png');
-        a.click();
-    };
-    
-    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+    // Try to find the SVG inside the QR code container
+    const qrContainer = document.querySelector('.p-4.bg-white.rounded-lg.shadow-sm');
+    const svg = qrContainer.querySelector('svg');
+    if (svg) {
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const a = document.createElement('a');
+            a.download = 'qr-{{ $fasRuang->kode_fasilitas }}.png';
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    } else {
+        // If not SVG, try to find an <img> (PNG QR code)
+        const img = qrContainer.querySelector('img');
+        if (img) {
+            const a = document.createElement('a');
+            a.download = 'qr-{{ $fasRuang->kode_fasilitas }}.png';
+            a.href = img.src;
+            a.click();
+        } else {
+            alert('QR code tidak ditemukan untuk diunduh.');
+        }
+    }
 }
 </script>
 @endsection
