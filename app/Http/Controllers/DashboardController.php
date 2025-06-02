@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\LaporanKerusakan;
 use App\Models\Tugas;
 use Carbon\Carbon;
@@ -29,11 +30,11 @@ class DashboardController extends Controller
             case 'mahasiswa':
                 return $this->mahasiswaDashboard();
             case 'dosen':
-                return view('pages.dashboard.dosen');
+                return $this->dosenDashboard();
             case 'tendik':
                 return view('pages.dashboard.tendik');
             case 'sarpras':
-                return view('pages.dashboard.sarpras');
+                return $this->sarprasDashboard();
             case 'teknisi':
                 return $this->teknisiDashboard();
             default:
@@ -81,6 +82,31 @@ class DashboardController extends Controller
             'recentReports'
         ));
     }
+    public function dosenDashboard()
+    {
+        $userId = Auth::id();
+
+        $totalLaporan = LaporanKerusakan::where('id_pengguna', $userId)->count();
+        $prosesLaporan = LaporanKerusakan::where('id_pengguna', $userId)
+            ->where('status', 'proses')
+            ->count();
+        $selesaiLaporan = LaporanKerusakan::where('id_pengguna', $userId)
+            ->where('status', 'selesai')
+            ->count();
+
+        $recentReports = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang'])
+            ->where('id_pengguna', $userId)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('pages.dashboard.dosen', compact(
+            'totalLaporan',
+            'prosesLaporan',
+            'selesaiLaporan',
+            'recentReports'
+        ));
+    }
 
     public function teknisiDashboard()
 {
@@ -99,5 +125,93 @@ class DashboardController extends Controller
 
     return view('pages.dashboard.teknisi', compact('ditugaskan', 'dikerjakan', 'selesai', 'tugasAktif'));
 }
-
+public function sarprasDashboard()
+{
+    $laporanStats = [
+        'menunggu_verifikasi' => LaporanKerusakan::where('status', 'menunggu_verifikasi')->count(),
+        'diproses' => LaporanKerusakan::where('status', 'diproses')->count(),
+        'diperbaiki' => LaporanKerusakan::where('status', 'diperbaiki')->count(),
+        'selesai' => LaporanKerusakan::where('status', 'selesai')->count(),
+        'ditolak' => LaporanKerusakan::where('status', 'ditolak')->count(),
+        'total' => LaporanKerusakan::count()
+    ];
+    
+    $pendingReports = LaporanKerusakan::where('status', 'menunggu_verifikasi')
+        ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
+        ->latest()
+        ->take(5)
+        ->get();
+    
+    $recentTasks = Tugas::with(['laporan.fasilitasRuang.fasilitas', 'laporan.fasilitasRuang.ruang', 'teknisi'])
+        ->latest()
+        ->take(5)
+        ->get();
+    
+    $reportsByLocation = DB::table('laporan_kerusakan')
+        ->join('fasilitas_ruang', 'laporan_kerusakan.id_fas_ruang', '=', 'fasilitas_ruang.id_fas_ruang')
+        ->join('ruang', 'fasilitas_ruang.id_ruang', '=', 'ruang.id_ruang')
+        ->join('gedung', 'ruang.id_gedung', '=', 'gedung.id_gedung')
+        ->select('gedung.nama_gedung', DB::raw('count(*) as total'))
+        ->groupBy('gedung.id_gedung', 'gedung.nama_gedung')
+        ->orderBy('total', 'desc')
+        ->take(5)
+        ->get();
+    
+    $startDate = Carbon::now()->subDays(6)->startOfDay();
+    $endDate = Carbon::now()->endOfDay();
+    
+    $reportTrend = LaporanKerusakan::whereBetween('created_at', [$startDate, $endDate])
+        ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get();
+    
+    $dateRange = [];
+    for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
+        $formattedDate = $date->format('Y-m-d');
+        $count = 0;
+        
+        foreach ($reportTrend as $trend) {
+            if ($trend->date === $formattedDate) {
+                $count = $trend->count;
+                break;
+            }
+        }
+        
+        $dateRange[] = [
+            'date' => $formattedDate,
+            'day' => $date->format('D'),
+            'count' => $count
+        ];
+    }
+    
+    $currentMonth = Carbon::now()->startOfMonth();
+    $monthlyStats = [
+        'total' => LaporanKerusakan::whereMonth('created_at', $currentMonth->month)
+            ->whereYear('created_at', $currentMonth->year)
+            ->count(),
+        'selesai' => LaporanKerusakan::whereMonth('created_at', $currentMonth->month)
+            ->whereYear('created_at', $currentMonth->year)
+            ->where('status', 'selesai')
+            ->count(),
+    ];
+    
+    $priorityReports = LaporanKerusakan::where('ranking', '>=', 4)
+        ->where('status', '!=', 'selesai')
+        ->where('status', '!=', 'ditolak')
+        ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
+        ->latest()
+        ->take(3)
+        ->get();
+    
+    return view('pages.dashboard.sarpras', compact(
+        'laporanStats',
+        'pendingReports',
+        'recentTasks',
+        'reportsByLocation',
+        'dateRange',
+        'monthlyStats',
+        'priorityReports'
+    ));
+}
 }
