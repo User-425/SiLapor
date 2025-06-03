@@ -181,69 +181,85 @@ class LaporanKerusakanController extends Controller
     }
 
     public function edit(LaporanKerusakan $laporan)
-    {
-        if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
-            abort(403);
-        }
-        $gedungs = \App\Models\Gedung::all();
-        return view('pages.laporan.edit', compact('laporan', 'gedungs'));
+{
+    // Check if report is already completed
+    if ($laporan->status === 'selesai') {
+        return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
     }
 
+    // Check user permissions
+    if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
+        abort(403, 'Unauthorized action.');
+    }
+
+    $gedungs = \App\Models\Gedung::all();
+    return view('pages.laporan.edit', compact('laporan', 'gedungs'));
+}
+
     public function update(Request $request, LaporanKerusakan $laporan)
-    {
-        if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+{
+    // Check if report is already completed
+    if ($laporan->status === 'selesai') {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => false, 'message' => 'Laporan yang sudah selesai tidak dapat diubah.'], 403);
         }
+        return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
+    }
 
-        // Ubah validasi sesuai field yang tersedia di form
-        $request->validate([
-            'deskripsi' => 'required|string|max:255',
-            'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            // Hapus validasi untuk field yang tidak ada di form edit
-            // 'tingkat_kerusakan_sarpras' => 'required|integer|min:1|max:5',
-            // 'dampak_akademik_sarpras' => 'required|integer|min:1|max:5',
-            // 'kebutuhan_sarpras' => 'required|integer|min:1|max:5',
-        ]);
+    // Check user permissions
+    if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
+        abort(403, 'Unauthorized action.');
+    }
 
-        try {
-            $data = [
-                'id_fas_ruang' => $request->id_fas_ruang,
-                'deskripsi' => $request->deskripsi,
-            ];
+    // Remaining validation and update code stays the same
+    $request->validate([
+        'deskripsi' => 'required|string|max:255',
+        'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        // Hapus validasi untuk field yang tidak ada di form edit
+        // 'tingkat_kerusakan_sarpras' => 'required|integer|min:1|max:5',
+        // 'dampak_akademik_sarpras' => 'required|integer|min:1|max:5',
+        // 'kebutuhan_sarpras' => 'required|integer|min:1|max:5',
+    ]);
 
-            if ($request->hasFile('url_foto')) {
-                if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
-                    Storage::disk('public')->delete($laporan->url_foto);
-                }
-                $path = $request->file('url_foto')->store('laporan_foto', 'public');
-                $data['url_foto'] = $path;
+    try {
+        $data = [
+            'id_fas_ruang' => $request->id_fas_ruang,
+            'deskripsi' => $request->deskripsi,
+        ];
+
+        if ($request->hasFile('url_foto')) {
+            if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
+                Storage::disk('public')->delete($laporan->url_foto);
             }
+            $path = $request->file('url_foto')->store('laporan_foto', 'public');
+            $data['url_foto'] = $path;
+        }
 
         $laporan->update($data);
 
-            // Hapus update kriteria sarpras karena tidak ada di form edit
-            // Hanya administrator sarpras yang dapat mengisi kriteria sarpras
-            // DB::table('kriteria_laporan')
-            //     ->where('id_laporan', $laporan->id_laporan)
-            //     ->update([
-            //         'tingkat_kerusakan_sarpras' => $request->tingkat_kerusakan_sarpras,
-            //         'dampak_akademik_sarpras' => $request->dampak_akademik_sarpras,
-            //         'kebutuhan_sarpras' => $request->kebutuhan_sarpras,
-            //         'updated_at' => now(),
-            //     ]);
+        // Hapus update kriteria sarpras karena tidak ada di form edit
+        // Hanya administrator sarpras yang dapat mengisi kriteria sarpras
+        // DB::table('kriteria_laporan')
+        //     ->where('id_laporan', $laporan->id_laporan)
+        //     ->update([
+        //         'tingkat_kerusakan_sarpras' => $request->tingkat_kerusakan_sarpras,
+        //         'dampak_akademik_sarpras' => $request->dampak_akademik_sarpras,
+        //         'kebutuhan_sarpras' => $request->kebutuhan_sarpras,
+        //         'updated_at' => now(),
+        //     ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Laporan berhasil diupdate.',
-                'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Laporan berhasil diupdate.',
+            'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function destroy(LaporanKerusakan $laporan)
     {
