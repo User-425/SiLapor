@@ -96,56 +96,77 @@ class LaporanKerusakanController extends Controller
 
     public function store(Request $request)
 {
-    $request->validate([
-        'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
-        'deskripsi' => 'required|string|max:255',
-        'url_foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        'tingkat_kerusakan_pelapor' => 'required|integer|min:1|max:5',
-        'dampak_akademik_pelapor' => 'required|integer|min:1|max:5',
-        'kebutuhan_pelapor' => 'required|integer|min:1|max:5',
-    ]);
+    try {
+        $request->validate([
+            'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
+            'deskripsi' => 'required|string|max:255',
+            'url_foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'tingkat_kerusakan_pelapor' => 'required|integer|min:1|max:5',
+            'dampak_akademik_pelapor' => 'required|integer|min:1|max:5',
+            'kebutuhan_pelapor' => 'required|integer|min:1|max:5',
+        ]);
 
-    // Pastikan folder laporan_foto ada
-    $directory = storage_path('app/public/laporan_foto');
-    if (!file_exists($directory)) {
-        mkdir($directory, 0755, true);
-        Log::info('Folder laporan_foto dibuat di: ' . $directory);
+        // Make sure upload directory exists
+        $directory = storage_path('app/public/laporan_foto');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $data = [
+            'id_pengguna' => Auth::id(),
+            'id_fas_ruang' => $request->id_fas_ruang,
+            'deskripsi' => $request->deskripsi,
+            'status' => 'menunggu_verifikasi',
+            'ranking' => 0,
+        ];
+
+        if ($request->hasFile('url_foto')) {
+            $file = $request->file('url_foto');
+            $path = $file->store('laporan_foto', 'public');
+            $data['url_foto'] = $path;
+        }
+
+        $laporan = LaporanKerusakan::create($data);
+
+        // Save criteria
+        DB::table('kriteria_laporan')->insert([
+            'id_laporan' => $laporan->id_laporan,
+            'tingkat_kerusakan_pelapor' => $request->tingkat_kerusakan_pelapor,
+            'dampak_akademik_pelapor' => $request->dampak_akademik_pelapor,
+            'kebutuhan_pelapor' => $request->kebutuhan_pelapor,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Notify sarpras users
+        $sarprasUsers = Pengguna::where('peran', 'sarpras')->get();
+        foreach ($sarprasUsers as $user) {
+            $user->notify(new NewReportNotification($laporan->load([
+                'fasilitasRuang.fasilitas', 'fasilitasRuang.ruang', 'pengguna'
+            ])));
+        }
+
+        // Return appropriate response based on request type
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Laporan berhasil disimpan'
+            ]);
+        }
+
+        // For normal form submission - this creates the green flash message
+        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil disimpan');
+
+    } catch (\Exception $e) {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 422);
+        }
+
+        return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
     }
-
-    $data = [
-        'id_pengguna' => Auth::id(),
-        'id_fas_ruang' => $request->id_fas_ruang,
-        'deskripsi' => $request->deskripsi,
-        'status' => 'menunggu_verifikasi',
-        'ranking' => 0,
-    ];
-
-    if ($request->hasFile('url_foto')) {
-        $file = $request->file('url_foto');
-        $path = $file->store('laporan_foto', 'public');
-        $data['url_foto'] = $path;
-    } else {
-        return redirect()->back()->with('error', 'Gagal mengunggah foto.');
-    }
-
-    $laporan = LaporanKerusakan::create($data);
-
-    // Simpan kriteria pelapor ke tabel kriteria_laporan
-    DB::table('kriteria_laporan')->insert([
-        'id_laporan' => $laporan->id_laporan,
-        'tingkat_kerusakan_pelapor' => $request->tingkat_kerusakan_pelapor,
-        'dampak_akademik_pelapor' => $request->dampak_akademik_pelapor,
-        'kebutuhan_pelapor' => $request->kebutuhan_pelapor,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-    
-    $sarprasUsers = Pengguna::where('peran', 'sarpras')->get();
-    foreach ($sarprasUsers as $user) {
-        $user->notify(new NewReportNotification($laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang', 'pengguna'])));
-    }
-
-    return redirect()->route('laporan.index')->with('success', 'Laporan berhasil ditambahkan.');
 }
 
     public function show(LaporanKerusakan $laporan)
@@ -173,12 +194,14 @@ class LaporanKerusakanController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
+        // Ubah validasi sesuai field yang tersedia di form
         $request->validate([
-            'deskripsi' => 'required|string',
+            'deskripsi' => 'required|string|max:255',
             'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'tingkat_kerusakan_sarpras' => 'required|integer|min:1|max:5',
-            'dampak_akademik_sarpras' => 'required|integer|min:1|max:5',
-            'kebutuhan_sarpras' => 'required|integer|min:1|max:5',
+            // Hapus validasi untuk field yang tidak ada di form edit
+            // 'tingkat_kerusakan_sarpras' => 'required|integer|min:1|max:5',
+            // 'dampak_akademik_sarpras' => 'required|integer|min:1|max:5',
+            // 'kebutuhan_sarpras' => 'required|integer|min:1|max:5',
         ]);
 
         try {
@@ -191,21 +214,22 @@ class LaporanKerusakanController extends Controller
                 if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
                     Storage::disk('public')->delete($laporan->url_foto);
                 }
-                $path = $request->file('url_foto')->store('laporan-photos', 'public');
+                $path = $request->file('url_foto')->store('laporan_foto', 'public');
                 $data['url_foto'] = $path;
             }
 
         $laporan->update($data);
 
-            // Update kriteria sarpras di tabel kriteria_laporan
-            DB::table('kriteria_laporan')
-                ->where('id_laporan', $laporan->id_laporan)
-                ->update([
-                    'tingkat_kerusakan_sarpras' => $request->tingkat_kerusakan_sarpras,
-                    'dampak_akademik_sarpras' => $request->dampak_akademik_sarpras,
-                    'kebutuhan_sarpras' => $request->kebutuhan_sarpras,
-                    'updated_at' => now(),
-                ]);
+            // Hapus update kriteria sarpras karena tidak ada di form edit
+            // Hanya administrator sarpras yang dapat mengisi kriteria sarpras
+            // DB::table('kriteria_laporan')
+            //     ->where('id_laporan', $laporan->id_laporan)
+            //     ->update([
+            //         'tingkat_kerusakan_sarpras' => $request->tingkat_kerusakan_sarpras,
+            //         'dampak_akademik_sarpras' => $request->dampak_akademik_sarpras,
+            //         'kebutuhan_sarpras' => $request->kebutuhan_sarpras,
+            //         'updated_at' => now(),
+            //     ]);
 
             return response()->json([
                 'success' => true,
@@ -306,7 +330,7 @@ public function getDetail(LaporanKerusakan $laporan)
     ]);
 
     $oldStatus = $laporan->status;
-    
+
     $laporan->update([
         'status' => $request->status,
         'ranking' => $request->ranking ?? 0,
@@ -315,8 +339,8 @@ public function getDetail(LaporanKerusakan $laporan)
     // Notify the report creator about verification result
     $laporan->pengguna->notify(
         new StatusChangedNotification(
-            $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']), 
-            $oldStatus, 
+            $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']),
+            $oldStatus,
             $request->status
         )
     );
@@ -337,7 +361,7 @@ public function getDetail(LaporanKerusakan $laporan)
         ]);
 
         $oldStatus = $laporan->status;
-        
+
         $laporan->update([
             'status' => $request->status,
             'ranking' => $request->ranking,
@@ -346,8 +370,8 @@ public function getDetail(LaporanKerusakan $laporan)
         // Send notification to the report creator about status change
         $laporan->pengguna->notify(
             new StatusChangedNotification(
-                $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']), 
-                $oldStatus, 
+                $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']),
+                $oldStatus,
                 $request->status
             )
         );
@@ -379,7 +403,7 @@ public function getDetail(LaporanKerusakan $laporan)
 
         // Get all reports before updating
         $laporans = LaporanKerusakan::whereIn('id_laporan', $request->laporan_ids)->get();
-        
+
         // Update all reports
         LaporanKerusakan::whereIn('id_laporan', $request->laporan_ids)->update([
             'status' => $request->status,
@@ -389,19 +413,19 @@ public function getDetail(LaporanKerusakan $laporan)
         // Send notifications for each report
         foreach ($laporans as $laporan) {
             $oldStatus = $laporan->status;
-            
+
             // Reload the model to get fresh data
             $laporan->refresh();
-            
+
             // Notify the report creator about status change
             $laporan->pengguna->notify(
                 new StatusChangedNotification(
-                    $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']), 
-                    $oldStatus, 
+                    $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']),
+                    $oldStatus,
                     $request->status
                 )
             );
-            
+
             // If status changed to 'selesai', send feedback request
             if ($request->status === 'selesai') {
                 $laporan->pengguna->notify(
