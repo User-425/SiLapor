@@ -23,14 +23,14 @@
                 </svg>
                 <span class="ml-3">Dashboard</span>
             </a>
-            
+
             @auth
             <!-- Admin Menus -->
             @if(auth()->user()->peran === 'admin')
             <a href="{{ route('users.index') }}"
                 class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('users.*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                 </svg>
                 <span class="ml-3">Manajemen Pengguna</span>
             </a>
@@ -46,7 +46,7 @@
             <a href="{{ route('ruang.index') }}"
                 class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('ruang.*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v2h1v1H4v-1h1v-2h1v2h1v-2h1v2h1v-2h1v2h1v-2h1v2h1v-2h1v2h1v-2h1v2h1z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v2h1v1H4v-1h1v-2h1v2h1v-2h1v2h1v-2h1v2h1v-2h1v2h1v-2h1v2h1z" clip-rule="evenodd" />
                 </svg>
                 <span class="ml-3">Manajemen Ruang</span>
             </a>
@@ -78,23 +78,39 @@
 
             <!-- User Menus (Mahasiswa, Dosen, Tendik) -->
             @if(in_array(auth()->user()->peran, ['mahasiswa', 'dosen', 'tendik']))
-            <a href="{{ route('laporan.index') }}" 
-                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('laporan.*') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+            <a href="{{ route('laporan.index') }}"
+                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('laporan.index') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" />
                 </svg>
                 <span class="ml-3">Laporan Kerusakan</span>
             </a>
+
+            <a href="{{ route('laporan.riwayat') }}"
+                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('laporan.riwayat') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-3">Riwayat Laporan</span>
+            </a>
             @endif
 
             <!-- Sarpras Menus -->
             @if(auth()->user()->peran === 'sarpras')
-            <a href="{{ route('laporan.index') }}" 
-                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('laporan.*') && !request()->routeIs('laporan.export') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+            <a href="{{ route('laporan.index') }}"
+                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('laporan.*') && !request()->routeIs('laporan.export') && !request()->routeIs('laporan.riwayat') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                 </svg>
                 <span class="ml-3">Verifikasi Laporan</span>
+            </a>
+
+            <a href="{{ route('laporan.riwayat') }}"
+                class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('laporan.riwayat') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-3">Riwayat Laporan</span>
             </a>
 
             <a href="{{ route('tugas.index') }}"
@@ -116,7 +132,7 @@
 
             <!-- Teknisi Menus -->
             @if(auth()->user()->peran === 'teknisi')
-            
+
             <a href="{{ route('teknisi.index') }}"
                 class="flex items-center mt-4 py-3 px-4 {{ request()->routeIs('teknisi.index') ? 'bg-indigo-500 text-white rounded-lg' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

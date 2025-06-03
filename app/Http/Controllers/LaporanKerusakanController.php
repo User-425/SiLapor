@@ -30,7 +30,8 @@ class LaporanKerusakanController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
+        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
+            ->where('status', '!=', 'selesai');
 
         // Jika bukan sarpras atau teknisi, hanya tampilkan laporan milik pengguna
         if (!in_array($user->peran, ['sarpras', 'teknisi'])) {
@@ -476,5 +477,27 @@ public function getDetail(LaporanKerusakan $laporan)
             return redirect()->route('laporan.create')
                 ->with('error', 'QR Code tidak valid. Silakan laporkan secara manual.');
         }
+    }
+
+    public function riwayat(Request $request)
+    {
+        $user = Auth::user();
+        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
+            ->where('status', 'selesai');
+
+        if (!in_array($user->peran, ['admin', 'sarpras', 'teknisi'])) {
+            $query->where('id_pengguna', $user->id_pengguna);
+        }
+
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+        }
+
+        $laporans = $query->latest()->paginate(10);
+
+        return view('pages.laporan.riwayat', compact('laporans'));
     }
 }

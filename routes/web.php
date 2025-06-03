@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [PenggunaController::class, 'profile'])->name('profile');
     Route::post('/profile', [PenggunaController::class, 'updateProfile'])->name('profile.update');
 
+
     // Admin Routes
     Route::middleware(['peran:admin'])->group(function () {
         Route::resource('pengguna', PenggunaController::class)->names('users')->except(['show']);
@@ -44,11 +45,13 @@ Route::middleware('auth')->group(function () {
     });
 
     // Laporan Routes - All Authenticated Users
+    Route::get('/laporan/riwayat', [LaporanKerusakanController::class, 'riwayat'])->name('laporan.riwayat');
     Route::resource('laporan', LaporanKerusakanController::class);
     Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
     Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
     Route::get('/laporan/quick/{code}', [LaporanKerusakanController::class, 'quickReport'])->name('laporan.quick');
+
 
     // Sarpras Routes
     Route::middleware(['peran:sarpras'])->group(function () {
