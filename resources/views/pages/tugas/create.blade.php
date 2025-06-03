@@ -67,26 +67,6 @@
                                 {{ \Carbon\Carbon::parse($laporan->created_at)->format('d/m/Y H:i') }}
                             </div>
                         </div>
-
-                        <!-- Ranking (jika ada) -->
-                        @if(isset($laporan->ranking))
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Ranking Urgensi</label>
-                            <div class="bg-white p-3 rounded-md border border-gray-200">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    @if($laporan->ranking <= 3)
-                                        bg-red-100 text-red-800
-                                    @elseif($laporan->ranking <= 7)
-                                        bg-yellow-100 text-yellow-800
-                                    @else
-                                        bg-green-100 text-green-800
-                                    @endif
-                                ">
-                                    Prioritas #{{ $laporan->ranking }}
-                                </span>
-                            </div>
-                        </div>
-                        @endif
                     </div>
 
                     <!-- Deskripsi -->
@@ -107,6 +87,50 @@
                     </div>
                     @endif
                 </div>
+
+                <!-- Section A.5: Ranking Urgensi (Prominent Display) -->
+                @if(isset($laporan->ranking))
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-indigo-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">🏆 Ranking Prioritas</h3>
+                            <p class="text-sm text-gray-600">Berdasarkan sistem penilaian otomatis</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2
+                                @if($laporan->ranking <= 3)
+                                    bg-red-100 text-red-800 border-red-200
+                                @elseif($laporan->ranking <= 7)
+                                    bg-amber-100 text-amber-800 border-amber-200
+                                @else
+                                    bg-emerald-100 text-emerald-800 border-emerald-200
+                                @endif
+                            ">
+                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                                Prioritas #{{ $laporan->ranking }}
+                                @if($laporan->ranking <= 3)
+                                    (TINGGI)
+                                @elseif($laporan->ranking <= 7)
+                                    (SEDANG)
+                                @else
+                                    (RENDAH)
+                                @endif
+                            </span>
+                            <div class="text-xs text-gray-500 mt-1">
+                                @if($laporan->ranking <= 3)
+                                    Segera tangani!
+                                @elseif($laporan->ranking <= 7)
+                                    Perlu perhatian
+                                @else
+                                    Dapat dijadwalkan
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Section B: Form Penugasan -->
                 <div class="px-6 py-6">

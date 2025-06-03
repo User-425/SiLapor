@@ -12,13 +12,27 @@ use App\Notifications\StatusChangedNotification;
 class TugasController extends Controller
 {
     // Menampilkan semua tugas (untuk admin/sarpras)
-    public function index()
-{
-    // Laporan yang belum ditugaskan
-    $laporanBelumDitugaskan = \App\Models\LaporanKerusakan::whereDoesntHave('tugas')->get();
+    public function index(Request $request)
+    {
+        $role = $request->query('role', 'all');
 
-    return view('pages.tugas.index', compact('laporanBelumDitugaskan'));
-}
+        $query = \App\Models\LaporanKerusakan::where('status', 'diproses')
+            ->whereDoesntHave('tugas');
+
+        if ($role === 'dosen') {
+            $query->whereHas('pengguna', function ($q) {
+                $q->where('peran', 'dosen');
+            });
+        } elseif ($role === 'mahasiswa') {
+            $query->whereHas('pengguna', function ($q) {
+                $q->where('peran', 'mahasiswa');
+            });
+        }
+
+        $laporanBelumDitugaskan = $query->get();
+
+        return view('pages.tugas.index', compact('laporanBelumDitugaskan', 'role'));
+    }
 
 
     // Menampilkan form untuk menugaskan teknisi
@@ -73,22 +87,21 @@ class TugasController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $tugas = Tugas::findOrFail($id);
-    $tugas->catatan = $request->catatan;
-    $tugas->status = $request->status;
+    {
+        $tugas = Tugas::findOrFail($id);
+        $tugas->catatan = $request->catatan;
+        $tugas->status = $request->status;
 
-    if ($request->hasFile('foto_setelah')) {
-        $file = $request->file('foto_setelah');
-        $path = $file->store('public/foto_perbaikan');
-        $tugas->url_foto = str_replace('public/', 'storage/', $path);
+        if ($request->hasFile('foto_setelah')) {
+            $file = $request->file('foto_setelah');
+            $path = $file->store('public/foto_perbaikan');
+            $tugas->url_foto = str_replace('public/', 'storage/', $path);
+        }
+
+        $tugas->tanggal_selesai = now(); // jika statusnya selesai
+        $tugas->save();
+
+        // Notifikasi bisa ditambahkan di sini jika perlu
+        return redirect()->route('teknisi.index')->with('success', 'Tugas diperbarui');
     }
-
-    $tugas->tanggal_selesai = now(); // jika statusnya selesai
-    $tugas->save();
-
-    // Notifikasi bisa ditambahkan di sini jika perlu
-    return redirect()->route('teknisi.index')->with('success', 'Tugas diperbarui');
-}
-
 }
