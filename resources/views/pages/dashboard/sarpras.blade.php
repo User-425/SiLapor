@@ -3,11 +3,9 @@
 @section('title', 'Dashboard Sarana Prasarana')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Dashboard Sarana Prasarana</h1>
-        <p class="text-gray-600">Monitoring dan pengelolaan laporan kerusakan fasilitas</p>
-    </div>
+
+<!-- Header -->
+
 
     <!-- Quick Action Buttons -->
     <div class="mb-6">

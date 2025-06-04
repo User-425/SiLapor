@@ -6,10 +6,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Penugasan Teknisi</h1>
-            <p class="text-gray-600 mt-2">Kelola dan tugaskan laporan kerusakan kepada teknisi yang tersedia</p>
-        </div>
+        
 
         <!-- Alert Success -->
         @if(session('success'))
