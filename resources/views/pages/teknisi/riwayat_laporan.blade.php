@@ -5,10 +5,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <!-- Header Section -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Riwayat Perbaikan Teknisi</h1>
-        <p class="text-gray-600 mt-1">Daftar riwayat perbaikan yang telah diselesaikan</p>
-    </div>
+    
 
     <!-- Riwayat List -->
     <div class="bg-white rounded-lg shadow-sm">

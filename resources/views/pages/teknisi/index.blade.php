@@ -5,10 +5,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <!-- Header Section -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Daftar Tugas Perbaikan</h1>
-        <p class="text-gray-600 mt-1">Kelola dan perbarui status tugas perbaikan fasilitas</p>
-    </div>
+    
 
     <!-- Priority Sections -->
     @foreach(['tinggi', 'sedang', 'rendah'] as $priority)
