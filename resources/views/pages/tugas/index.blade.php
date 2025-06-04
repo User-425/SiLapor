@@ -267,14 +267,6 @@ function openDetailModal(laporanId) {
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pelapor</label>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <div class="font-medium">${selectedLaporan.pengguna?.nama_pengguna || 'N/A'}</div>
-                                <div class="text-sm text-gray-500">${selectedLaporan.pengguna?.email || 'N/A'}</div>
-                            </div>
-                        </div>
-                        
-                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fasilitas</label>
                             <div class="bg-gray-50 p-3 rounded-lg">
                                 <div class="font-medium">${selectedLaporan.fasilitas_ruang?.fasilitas?.nama_fasilitas || 'N/A'}</div>
