@@ -8,7 +8,7 @@ class UmpanBalik extends Model
 {
     use HasFactory;
 
-    protected $table = 'umpan_baliks';
+    protected $table = 'umpan_balik';
     protected $primaryKey = 'id_umpan_balik';
     
     protected $fillable = [
