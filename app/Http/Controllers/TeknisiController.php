@@ -60,9 +60,8 @@ class TeknisiController extends Controller
                 $query->whereDate('tanggal_selesai', '<=', $request->tanggal_sampai);
             }
 
-            $riwayat = $query->latest('tanggal_selesai')
-                            ->paginate(10)
-                            ->withQueryString();
+            $riwayat = $query->latest('tanggal_selesai')->paginate(10);
+$riwayat->appends(request()->query());
 
             return view('pages.teknisi.riwayat_laporan', compact('riwayat'));
         } catch (\Exception $e) {
