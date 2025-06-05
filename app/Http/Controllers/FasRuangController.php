@@ -201,4 +201,33 @@ class FasRuangController extends Controller
         
         return view('pages.fasilitas.history', compact('fasRuang', 'laporanHistory', 'stats'));
     }
+
+    public function show($id)
+    {
+        $fasRuang = FasRuang::with(['fasilitas', 'ruang.gedung'])->findOrFail($id);
+        
+        return view('pages.fasilitas.show', compact('fasRuang'));
+    }
+
+    public function maintenance($id)
+    {
+        $fasRuang = FasRuang::with(['fasilitas', 'ruang.gedung'])->findOrFail($id);
+        
+        // Get active reports for this facility
+        $activeReports = LaporanKerusakan::where('id_fas_ruang', $id)
+            ->whereNotIn('status', ['selesai', 'ditolak'])
+            ->with('pengguna')
+            ->latest()
+            ->get();
+        
+        // Get maintenance history
+        $completedReports = LaporanKerusakan::where('id_fas_ruang', $id)
+            ->where('status', 'selesai')
+            ->with('pengguna')
+            ->latest()
+            ->take(5)
+            ->get();
+        
+        return view('pages.fasilitas.maintenance', compact('fasRuang', 'activeReports', 'completedReports'));
+    }
 }

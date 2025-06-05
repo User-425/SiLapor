@@ -30,6 +30,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [PenggunaController::class, 'profile'])->name('profile');
     Route::post('/profile', [PenggunaController::class, 'updateProfile'])->name('profile.update');
 
+    Route::middleware(['peran:admin,sarpras'])->group(function () {
+        Route::get('/fasilitas/{id}/history', [FasRuangController::class, 'history'])->name('fasilitas.history');
+    });
+
 
     // Admin Routes
     Route::middleware(['peran:admin'])->group(function () {
@@ -41,7 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('periode', PeriodeController::class);
         Route::get('/fasilitas/{id}/qr', [FasRuangController::class, 'generateQR'])
             ->name('fasilitas.qr');
-        Route::get('/fasilitas/{id}/history', [FasRuangController::class, 'history'])->name('fasilitas.history');
+        Route::get('/fasilitas/{id}/show', [FasRuangController::class, 'show'])->name('fasilitas.show');
     });
 
     // Laporan Routes - All Authenticated Users
@@ -51,7 +55,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
     Route::get('/laporan/quick/{code}', [LaporanKerusakanController::class, 'quickReport'])->name('laporan.quick');
-
 
     // Sarpras Routes
     Route::middleware(['peran:sarpras'])->group(function () {
@@ -87,4 +90,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+
+    // Shared Routes
+    Route::get('/fasilitas/{id}/maintenance', [FasRuangController::class, 'maintenance'])->name('fasilitas.maintenance');
 });

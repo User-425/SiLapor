@@ -485,10 +485,25 @@ public function getDetail(LaporanKerusakan $laporan)
             $id = base64_decode($code);
             $fasRuang = FasRuang::with(['fasilitas', 'ruang.gedung'])
                 ->findOrFail($id);
-
-            return view('pages.laporan.quick-report', [ // Changed view path
-                'fasRuang' => $fasRuang
-            ]);
+            
+            $userRole = Auth::user()->peran;
+            
+            // Redirect based on user role
+            switch ($userRole) {
+                case 'admin':
+                    return redirect()->route('fasilitas.show', $id);
+                    
+                case 'sarpras':
+                    return redirect()->route('fasilitas.history', $id);
+                    
+                case 'teknisi':
+                    return redirect()->route('fasilitas.maintenance', $id);
+                    
+                default:
+                    return view('pages.laporan.quick-report', [
+                        'fasRuang' => $fasRuang
+                    ]);
+            }
         } catch (\Exception $e) {
             return redirect()->route('laporan.create')
                 ->with('error', 'QR Code tidak valid. Silakan laporkan secara manual.');
