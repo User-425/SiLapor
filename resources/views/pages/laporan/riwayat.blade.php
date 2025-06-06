@@ -4,78 +4,165 @@
 
 @section('content')
 @if(session('success'))
-<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-    <p>{{ session('success') }}</p>
+<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-r-lg" role="alert">
+    <div class="flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <p>{{ session('success') }}</p>
+    </div>
+</div>
+@endif
+
+@if(session('error'))
+<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-r-lg" role="alert">
+    <div class="flex items-center">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <p>{{ session('error') }}</p>
+    </div>
 </div>
 @endif
 
 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-    <h1 class="text-xl font-semibold text-gray-800 mb-4">Daftar Riwayat Laporan Kerusakan</h1>
-
-    <!-- Search & Add Button in one row -->
-    <div class="flex justify-between items-center mb-4">
-        <form id="searchForm" method="GET" action="{{ route('periode.index') }}" class="w-full max-w-xs">
-            <div class="relative">
-                <input
-                    type="text"
-                    name="q"
-                    value="{{ request('q') }}"
-                    placeholder="Cari laporan..."
-                    class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-            </div>
-        </form>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-history mr-3 text-blue-600"></i>
+            Daftar Riwayat Laporan Kerusakan
+        </h1>
+        <div class="text-sm text-gray-600">
+            Total: <span class="font-semibold text-blue-600">{{ $laporans->total() }}</span> laporan
+        </div>
     </div>
 
-    <div class="overflow-x-auto border rounded-lg">
+    <form id="searchForm" method="GET" action="{{ route('laporan.riwayat') }}" class="mb-6">
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pencarian</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ request('q') }}"
+                        placeholder="Cari laporan, ruang, fasilitas..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-6">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+                </div>
+        </div>
+    </form>
+
+    <div id="loadingIndicator" class="hidden text-center py-4">
+        <i class="fas fa-spinner fa-spin text-blue-500 text-2xl"></i>
+        <p class="text-gray-600 mt-2">Memuat data...</p>
+    </div>
+
+    <div class="overflow-x-auto border rounded-lg shadow-sm">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-gradient-to-r from-blue-50 to-indigo-50">
                 <tr>
-                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-left">Nama Ruang</th>
-                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-left">Nama Fasilitas</th>
-                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-left">Kode Fasilitas</th>
-                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Status</th>
-                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Aksi</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">
+                        <div class="flex items-center">
+                            <i class="fas fa-door-open mr-2"></i>Ruang
+                        </div>
+                    </th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">
+                        <div class="flex items-center">
+                            <i class="fas fa-tools mr-2"></i>Fasilitas
+                        </div>
+                    </th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">
+                        <div class="flex items-center">
+                            <i class="fas fa-qrcode mr-2"></i>Kode
+                        </div>
+                    </th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-calendar mr-2"></i>Tanggal
+                        </div>
+                    </th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-info-circle mr-2"></i>Status
+                        </div>
+                    </th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-cogs mr-2"></i>Aksi
+                        </div>
+                    </th>
                 </tr>
             </thead>
             <tbody id="laporanTableBody" class="bg-white divide-y divide-gray-200">
                 @forelse($laporans as $laporan)
-                <tr>
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-left">
-                        {{ $laporan->fasilitasRuang->ruang->nama_ruang ?? '-' }}
+                        <div class="flex items-center">
+                            <div class="ml-0"> <div class="text-sm font-medium text-gray-900">
+                                    {{ $laporan->fasilitasRuang->ruang->nama_ruang ?? '-' }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    {{ $laporan->fasilitasRuang->ruang->gedung->nama_gedung ?? '' }}
+                                </div>
+                            </div>
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-left">
-                        {{ $laporan->fasilitasRuang->fasilitas->nama_fasilitas ?? '-' }}
+                        <div class="text-sm font-medium text-gray-900">
+                            {{ $laporan->fasilitasRuang->fasilitas->nama_fasilitas ?? '-' }}
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-left">
-                        {{ $laporan->fasilitasRuang->kode_fasilitas ?? '-' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                            @if($laporan->status == 'menunggu_verifikasi') bg-yellow-100 text-yellow-800
-                            @elseif($laporan->status == 'diproses') bg-blue-100 text-blue-800
-                            @elseif($laporan->status == 'diperbaiki') bg-indigo-100 text-indigo-800
-                            @elseif($laporan->status == 'selesai') bg-green-100 text-green-800
-                            @elseif($laporan->status == 'ditolak') bg-red-100 text-red-800
-                            @else bg-gray-100 text-gray-800 @endif">
-                            {{ ucfirst(str_replace('_', ' ', $laporan->status)) }}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ $laporan->fasilitasRuang->kode_fasilitas ?? '-' }}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
-                        <button class="detail-btn text-blue-600 hover:text-blue-900 mr-2" data-id="{{ $laporan->id_laporan }}">
-                            <i class="fas fa-eye"></i> Detail
-                        </button>
+                        <div class="text-sm text-gray-900">
+                            {{ $laporan->created_at->format('d/m/Y') }}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            {{ $laporan->created_at->format('H:i') }}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Selesai
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <button 
+                                class="detail-btn inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200" 
+                                data-id="{{ $laporan->id_laporan }}"
+                                title="Lihat Detail"
+                            >
+                                <i class="fas fa-eye mr-1"></i>
+                                Detail
+                            </button>
+                            
+                            @if($laporan->status == 'selesai' && !$laporan->umpanBaliks()->where('id_pengguna', Auth::id())->exists())
+                            <a 
+                                href="{{ route('umpan_balik.create', $laporan->id_laporan) }}"
+                                class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-200"
+                                title="Beri Umpan Balik"
+                            >
+                                <i class="fas fa-star mr-1"></i>
+                                Umpan Balik
+                            </a>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
-                        Tidak ada data laporan kerusakan
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada data laporan</h3>
+                            <p class="text-gray-500">Belum ada laporan kerusakan yang selesai</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse
@@ -83,345 +170,446 @@
         </table>
     </div>
 
-    <div class="mt-4 flex items-center justify-between">
-        <div class="text-sm text-gray-700">
+    @if($laporans->hasPages())
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
+        <div class="text-sm text-gray-700 mb-4 sm:mb-0">
             @if($laporans->count() > 0)
-                Menampilkan {{ $laporans->firstItem() }} sampai {{ $laporans->lastItem() }} dari {{ $laporans->total() }} hasil
-            @else
-                Tidak ada data
+                Menampilkan <span class="font-semibold">{{ $laporans->firstItem() }}</span> 
+                sampai <span class="font-semibold">{{ $laporans->lastItem() }}</span> 
+                dari <span class="font-semibold">{{ $laporans->total() }}</span> hasil
             @endif
         </div>
-        <div>
-            {{ $laporans->appends(['q' => request('q')])->links() }}
+        <div class="flex-1 flex justify-center sm:justify-end">
+            {{ $laporans->appends(request()->query())->links() }}
+        </div>
+    </div>
+    @endif
+</div>
+
+<div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-white flex items-center">
+                <i class="fas fa-info-circle mr-3"></i>
+                Detail Laporan Kerusakan
+            </h2>
+            <button id="closeDetailModal" class="text-white hover:text-gray-200 transition-colors duration-200" title="Tutup">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-6 max-h-[calc(90vh-80px)] overflow-y-auto">
+            <div id="modalContent" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-info mr-2 text-blue-600"></i>
+                            Informasi Laporan
+                        </h3>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Ruang:</span>
+                                <span id="modalRuang" class="text-gray-900 font-semibold"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Fasilitas:</span>
+                                <span id="modalFasilitas" class="text-gray-900 font-semibold"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Kode:</span>
+                                <span id="modalKode" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Status:</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Selesai
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-file-alt mr-2 text-blue-600"></i>
+                            Deskripsi Kerusakan
+                        </h3>
+                        <textarea 
+                            id="modalDeskripsi" 
+                            class="w-full bg-white border border-gray-200 rounded-lg p-3 text-gray-800 resize-none focus:outline-none" 
+                            rows="6" 
+                            readonly
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="bg-gray-50 p-4 rounded-lg h-full">
+                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-camera mr-2 text-blue-600"></i>
+                            Foto Kerusakan
+                        </h3>
+                        <div class="flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-200 h-80">
+                            <img 
+                                id="modalGambar" 
+                                src="" 
+                                alt="Foto Laporan" 
+                                class="max-h-full max-w-full object-contain rounded-lg shadow-sm cursor-pointer"
+                                onclick="openImageModal(this.src)"
+                            >
+                            <div id="modalNoImage" class="text-center text-gray-400 hidden">
+                                <i class="fas fa-image text-4xl mb-2"></i>
+                                <p>Tidak ada foto tersedia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Detail -->
-<div id="detailModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl p-8 relative transition-all duration-200">
-        <button id="closeDetailModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-        <h2 class="text-2xl font-bold mb-6 text-indigo-700 flex items-center">
-            <i class="fas fa-info-circle mr-2"></i> Detail Laporan
-        </h2>
-        <div id="modalContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <div class="mb-3">
-                    <strong class="text-gray-700">Ruang:</strong>
-                    <span id="modalRuang" class="text-gray-900"></span>
-                </div>
-                <div class="mb-3">
-                    <strong class="text-gray-700">Fasilitas:</strong>
-                    <span id="modalFasilitas" class="text-gray-900"></span>
-                </div>
-                <div class="mb-3">
-                    <strong class="text-gray-700">Kode Fasilitas:</strong>
-                    <span id="modalKode" class="text-gray-900"></span>
-                </div>
-                <div class="mb-3">
-                    <strong class="text-gray-700">Deskripsi:</strong>
-                    <textarea id="modalDeskripsi" class="bg-gray-50 rounded-lg p-3 mt-1 text-gray-800 shadow-inner w-full resize-none" rows="5" disabled></textarea>
-                </div>
-            </div>
-            <div>
-                <div class="mb-3">
-                    <strong class="text-gray-700">Gambar:</strong><br>
-                    <img id="modalGambar" src="" alt="Foto Laporan" class="mt-2 rounded-lg shadow max-h-72 w-full object-contain bg-gray-100">
-                </div>
-            </div>
-        </div>
+<div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60 p-4">
+    <div class="relative max-w-full max-h-full">
+        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl z-10">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="fullImage" src="" alt="Full Size Image" class="max-w-full max-h-full object-contain">
     </div>
 </div>
 
 @include('pages.laporan.create')
 @include('pages.laporan.edit')
-{{-- @include('pages.laporan.delete') jika ada modal hapus --}}
 
 @endsection
 
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Modal Elements
+    // DOM Elements
     const detailModal = document.getElementById('detailModal');
     const addLaporanModal = document.getElementById('addLaporanModal');
     const editLaporanModal = document.getElementById('editLaporanModal');
+    const loadingIndicator = document.getElementById('loadingIndicator');
 
-    // --- Tambah Laporan ---
+    // Utility Functions
+    function showLoading() {
+        if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+    }
+
+    function showNotification(message, type = 'success') {
+        const bgColor = type === 'success' ? 'bg-green-100 border-green-500 text-green-700' : 'bg-red-100 border-red-500 text-red-700';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        const notification = document.createElement('div');
+        notification.className = `${bgColor} border-l-4 p-4 mb-4 rounded-r-lg`;
+        notification.setAttribute('role', 'alert');
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${icon} mr-2"></i>
+                <p>${message}</p>
+            </div>
+        `;
+
+        const content = document.querySelector('.bg-white.rounded-lg');
+        content.parentNode.insertBefore(notification, content);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.style.transition = 'opacity 0.5s ease-out';
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 500);
+        }, 5000);
+    }
+
+    // Modal Management
+    function closeModal(modal) {
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    function openModal(modal) {
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // Add Laporan Modal
     const addLaporanBtn = document.getElementById('addPeriodBtn');
     if (addLaporanBtn && addLaporanModal) {
         addLaporanBtn.addEventListener('click', function() {
-            addLaporanModal.classList.remove('hidden');
+            openModal(addLaporanModal);
             const addForm = document.getElementById('addLaporanForm');
             if (addForm) addForm.reset();
-            document.getElementById('add_photo_preview').classList.add('hidden');
-            document.getElementById('add_fasilitas_id').innerHTML = '<option value="">Pilih Fasilitas</option>';
-            document.getElementById('add_id_fas_ruang').innerHTML = '<option value="">Pilih Kode Fasilitas</option>';
-            document.getElementById('step1').classList.remove('hidden');
-            document.getElementById('step2').classList.add('hidden');
+            
+            // Reset form elements
+            const elements = [
+                'add_photo_preview',
+                'add_fasilitas_id',
+                'add_id_fas_ruang',
+                'step1',
+                'step2'
+            ];
+            
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id.includes('preview')) el.classList.add('hidden');
+                    else if (id.includes('select')) el.innerHTML = '<option value="">Pilih...</option>';
+                    else if (id === 'step1') el.classList.remove('hidden');
+                    else if (id === 'step2') el.classList.add('hidden');
+                }
+            });
         });
     }
 
-    // --- Close Modal (semua modal) ---
+    // Close modal buttons
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', () => {
-            addLaporanModal.classList.add('hidden');
-            if (editLaporanModal) editLaporanModal.classList.add('hidden');
+            closeModal(addLaporanModal);
+            closeModal(editLaporanModal);
         });
     });
+
     if (document.getElementById('closeDetailModal')) {
         document.getElementById('closeDetailModal').addEventListener('click', () => {
-            detailModal.classList.add('hidden');
+            closeModal(detailModal);
         });
     }
 
-    // --- Detail Laporan ---
+    // Detail Modal
     document.querySelectorAll('.detail-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
+            showLoading();
+            
             try {
                 const response = await fetch(`/laporan/detail/${id}`);
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Gagal memuat data');
+                
                 const data = await response.json();
-                document.getElementById('modalRuang').textContent =
-                    [data.fasilitasRuang?.ruang?.gedung?.nama_gedung, data.fasilitasRuang?.ruang?.nama_ruang].filter(Boolean).join(' - ') || '-';
-                document.getElementById('modalFasilitas').textContent = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
-                document.getElementById('modalKode').textContent = data.fasilitasRuang?.kode_fasilitas || '-';
+                
+                // Populate modal content
+                document.getElementById('modalRuang').textContent = 
+                    [data.fasilitasRuang?.ruang?.gedung?.nama_gedung, data.fasilitasRuang?.ruang?.nama_ruang]
+                    .filter(Boolean).join(' - ') || '-';
+                
+                document.getElementById('modalFasilitas').textContent = 
+                    data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
+                
+                document.getElementById('modalKode').textContent = 
+                    data.fasilitasRuang?.kode_fasilitas || '-';
+                
                 document.getElementById('modalDeskripsi').value = data.deskripsi || '-';
+                
+                // Handle image
+                const modalGambar = document.getElementById('modalGambar');
+                const modalNoImage = document.getElementById('modalNoImage');
+                
                 if (data.url_foto) {
-                    document.getElementById('modalGambar').src = data.url_foto;
-                    document.getElementById('modalGambar').style.display = 'block';
+                    modalGambar.src = data.url_foto;
+                    modalGambar.classList.remove('hidden');
+                    modalNoImage.classList.add('hidden');
                 } else {
-                    document.getElementById('modalGambar').style.display = 'none';
+                    modalGambar.classList.add('hidden');
+                    modalNoImage.classList.remove('hidden');
                 }
-                detailModal.classList.remove('hidden');
+                
+                openModal(detailModal);
             } catch (error) {
-                alert('Gagal memuat detail laporan');
+                console.error('Error:', error);
+                showNotification('Gagal memuat detail laporan', 'error');
+            } finally {
+                hideLoading();
             }
         });
     });
 
-    // --- Edit Laporan ---
+    // Edit Modal (if exists)
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
+            showLoading();
+            
             try {
                 const response = await fetch(`/laporan/detail/${id}`);
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Gagal memuat data');
+                
                 const data = await response.json();
                 const editForm = document.getElementById('editLaporanForm');
-                editForm.action = `/laporan/${id}`;
-                document.getElementById('edit_ruang_display').value =
-                    [data.fasilitasRuang?.ruang?.gedung?.nama_gedung, data.fasilitasRuang?.ruang?.nama_ruang].filter(Boolean).join(' - ') || '-';
-                document.getElementById('edit_fasilitas_display').value = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
-                document.getElementById('edit_fas_ruang_display').value = data.fasilitasRuang?.kode_fasilitas || '-';
-                document.getElementById('edit_deskripsi').value = data.deskripsi || '';
-                document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang;
-                const photoPreview = document.getElementById('edit_photo_preview');
-                const currentPhotoDiv = document.getElementById('current_photo');
-                if (data.url_foto) {
-                    photoPreview.src = data.url_foto;
-                    currentPhotoDiv.style.display = 'block';
-                } else {
-                    currentPhotoDiv.style.display = 'none';
+                
+                if (editForm) {
+                    editForm.action = `/laporan/${id}`;
+                    
+                    // Populate edit form
+                    const fields = {
+                        'edit_ruang_display': [data.fasilitasRuang?.ruang?.gedung?.nama_gedung, data.fasilitasRuang?.ruang?.nama_ruang].filter(Boolean).join(' - ') || '-',
+                        'edit_fasilitas_display': data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-',
+                        'edit_fas_ruang_display': data.fasilitasRuang?.kode_fasilitas || '-',
+                        'edit_deskripsi': data.deskripsi || '',
+                        'edit_id_fas_ruang': data.fasilitasRuang?.id_fas_ruang
+                    };
+                    
+                    Object.entries(fields).forEach(([id, value]) => {
+                        const element = document.getElementById(id);
+                        if (element) element.value = value;
+                    });
+                    
+                    // Handle photo preview
+                    const photoPreview = document.getElementById('edit_photo_preview');
+                    const currentPhotoDiv = document.getElementById('current_photo');
+                    
+                    if (data.url_foto && photoPreview) {
+                        photoPreview.src = data.url_foto;
+                        if (currentPhotoDiv) currentPhotoDiv.style.display = 'block';
+                    } else if (currentPhotoDiv) {
+                        currentPhotoDiv.style.display = 'none';
+                    }
+                    
+                    openModal(editLaporanModal);
                 }
-                editLaporanModal.classList.remove('hidden');
             } catch (error) {
-                alert('Gagal memuat data laporan');
+                console.error('Error:', error);
+                showNotification('Gagal memuat data laporan', 'error');
+            } finally {
+                hideLoading();
             }
         });
     });
 
-    // --- Step Form Logic Tambah Laporan ---
+    // Form Submissions
+    const forms = ['addLaporanForm', 'editLaporanForm'];
+    forms.forEach(formId => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const isEdit = formId === 'editLaporanForm';
+                
+                if (isEdit) formData.append('_method', 'PUT');
+                
+                showLoading();
+                
+                try {
+                    const response = await fetch(this.action || (isEdit ? '' : '/laporan'), {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        closeModal(isEdit ? editLaporanModal : addLaporanModal);
+                        showNotification(result.message || `Laporan berhasil ${isEdit ? 'diupdate' : 'disimpan'}`);
+                        
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        throw new Error(result.message || `Gagal ${isEdit ? 'mengupdate' : 'menyimpan'} laporan`);
+                    }
+                } catch (error) {
+                    console.error('Form submission error:', error);
+                    showNotification(error.message, 'error');
+                } finally {
+                    hideLoading();
+                }
+            });
+        }
+    });
+
+    // Step Navigation (if exists)
     const nextStepBtn = document.getElementById('nextStepBtn');
     const prevStepBtn = document.getElementById('prevStepBtn');
+    
     if (nextStepBtn) {
         nextStepBtn.addEventListener('click', function() {
-            const ruang = document.getElementById('add_ruang_id').value;
-            const fasilitas = document.getElementById('add_fasilitas_id').value;
-            const kode = document.getElementById('add_id_fas_ruang').value;
-            const deskripsi = document.getElementById('add_deskripsi').value;
-            const foto = document.getElementById('add_url_foto').files.length > 0;
-            if (!ruang || !fasilitas || !kode || !deskripsi || !foto) {
-                alert('Mohon lengkapi semua data dan upload foto!');
+            const requiredFields = [
+                'add_ruang_id',
+                'add_fasilitas_id', 
+                'add_id_fas_ruang',
+                'add_deskripsi'
+            ];
+            
+            const missingFields = requiredFields.filter(id => {
+                const element = document.getElementById(id);
+                return !element || !element.value.trim();
+            });
+            
+            const fileInput = document.getElementById('add_url_foto');
+            const hasFile = fileInput && fileInput.files.length > 0;
+            
+            if (missingFields.length > 0 || !hasFile) {
+                showNotification('Mohon lengkapi semua data dan upload foto!', 'error');
                 return;
             }
+            
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('step1BtnGroup').classList.add('hidden'); // tambahkan ini
         });
     }
+    
     if (prevStepBtn) {
         prevStepBtn.addEventListener('click', function() {
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('step1').classList.remove('hidden');
-            document.getElementById('step1BtnGroup').classList.remove('hidden'); // tambahkan ini
         });
     }
 
-    // --- Preview Foto Tambah Laporan ---
-    const addUrlFoto = document.getElementById('add_url_foto');
-    const addPhotoPreview = document.getElementById('add_photo_preview');
-    if (addUrlFoto && addPhotoPreview) {
-        addUrlFoto.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    addPhotoPreview.src = event.target.result;
-                    addPhotoPreview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                addPhotoPreview.classList.add('hidden');
-                if (file) {
-                    alert('File harus berupa gambar (JPG, PNG)');
-                    this.value = '';
+    // Photo Preview
+    const photoInputs = ['add_url_foto', 'edit_url_foto'];
+    photoInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const previewId = inputId.replace('url_foto', 'photo_preview'); // Corrected this line
+                const preview = document.getElementById(previewId);
+                
+                if (file && preview) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        preview.src = event.target.result;
+                        preview.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                } else if (preview) {
+                    preview.src = '#'; // Clear previous image
+                    preview.classList.add('hidden');
                 }
-            }
-        });
+            });
+        }
+    });
+
+    // Image Modal Functions
+    window.openImageModal = function(src) {
+        document.getElementById('fullImage').src = src;
+        document.getElementById('imageModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
-    // --- Dynamic Dropdown Tambah Laporan ---
-    const addRuangSelect = document.getElementById('add_ruang_id');
-    const addFasilitasSelect = document.getElementById('add_fasilitas_id');
-    const addKodeSelect = document.getElementById('add_id_fas_ruang');
-    addRuangSelect.addEventListener('change', function() {
-        addFasilitasSelect.innerHTML = '<option value="">Memuat fasilitas...</option>';
-        fetch(`/laporan/fasilitas-by-ruang/${this.value}`)
-            .then(res => res.json())
-            .then(data => {
-                addFasilitasSelect.innerHTML = '<option value="">Pilih Fasilitas</option>' +
-                    data.map(item => `<option value="${item.id_fasilitas}">${item.nama_fasilitas}</option>`).join('');
-            });
-        addKodeSelect.innerHTML = '<option value="">Pilih Kode Fasilitas</option>';
-    });
-        addFasilitasSelect.addEventListener('change', function() {
-        if (addRuangSelect.value && this.value) {
-            addKodeSelect.innerHTML = '<option value="">Memuat kode...</option>';
-            fetch(`/laporan/kode-by-ruang-fasilitas/${addRuangSelect.value}/${this.value}`)
-                .then(res => res.json())
-                .then(data => { // <-- BENAR: Tambahkan tanda kurung di sini
-                    addKodeSelect.innerHTML = '<option value="">Pilih Kode Fasilitas</option>' +
-                        data.map(item => `<option value="${item.id_fas_ruang}">${item.kode_fasilitas}</option>`).join('');
-                });
+    window.closeImageModal = function() {
+        document.getElementById('imageModal').classList.add('hidden');
+        if (!detailModal.classList.contains('hidden')) { // Only restore body scroll if detailModal is open
+            // No need to change body.style.overflow here if detailModal is still open, as it handles its own overflow
+        } else {
+            document.body.style.overflow = 'auto';
         }
-    });
+    }
 
-    // --- Submit Tambah Laporan ---
-    document.getElementById('addLaporanForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin'
-            });
-
-            // Check if response is ok first
-            if (!response.ok) {
-                // Try to get more details about the error
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Server responded with an error');
-                } else {
-                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
-                }
-            }
-
-            const result = await response.json();
-            if (result.success) {
-                addLaporanModal.classList.add('hidden');
-
-                // Tambahkan flash message di UI
-                const flashContainer = document.createElement('div');
-                flashContainer.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4';
-                flashContainer.setAttribute('role', 'alert');
-                flashContainer.innerHTML = `<p>Laporan berhasil disimpan</p>`;
-
-                // Tempatkan flash message sebelum konten utama
-                const content = document.querySelector('.bg-white.rounded-lg');
-                content.parentNode.insertBefore(flashContainer, content);
-
-                // Auto-hide flash message setelah 4 detik
-                setTimeout(() => {
-                    flashContainer.style.transition = 'opacity 0.5s';
-                    flashContainer.style.opacity = '0';
-                    setTimeout(() => flashContainer.remove(), 500);
-                }, 4000);
-
-                // Untuk reload data tanpa refresh penuh halaman (opsional)
-                location.reload();
-            } else {
-                alert(result.message || 'Gagal menyimpan laporan');
-            }
-        } catch (error) {
-            console.error('Form submission error:', error);
-            alert('Gagal menyimpan laporan: ' + error.message);
-        }
-    });
-
-        // --- Submit Edit Laporan ---
-    document.getElementById('editLaporanForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        formData.append('_method', 'PUT');
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
-            const result = await response.json();
-            if (response.ok && result.success) {
-                editLaporanModal.classList.add('hidden');
-
-                // Tambahkan flash message di UI
-                const flashContainer = document.createElement('div');
-                flashContainer.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4';
-                flashContainer.setAttribute('role', 'alert');
-                flashContainer.innerHTML = `<p>Laporan berhasil diupdate</p>`;
-
-                // Tempatkan flash message sebelum konten utama
-                const content = document.querySelector('.bg-white.rounded-lg');
-                content.parentNode.insertBefore(flashContainer, content);
-
-                // Auto-hide flash message setelah 4 detik
-                setTimeout(() => {
-                    flashContainer.style.transition = 'opacity 0.5s';
-                    flashContainer.style.opacity = '0';
-                    setTimeout(() => flashContainer.remove(), 500);
-                }, 4000);
-
-                // Untuk reload data tanpa refresh penuh halaman (opsional)
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                alert(result.message || 'Gagal mengupdate laporan');
-            }
-        } catch (error) {
-            alert('Gagal mengupdate laporan: ' + error.message);
-        }
-    });
-
-    // --- Close modal jika klik di luar konten modal ---
-    [detailModal, addLaporanModal, editLaporanModal].forEach(modal => {
-        if (modal) {
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) modal.classList.add('hidden');
-            });
-        }
-    });
 });
 </script>
 @endsection

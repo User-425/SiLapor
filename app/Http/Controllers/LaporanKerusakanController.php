@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Exports\LaporanKerusakanExport;
@@ -16,8 +15,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-use function Laravel\Prompts\error;
-
 class LaporanKerusakanController extends Controller
 {
     public function __construct()
@@ -33,14 +30,12 @@ class LaporanKerusakanController extends Controller
         $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
             ->where('status', '!=', 'selesai');
 
-        // Jika bukan sarpras atau teknisi, hanya tampilkan laporan milik pengguna
         if (!in_array($user->peran, ['sarpras', 'teknisi'])) {
             $query->where('id_pengguna', $user->id_pengguna);
             $laporans = $query->latest()->paginate(10);
             return view('pages.laporan.index', compact('laporans'));
         }
 
-        // Untuk sarpras dan teknisi
         $status = $request->get('status', 'menunggu_verifikasi');
 
         if ($status !== 'semua') {
@@ -96,79 +91,74 @@ class LaporanKerusakanController extends Controller
     }
 
     public function store(Request $request)
-{
-    try {
-        $request->validate([
-            'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
-            'deskripsi' => 'required|string|max:255',
-            'url_foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'tingkat_kerusakan_pelapor' => 'required|integer|min:1|max:5',
-            'dampak_akademik_pelapor' => 'required|integer|min:1|max:5',
-            'kebutuhan_pelapor' => 'required|integer|min:1|max:5',
-        ]);
-
-        // Make sure upload directory exists
-        $directory = storage_path('app/public/laporan_foto');
-        if (!file_exists($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        $data = [
-            'id_pengguna' => Auth::id(),
-            'id_fas_ruang' => $request->id_fas_ruang,
-            'deskripsi' => $request->deskripsi,
-            'status' => 'menunggu_verifikasi',
-            'ranking' => 0,
-        ];
-
-        if ($request->hasFile('url_foto')) {
-            $file = $request->file('url_foto');
-            $path = $file->store('laporan_foto', 'public');
-            $data['url_foto'] = $path;
-        }
-
-        $laporan = LaporanKerusakan::create($data);
-
-        // Save criteria
-        DB::table('kriteria_laporan')->insert([
-            'id_laporan' => $laporan->id_laporan,
-            'tingkat_kerusakan_pelapor' => $request->tingkat_kerusakan_pelapor,
-            'dampak_akademik_pelapor' => $request->dampak_akademik_pelapor,
-            'kebutuhan_pelapor' => $request->kebutuhan_pelapor,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        // Notify sarpras users
-        $sarprasUsers = Pengguna::where('peran', 'sarpras')->get();
-        foreach ($sarprasUsers as $user) {
-            $user->notify(new NewReportNotification($laporan->load([
-                'fasilitasRuang.fasilitas', 'fasilitasRuang.ruang', 'pengguna'
-            ])));
-        }
-
-        // Return appropriate response based on request type
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Laporan berhasil disimpan'
+    {
+        try {
+            $request->validate([
+                'id_fas_ruang' => 'required|exists:fasilitas_ruang,id_fas_ruang',
+                'deskripsi' => 'required|string|max:255',
+                'url_foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'tingkat_kerusakan_pelapor' => 'required|integer|min:1|max:5',
+                'dampak_akademik_pelapor' => 'required|integer|min:1|max:5',
+                'kebutuhan_pelapor' => 'required|integer|min:1|max:5',
             ]);
+
+            $directory = storage_path('app/public/laporan_foto');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            $data = [
+                'id_pengguna' => Auth::id(),
+                'id_fas_ruang' => $request->id_fas_ruang,
+                'deskripsi' => $request->deskripsi,
+                'status' => 'menunggu_verifikasi',
+                'ranking' => 0,
+            ];
+
+            if ($request->hasFile('url_foto')) {
+                $file = $request->file('url_foto');
+                $path = $file->store('laporan_foto', 'public');
+                $data['url_foto'] = $path;
+            }
+
+            $laporan = LaporanKerusakan::create($data);
+
+            DB::table('kriteria_laporan')->insert([
+                'id_laporan' => $laporan->id_laporan,
+                'tingkat_kerusakan_pelapor' => $request->tingkat_kerusakan_pelapor,
+                'dampak_akademik_pelapor' => $request->dampak_akademik_pelapor,
+                'kebutuhan_pelapor' => $request->kebutuhan_pelapor,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $sarprasUsers = Pengguna::where('peran', 'sarpras')->get();
+            foreach ($sarprasUsers as $user) {
+                $user->notify(new NewReportNotification($laporan->load([
+                    'fasilitasRuang.fasilitas', 'fasilitasRuang.ruang', 'pengguna'
+                ])));
+            }
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Laporan berhasil disimpan'
+                ]);
+            }
+
+            return redirect()->route('laporan.index')->with('success', 'Laporan berhasil disimpan');
+
+        } catch (\Exception $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ], 422);
+            }
+
+            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
-
-        // For normal form submission - this creates the green flash message
-        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil disimpan');
-
-    } catch (\Exception $e) {
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 422);
-        }
-
-        return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
     }
-}
 
     public function show(LaporanKerusakan $laporan)
     {
@@ -181,85 +171,65 @@ class LaporanKerusakanController extends Controller
     }
 
     public function edit(LaporanKerusakan $laporan)
-{
-    // Check if report is already completed
-    if ($laporan->status === 'selesai') {
-        return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
-    }
+    {
+        if ($laporan->status === 'selesai') {
+            return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
+        }
 
-    // Check user permissions
-    if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
-        abort(403, 'Unauthorized action.');
-    }
+        if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
+            abort(403, 'Unauthorized action.');
+        }
 
-    $gedungs = \App\Models\Gedung::all();
-    return view('pages.laporan.edit', compact('laporan', 'gedungs'));
-}
+        $gedungs = \App\Models\Gedung::all();
+        return view('pages.laporan.edit', compact('laporan', 'gedungs'));
+    }
 
     public function update(Request $request, LaporanKerusakan $laporan)
-{
-    // Check if report is already completed
-    if ($laporan->status === 'selesai') {
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json(['success' => false, 'message' => 'Laporan yang sudah selesai tidak dapat diubah.'], 403);
-        }
-        return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
-    }
-
-    // Check user permissions
-    if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
-        abort(403, 'Unauthorized action.');
-    }
-
-    // Remaining validation and update code stays the same
-    $request->validate([
-        'deskripsi' => 'required|string|max:255',
-        'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        // Hapus validasi untuk field yang tidak ada di form edit
-        // 'tingkat_kerusakan_sarpras' => 'required|integer|min:1|max:5',
-        // 'dampak_akademik_sarpras' => 'required|integer|min:1|max:5',
-        // 'kebutuhan_sarpras' => 'required|integer|min:1|max:5',
-    ]);
-
-    try {
-        $data = [
-            'id_fas_ruang' => $request->id_fas_ruang,
-            'deskripsi' => $request->deskripsi,
-        ];
-
-        if ($request->hasFile('url_foto')) {
-            if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
-                Storage::disk('public')->delete($laporan->url_foto);
+    {
+        if ($laporan->status === 'selesai') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Laporan yang sudah selesai tidak dapat diubah.'], 403);
             }
-            $path = $request->file('url_foto')->store('laporan_foto', 'public');
-            $data['url_foto'] = $path;
+            return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
         }
 
-        $laporan->update($data);
+        if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
+            abort(403, 'Unauthorized action.');
+        }
 
-        // Hapus update kriteria sarpras karena tidak ada di form edit
-        // Hanya administrator sarpras yang dapat mengisi kriteria sarpras
-        // DB::table('kriteria_laporan')
-        //     ->where('id_laporan', $laporan->id_laporan)
-        //     ->update([
-        //         'tingkat_kerusakan_sarpras' => $request->tingkat_kerusakan_sarpras,
-        //         'dampak_akademik_sarpras' => $request->dampak_akademik_sarpras,
-        //         'kebutuhan_sarpras' => $request->kebutuhan_sarpras,
-        //         'updated_at' => now(),
-        //     ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Laporan berhasil diupdate.',
-            'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
+        $request->validate([
+            'deskripsi' => 'required|string|max:255',
+            'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
-        ], 500);
+
+        try {
+            $data = [
+                'id_fas_ruang' => $request->id_fas_ruang,
+                'deskripsi' => $request->deskripsi,
+            ];
+
+            if ($request->hasFile('url_foto')) {
+                if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
+                    Storage::disk('public')->delete($laporan->url_foto);
+                }
+                $path = $request->file('url_foto')->store('laporan_foto', 'public');
+                $data['url_foto'] = $path;
+            }
+
+            $laporan->update($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Laporan berhasil diupdate.',
+                'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     public function destroy(LaporanKerusakan $laporan)
     {
@@ -300,18 +270,18 @@ class LaporanKerusakanController extends Controller
         return response()->json($kode);
     }
 
-public function getDetail(LaporanKerusakan $laporan)
-{
-    if ($laporan->id_pengguna !== Auth::id() && !in_array(Auth::user()->peran, ['sarpras', 'teknisi'])) {
-        abort(403);
-    }
+    public function getDetail(LaporanKerusakan $laporan)
+    {
+        if ($laporan->id_pengguna !== Auth::id() && !in_array(Auth::user()->peran, ['sarpras', 'teknisi'])) {
+            abort(403);
+        }
 
-    $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
+        $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
 
         return response()->json([
             'id_laporan' => $laporan->id_laporan,
             'deskripsi' => $laporan->deskripsi,
-            'url_foto' => asset('storage/' . $laporan->url_foto), // Fix the URL
+            'url_foto' => $laporan->url_foto ? asset('storage/' . $laporan->url_foto) : null,
             'status' => $laporan->status,
             'ranking' => $laporan->ranking,
             'created_at' => $laporan->created_at->format('d/m/Y H:i'),
@@ -327,8 +297,8 @@ public function getDetail(LaporanKerusakan $laporan)
                     'id_ruang' => $laporan->fasilitasRuang->ruang->id_ruang,
                     'nama_ruang' => $laporan->fasilitasRuang->ruang->nama_ruang,
                     'gedung' => [
-                        'id_gedung' => $laporan->fasilitasRuang->ruang->gedung->id_gedung,
-                        'nama_gedung' => $laporan->fasilitasRuang->ruang->gedung->nama_gedung,
+                        'id_gedung' => $laporan->fasilitasRuang->ruang->gedung->id,
+                        'nama_gedunging' => $laporan->fasilitasRuang->ruang->gedung->nama_gedung,
                     ],
                 ],
             ],
@@ -340,35 +310,34 @@ public function getDetail(LaporanKerusakan $laporan)
     }
 
     public function verifikasi(Request $request, LaporanKerusakan $laporan)
-{
-    $request->validate([
-        'status' => 'required|in:diproses,ditolak',
-        'ranking' => 'nullable|integer|min:0|max:5',
-    ]);
+    {
+        $request->validate([
+            'status' => 'required|in:diproses,ditolak',
+            'ranking' => 'nullable|integer|min:0|max:5',
+        ]);
 
-    $oldStatus = $laporan->status;
+        $oldStatus = $laporan->status;
 
-    $laporan->update([
-        'status' => $request->status,
-        'ranking' => $request->ranking ?? 0,
-    ]);
+        $laporan->update([
+            'status' => $request->status,
+            'ranking' => $request->ranking ?? 0,
+        ]);
 
-    // Notify the report creator about verification result
-    $laporan->pengguna->notify(
-        new StatusChangedNotification(
-            $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']),
-            $oldStatus,
-            $request->status
-        )
-    );
+        $laporan->pengguna->notify(
+            new StatusChangedNotification(
+                $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']),
+                $oldStatus,
+                $request->status
+            )
+        );
 
-    $message = "Laporan berhasil diverifikasi dengan status: " . str_replace('_', ' ', ucwords($request->status));
-    if ($request->ajax()) {
-        return response()->json(['success' => true, 'message' => $message]);
+        $message = "Laporan berhasil diverifikasi dengan status: " . str_replace('_', ' ', ucwords($request->status));
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return redirect()->route('laporan.index')->with('success', $message);
     }
-
-    return redirect()->route('laporan.index')->with('success', $message);
-}
 
     public function updateStatus(Request $request, LaporanKerusakan $laporan)
     {
@@ -384,7 +353,6 @@ public function getDetail(LaporanKerusakan $laporan)
             'ranking' => $request->ranking,
         ]);
 
-        // Send notification to the report creator about status change
         $laporan->pengguna->notify(
             new StatusChangedNotification(
                 $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']),
@@ -393,7 +361,6 @@ public function getDetail(LaporanKerusakan $laporan)
             )
         );
 
-        // If status changed to 'selesai', send feedback request
         if ($request->status === 'selesai') {
             $laporan->pengguna->notify(
                 new FeedbackRequestNotification(
@@ -418,23 +385,18 @@ public function getDetail(LaporanKerusakan $laporan)
             'status' => 'required|in:menunggu_verifikasi,diproses,diperbaiki,selesai,ditolak',
         ]);
 
-        // Get all reports before updating
         $laporans = LaporanKerusakan::whereIn('id_laporan', $request->laporan_ids)->get();
 
-        // Update all reports
         LaporanKerusakan::whereIn('id_laporan', $request->laporan_ids)->update([
             'status' => $request->status,
             'updated_at' => now(),
         ]);
 
-        // Send notifications for each report
         foreach ($laporans as $laporan) {
             $oldStatus = $laporan->status;
 
-            // Reload the model to get fresh data
             $laporan->refresh();
 
-            // Notify the report creator about status change
             $laporan->pengguna->notify(
                 new StatusChangedNotification(
                     $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang']),
@@ -443,7 +405,6 @@ public function getDetail(LaporanKerusakan $laporan)
                 )
             );
 
-            // If status changed to 'selesai', send feedback request
             if ($request->status === 'selesai') {
                 $laporan->pengguna->notify(
                     new FeedbackRequestNotification(
@@ -458,7 +419,7 @@ public function getDetail(LaporanKerusakan $laporan)
             return response()->json(['success' => true, 'message' => $message]);
         }
 
-        return redirect()->route('laporan.index')->with('success', $message);
+        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil disimpan');
     }
 
     public function export(Request $request)
@@ -485,20 +446,20 @@ public function getDetail(LaporanKerusakan $laporan)
             $id = base64_decode($code);
             $fasRuang = FasRuang::with(['fasilitas', 'ruang.gedung'])
                 ->findOrFail($id);
-            
+
             $userRole = Auth::user()->peran;
-            
+
             // Redirect based on user role
             switch ($userRole) {
                 case 'admin':
                     return redirect()->route('fasilitas.show', $id);
-                    
+
                 case 'sarpras':
                     return redirect()->route('fasilitas.history', $id);
-                    
+
                 case 'teknisi':
                     return redirect()->route('fasilitas.maintenance', $id);
-                    
+
                 default:
                     return view('pages.laporan.quick-report', [
                         'fasRuang' => $fasRuang
@@ -511,24 +472,41 @@ public function getDetail(LaporanKerusakan $laporan)
     }
 
     public function riwayat(Request $request)
-    {
-        $user = Auth::user();
-        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
-            ->where('status', 'selesai');
+{
+    $user = Auth::user();
+    $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
+        ->where('status', 'selesai');
 
-        if (!in_array($user->peran, ['admin', 'sarpras', 'teknisi'])) {
-            $query->where('id_pengguna', $user->id_pengguna);
-        }
+    if (!in_array($user->peran, ['admin', 'sarpras', 'teknisi'])) {
+        $query->where('id_pengguna', $user->id_pengguna);
+    }
 
-        if ($request->filled('tanggal_dari')) {
-            $query->whereDate('created_at', '>=', $request->tanggal_dari);
-        }
-        if ($request->filled('tanggal_sampai')) {
-            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
-        }
+    if ($request->filled('q')) {
+        $query->where(function ($q) use ($request) {
+            $q->whereHas('fasilitasRuang.ruang', function ($r) use ($request) {
+                $r->where('nama_ruang', 'like', '%' . $request->q . '%');
+            })
+            ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($request) {
+                $f->where('nama_fasilitas', 'like', '%' . $request->q . '%');
+            })
+            ->orWhere('fasilitasRuang.kode_fasilitas', 'like', '%' . $request->q . '%');
+        });
+    }
 
+    if ($request->filled('tanggal_dari')) {
+        $query->whereDate('created_at', '>=', $request->tanggal_dari);
+    }
+    if ($request->filled('tanggal_sampai')) {
+        $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+    }
+
+    try {
         $laporans = $query->latest()->paginate(10);
+    } catch (\Exception $e) {
+        \Log::error('Error loading riwayat: ' . $e->getMessage());
+        return view('pages.laporan.riwayat', ['laporans' => collect([])])->with('error', 'Gagal memuat data riwayat');
+    }
 
-        return view('pages.laporan.riwayat', compact('laporans'));
+    return view('pages.laporan.riwayat', compact('laporans'));
     }
 }

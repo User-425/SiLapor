@@ -6,10 +6,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Penugasan Teknisi</h1>
-            <p class="text-gray-600 mt-2">Kelola dan tugaskan laporan kerusakan kepada teknisi yang tersedia</p>
-        </div>
+        
 
         <!-- Alert Success -->
         @if(session('success'))
@@ -263,14 +260,6 @@ function openDetailModal(laporanId) {
                             <label class="block text-sm font-medium text-gray-700 mb-1">ID Laporan</label>
                             <div class="bg-gray-50 p-3 rounded-lg">
                                 <span class="font-mono text-indigo-600">${selectedLaporan.id_laporan}</span>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pelapor</label>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <div class="font-medium">${selectedLaporan.pengguna?.nama_pengguna || 'N/A'}</div>
-                                <div class="text-sm text-gray-500">${selectedLaporan.pengguna?.email || 'N/A'}</div>
                             </div>
                         </div>
                         

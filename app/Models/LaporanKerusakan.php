@@ -41,4 +41,9 @@ class LaporanKerusakan extends Model
     return $this->hasOne(\App\Models\Tugas::class, 'id_laporan');
     }
 
+    public function umpanBaliks()
+    {
+        return $this->hasMany(UmpanBalik::class, 'id_laporan', 'id_laporan');
+    }
+
 }

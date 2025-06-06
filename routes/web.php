@@ -14,6 +14,7 @@ use App\Http\Controllers\GedungController;
 use App\Http\Controllers\TugasController;
 use App\Http\Controllers\TeknisiController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\UmpanBalikController;
 
 // Authentication Routes
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -55,6 +56,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
     Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
     Route::get('/laporan/quick/{code}', [LaporanKerusakanController::class, 'quickReport'])->name('laporan.quick');
+    Route::get('/umpan-balik/{id_laporan}/create', [UmpanBalikController::class, 'create'])->name('umpan_balik.create');
+    Route::post('/umpan-balik', [UmpanBalikController::class, 'store'])->name('umpan_balik.store');
 
     // Sarpras Routes
     Route::middleware(['peran:sarpras'])->group(function () {
@@ -70,6 +73,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/tugas/{id}/edit', [TugasController::class, 'edit'])->name('tugas.edit');
         Route::put('/tugas/{id}', [TugasController::class, 'update'])->name('tugas.update');
         Route::delete('/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy');
+        Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan_balik.index')->middleware('peran:sarpras');
+        
+        
     });
 
     // Shared Sarpras & Teknisi Routes
