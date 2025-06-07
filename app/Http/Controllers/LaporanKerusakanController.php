@@ -298,7 +298,7 @@ class LaporanKerusakanController extends Controller
                     'nama_ruang' => $laporan->fasilitasRuang->ruang->nama_ruang,
                     'gedung' => [
                         'id_gedung' => $laporan->fasilitasRuang->ruang->gedung->id,
-                        'nama_gedunging' => $laporan->fasilitasRuang->ruang->gedung->nama_gedung,
+                        'nama_gedung' => $laporan->fasilitasRuang->ruang->gedung->nama_gedung,
                     ],
                 ],
             ],
