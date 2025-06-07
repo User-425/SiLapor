@@ -291,4 +291,107 @@ class BatchController extends Controller
         
         return view('pages.batch.calculations', compact('batch', 'rankedReports', 'calculationSteps', 'reportsById'));
     }
+
+    /**
+     * Show the GDSS ranking page for a batch
+     */
+    public function showGDSSRankingPage(Request $request, Batch $batch)
+    {
+        if ($batch->status === 'selesai') {
+            return redirect()->route('batches.show', $batch->id_batch)
+                ->with('error', 'Batch yang sudah selesai tidak dapat diubah prioritasnya.');
+        }
+        
+        // Get the GDSS method from the request or default to Copeland
+        $gdssMethod = $request->get('method', 'copeland');
+        if (!in_array($gdssMethod, ['copeland', 'borda'])) {
+            $gdssMethod = 'copeland';
+        }
+        
+        // Load reports with criteria
+        $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
+            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
+            ->get();
+        
+        if ($reports->count() == 0) {
+            return redirect()->route('batches.show', $batch->id_batch)
+                ->with('error', 'Tidak ada laporan yang dapat diproses dalam batch ini.');
+        }
+        
+        // Calculate priorities using MABAC with GDSS
+        $result = $this->mabacService->calculatePrioritiesWithGDSS($reports, $gdssMethod);
+        $rankedReports = $result['reports'];
+        $calculationSteps = $result['steps'];
+        
+        return view('pages.batch.gdss-ranking', compact('batch', 'rankedReports', 'calculationSteps', 'gdssMethod'));
+    }
+
+    /**
+     * Show detailed GDSS calculations for a batch
+     */
+    public function showGDSSCalculations(Request $request, Batch $batch)
+    {
+        if ($batch->status === 'selesai') {
+            return redirect()->route('batches.show', $batch->id_batch)
+                ->with('error', 'Batch yang sudah selesai tidak dapat diubah prioritasnya.');
+        }
+        
+        // Get the GDSS method from the request or default to Copeland
+        $gdssMethod = $request->get('method', 'copeland');
+        if (!in_array($gdssMethod, ['copeland', 'borda'])) {
+            $gdssMethod = 'copeland';
+        }
+        
+        // Load reports with criteria
+        $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
+            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
+            ->get();
+        
+        if ($reports->count() == 0) {
+            return redirect()->route('batches.show', $batch->id_batch)
+                ->with('error', 'Tidak ada laporan yang dapat diproses dalam batch ini.');
+        }
+        
+        // Calculate priorities using MABAC with GDSS
+        $result = $this->mabacService->calculatePrioritiesWithGDSS($reports, $gdssMethod);
+        $rankedReports = $result['reports'];
+        $calculationSteps = $result['steps'];
+        
+        // Map report IDs to report objects for display
+        $reportsById = [];
+        foreach ($reports as $report) {
+            $reportsById[$report->id_laporan] = $report;
+        }
+        
+        return view('pages.batch.gdss-calculations', compact('batch', 'rankedReports', 'calculationSteps', 'reportsById', 'gdssMethod'));
+    }
+
+    /**
+     * Save the GDSS rankings to database
+     */
+    public function saveGDSSRankings(Request $request, Batch $batch)
+    {
+        $request->validate([
+            'rankings' => 'required|array',
+            'rankings.*' => 'required|numeric',
+        ]);
+        
+        DB::beginTransaction();
+        
+        try {
+            foreach ($request->rankings as $laporan_id => $ranking) {
+                LaporanKerusakan::where('id_laporan', $laporan_id)
+                    ->update(['ranking' => $ranking]);
+            }
+            
+            DB::commit();
+            return redirect()->route('batches.show', $batch->id_batch)
+                ->with('success', 'Prioritas laporan berhasil disimpan dengan metode GDSS.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', 'Gagal menyimpan prioritas: ' . $e->getMessage());
+        }
+    }
 }

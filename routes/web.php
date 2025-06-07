@@ -111,4 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/fasilitas/{id}/maintenance', [FasRuangController::class, 'maintenance'])->name('fasilitas.maintenance');
     Route::get('/batches/{batch}/ranking', [BatchController::class, 'showRankingPage'])->name('batches.ranking');
     Route::post('/batches/{batch}/save-rankings', [BatchController::class, 'saveRankings'])->name('batches.save-rankings');
+    Route::get('/batches/{batch}/gdss', [BatchController::class, 'showGDSSRankingPage'])->name('batches.gdss');
+    Route::get('/batches/{batch}/gdss-calculations', [BatchController::class, 'showGDSSCalculations'])->name('batches.gdss-calculations');
+    Route::post('/batches/{batch}/gdss-rankings', [BatchController::class, 'saveGDSSRankings'])->name('batches.save-gdss-rankings');
 });
