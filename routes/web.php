@@ -15,6 +15,7 @@ use App\Http\Controllers\TugasController;
 use App\Http\Controllers\TeknisiController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UmpanBalikController;
+use App\Http\Controllers\EksporSarprasController;
 
 // Authentication Routes
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -49,21 +50,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/fasilitas/{id}/show', [FasRuangController::class, 'show'])->name('fasilitas.show');
     });
 
-    // Laporan Routes - All Authenticated Users
-    Route::get('/laporan/riwayat', [LaporanKerusakanController::class, 'riwayat'])->name('laporan.riwayat');
-    Route::resource('laporan', LaporanKerusakanController::class);
-    Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
-    Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
-    Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
-    Route::get('/laporan/quick/{code}', [LaporanKerusakanController::class, 'quickReport'])->name('laporan.quick');
-    Route::get('/umpan-balik/{id_laporan}/create', [UmpanBalikController::class, 'create'])->name('umpan_balik.create');
-    Route::post('/umpan-balik', [UmpanBalikController::class, 'store'])->name('umpan_balik.store');
-
-    // Sarpras Routes
+    // Sarpras Routes - PINDAHKAN KE ATAS SEBELUM RESOURCE LAPORAN
     Route::middleware(['peran:sarpras'])->group(function () {
+        Route::get('/laporan/export', [EksporSarprasController::class, 'form'])->name('laporan.export');
+        Route::post('/laporan/download-export', [EksporSarprasController::class, 'export'])->name('laporan.download-export');
         Route::post('/laporan/{laporan}/verifikasi', [LaporanKerusakanController::class, 'verifikasi'])->name('laporan.verifikasi');
         Route::post('/laporan/batch-update-status', [LaporanKerusakanController::class, 'batchUpdateStatus'])->name('laporan.batchUpdateStatus');
-        Route::get('/laporan/export', [LaporanKerusakanController::class, 'export'])->name('laporan.export');
         Route::put('/laporan/{laporan}/update-sarpras', [LaporanKerusakanController::class, 'update'])->name('laporan.updateSarpras');
 
         Route::get('/tugas', [TugasController::class, 'index'])->name('tugas.index');
@@ -74,9 +66,17 @@ Route::middleware('auth')->group(function () {
         Route::put('/tugas/{id}', [TugasController::class, 'update'])->name('tugas.update');
         Route::delete('/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy');
         Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan_balik.index')->middleware('peran:sarpras');
-        
-        
     });
+
+    // Laporan Routes - PINDAHKAN KE BAWAH
+    Route::get('/laporan/riwayat', [LaporanKerusakanController::class, 'riwayat'])->name('laporan.riwayat');
+    Route::resource('laporan', LaporanKerusakanController::class);
+    Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
+    Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
+    Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
+    Route::get('/laporan/quick/{code}', [LaporanKerusakanController::class, 'quickReport'])->name('laporan.quick');
+    Route::get('/umpan-balik/{id_laporan}/create', [UmpanBalikController::class, 'create'])->name('umpan_balik.create');
+    Route::post('/umpan-balik', [UmpanBalikController::class, 'store'])->name('umpan_balik.store');
 
     // Shared Sarpras & Teknisi Routes
     Route::middleware(['peran:sarpras,teknisi'])->group(function () {

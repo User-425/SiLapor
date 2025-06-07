@@ -40,7 +40,7 @@ class LaporanKerusakanSeeder extends Seeder
                 'id_fas_ruang' => 4,
                 'deskripsi' => 'AC bocor dan mengeluarkan air cukup banyak. Ada genangan di lantai yang berbahaya.',
                 'url_foto' => 'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/window-ac-1525200738.jpg',
-                'status' => 'diperbaiki',
+                'status' => 'diproses',
                 'ranking' => 5,
                 'created_at' => Carbon::now()->subDays(15),
                 'updated_at' => Carbon::now()->subDays(2),
