@@ -35,7 +35,7 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 function downloadQR() {
     // Try to find the SVG inside the QR code container
@@ -70,4 +70,4 @@ function downloadQR() {
     }
 }
 </script>
-@endsection
+@endpush

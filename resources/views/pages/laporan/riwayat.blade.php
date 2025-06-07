@@ -284,7 +284,7 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
@@ -612,4 +612,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
-@endsection
+@endpush

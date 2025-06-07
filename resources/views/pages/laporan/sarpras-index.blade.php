@@ -171,7 +171,9 @@
     @include('pages.laporan.sarpras-edit')
 </div>
 
-@section('scripts')
+@endsection
+
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // AJAX untuk Detail
@@ -321,5 +323,4 @@
         }
     });
 </script>
-@endsection
-@endsection
+@endpush

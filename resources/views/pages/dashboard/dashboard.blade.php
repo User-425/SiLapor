@@ -169,8 +169,8 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
     // Charts can be initialized here using Chart.js or any other library
 </script>
-@endsection
+@endpush

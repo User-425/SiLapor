@@ -140,7 +140,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
     // Modal functionality
     document.addEventListener('DOMContentLoaded', function() {
@@ -231,4 +231,4 @@
         }
     });
 </script>
-@endsection
+@endpush
