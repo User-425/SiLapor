@@ -15,6 +15,7 @@ use App\Http\Controllers\TugasController;
 use App\Http\Controllers\TeknisiController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UmpanBalikController;
+use App\Http\Controllers\BatchController;
 
 // Authentication Routes
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -75,7 +76,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy');
         Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan_balik.index')->middleware('peran:sarpras');
         
-        
+        Route::get('/batches', [BatchController::class, 'index'])->name('batches.index');
+        Route::get('/batches/create', [BatchController::class, 'create'])->name('batches.create');
+        Route::post('/batches', [BatchController::class, 'store'])->name('batches.store');
+        Route::get('/batches/{batch}', [BatchController::class, 'show'])->name('batches.show');
+        Route::post('/batches/{batch}/activate', [BatchController::class, 'activate'])->name('batches.activate');
+        Route::post('/batches/{batch}/complete', [BatchController::class, 'complete'])->name('batches.complete');
+        Route::get('/batches/{batch}/add-reports', [BatchController::class, 'showAddReports'])->name('batches.add-reports');
+        Route::post('/batches/{batch}/add-reports', [BatchController::class, 'addReports'])->name('batches.add-reports');
+        Route::post('/batches/{batch}/remove-report/{laporan}', [BatchController::class, 'removeReport'])->name('batches.remove-report');
+        Route::get('/batches/{batch}/calculations', [BatchController::class, 'showCalculations'])->name('batches.calculations');
     });
 
     // Shared Sarpras & Teknisi Routes
@@ -99,4 +109,6 @@ Route::middleware('auth')->group(function () {
 
     // Shared Routes
     Route::get('/fasilitas/{id}/maintenance', [FasRuangController::class, 'maintenance'])->name('fasilitas.maintenance');
+    Route::get('/batches/{batch}/ranking', [BatchController::class, 'showRankingPage'])->name('batches.ranking');
+    Route::post('/batches/{batch}/save-rankings', [BatchController::class, 'saveRankings'])->name('batches.save-rankings');
 });

@@ -19,6 +19,7 @@ class LaporanKerusakan extends Model
         'url_foto',
         'status',
         'ranking',
+        'id_batch',
     ];
 
     public function pengguna()
@@ -38,7 +39,7 @@ class LaporanKerusakan extends Model
 
     public function tugas()
     {
-    return $this->hasOne(\App\Models\Tugas::class, 'id_laporan');
+        return $this->hasOne(\App\Models\Tugas::class, 'id_laporan');
     }
 
     public function umpanBaliks()
@@ -46,4 +47,13 @@ class LaporanKerusakan extends Model
         return $this->hasMany(UmpanBalik::class, 'id_laporan', 'id_laporan');
     }
 
+    public function batch()
+    {
+        return $this->belongsTo(Batch::class, 'id_batch', 'id_batch');
+    }
+
+    public function kriteria()
+    {
+        return $this->hasOne(KriteriaLaporan::class, 'id_laporan', 'id_laporan');
+    }
 }
