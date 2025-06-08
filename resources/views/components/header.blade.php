@@ -1,9 +1,18 @@
 <header class="bg-white shadow-sm">
-    <div class="flex items-center justify-between px-6 py-3">
-        <h1 class="text-2xl font-semibold text-gray-800">@yield('title', 'Dashboard')</h1>
+    <div class="flex items-center justify-between px-4 py-3 sm:px-6">
+        <!-- Mobile menu button (only visible on small screens) -->
+        <button class="text-gray-500 hover:text-gray-600 focus:outline-none mr-2 lg:hidden" onclick="toggleSidebar()" aria-label="Open sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        
+        <!-- Title - Truncates on small screens -->
+        <h1 class="text-xl font-semibold text-gray-800 truncate sm:text-2xl max-w-[180px] sm:max-w-xs md:max-w-md">@yield('title', 'Dashboard')</h1>
 
         <div class="flex items-center">
-            <div class="relative mx-4">
+            <!-- Search - Hidden on mobile, visible on md+ -->
+            <div class="relative hidden md:block mx-4">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
                     <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 20 20" fill="currentColor">
@@ -13,10 +22,18 @@
                     </svg>
                 </span>
                 <input type="text"
-                    class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    class="w-48 lg:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="Search here...">
             </div>
 
+            <!-- Search button - Only visible on mobile -->
+            <button class="md:hidden p-2 mr-2 text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+            </button>
+
+            <!-- Notifications -->
             <div class="relative" x-data="{ open: false, notifications: [], count: 0 }" 
                  @click.away="open = false"
                  x-init="
@@ -27,7 +44,7 @@
                             count = data.count;
                         });
                  ">
-                <button @click="open = !open" class="flex items-center focus:outline-none">
+                <button @click="open = !open" class="p-1 flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-full">
                     <div class="relative">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500"
                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,7 +66,8 @@
                      x-transition:leave="transition ease-in duration-75" 
                      x-transition:leave-start="transform opacity-100 scale-100" 
                      x-transition:leave-end="transform opacity-0 scale-95"
-                     class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50">
+                     class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-md shadow-lg py-1 z-50"
+                     style="max-width: calc(100vw - 1rem);">
                     <div class="px-4 py-2 border-b border-gray-100">
                         <div class="flex justify-between items-center">
                             <h3 class="text-sm font-semibold text-gray-700">Notifications</h3>
@@ -117,7 +135,8 @@
                 </div>
             </div>
 
-            <div x-data="{ isOpen: false }" class="relative ml-4">
+            <!-- User Profile -->
+            <div x-data="{ isOpen: false }" class="relative ml-3">
                 <button @click="isOpen = !isOpen" 
                         @keydown.escape="isOpen = false"
                         class="flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg p-1" 
@@ -125,8 +144,8 @@
                     <img class="h-8 w-8 rounded-full object-cover"
                         src="{{ Auth::user()->img_url ? asset('storage/'.Auth::user()->img_url) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->nama_lengkap).'&background=random' }}"
                         alt="{{ Auth::user()->nama_lengkap }}">
-                    <div class="ml-2">
-                        <div class="text-sm font-medium text-gray-700">{{ Auth::user()->nama_lengkap }}</div>
+                    <div class="ml-2 hidden sm:block">
+                        <div class="text-sm font-medium text-gray-700 truncate max-w-[100px] md:max-w-[150px]">{{ Auth::user()->nama_lengkap }}</div>
                         <div class="text-xs text-gray-500">{{ ucfirst(Auth::user()->peran) }}</div>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" 
@@ -180,4 +199,38 @@
             </div>
         </div>
     </div>
+    
+    <!-- Mobile search overlay (initially hidden) -->
+    <div id="mobileSearchOverlay" class="hidden px-4 py-3 bg-gray-50 border-t border-b border-gray-200">
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                        clip-rule="evenodd" />
+                </svg>
+            </span>
+            <input type="text"
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Search here...">
+        </div>
+    </div>
 </header>
+
+<script>
+    // Toggle mobile search
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchButton = document.querySelector('.md\\:hidden.p-2.mr-2');
+        const searchOverlay = document.getElementById('mobileSearchOverlay');
+        
+        if (searchButton && searchOverlay) {
+            searchButton.addEventListener('click', function() {
+                searchOverlay.classList.toggle('hidden');
+                if (!searchOverlay.classList.contains('hidden')) {
+                    searchOverlay.querySelector('input').focus();
+                }
+            });
+        }
+    });
+</script>

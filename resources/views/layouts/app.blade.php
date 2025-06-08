@@ -16,9 +16,15 @@
 </head>
 
 <body class="bg-gray-100">
-    <div class="flex h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Mobile sidebar backdrop -->
+        <div id="sidebar-backdrop" class="fixed inset-0 z-20 transition-opacity bg-gray-600 opacity-0 pointer-events-none lg:hidden" 
+             onclick="toggleSidebar()"></div>
+
         <!-- Sidebar -->
-        @include('components.sidebar')
+        <div id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
+            @include('components.sidebar')
+        </div>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
@@ -26,11 +32,38 @@
             @include('components.header')
 
             <!-- Main Content Area -->
-            <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
+            <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-100">
                 @yield('content')
             </main>
         </div>
     </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+                backdrop.classList.remove('opacity-50');
+            } else {
+                backdrop.classList.remove('opacity-0', 'pointer-events-none');
+                backdrop.classList.add('opacity-50');
+            }
+        }
+
+        // Close sidebar on resize if we're on desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) { // lg breakpoint
+                const sidebar = document.getElementById('sidebar');
+                const backdrop = document.getElementById('sidebar-backdrop');
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+                backdrop.classList.remove('opacity-50');
+            }
+        });
+    </script>
 
     @stack('scripts')
 </body>
