@@ -114,4 +114,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/batches/{batch}/gdss', [BatchController::class, 'showGDSSRankingPage'])->name('batches.gdss');
     Route::get('/batches/{batch}/gdss-calculations', [BatchController::class, 'showGDSSCalculations'])->name('batches.gdss-calculations');
     Route::post('/batches/{batch}/gdss-rankings', [BatchController::class, 'saveGDSSRankings'])->name('batches.save-gdss-rankings');
+    Route::get('/laporan/{id}', [TugasController::class, 'getLaporanDetails']);
 });

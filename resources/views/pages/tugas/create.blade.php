@@ -26,6 +26,21 @@
                 @csrf
                 <input type="hidden" name="id_laporan" value="{{ $laporan->id_laporan }}">
 
+                <!-- Batch Information (NEW) -->
+                @if($laporan->batch)
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        <div>
+                            <h3 class="text-lg font-semibold text-blue-800">Batch: {{ $laporan->batch->nama_batch }}</h3>
+                            <p class="text-sm text-blue-600">Status: {{ ucfirst($laporan->batch->status) }}</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Section A: Detail Laporan (Readonly) -->
                 <div class="bg-gray-50 px-6 py-4 border-b">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">📋 Detail Laporan</h2>
@@ -94,7 +109,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800 mb-2">🏆 Ranking Prioritas</h3>
-                            <p class="text-sm text-gray-600">Berdasarkan sistem penilaian otomatis</p>
+                            <p class="text-sm text-gray-600">Berdasarkan perhitungan MABAC dan GDSS pada batch</p>
                         </div>
                         <div class="text-right">
                             <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2
@@ -157,7 +172,7 @@
                             @enderror
                         </div>
 
-                        <!-- Prioritas -->
+                        <!-- Prioritas - Auto-select based on ranking if available -->
                         <div>
                             <label for="prioritas" class="block text-sm font-medium text-gray-700 mb-2">
                                 Prioritas <span class="text-red-500">*</span>
@@ -166,13 +181,13 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
                                     required>
                                 <option value="">-- Pilih Prioritas --</option>
-                                <option value="rendah" {{ old('prioritas') == 'rendah' ? 'selected' : '' }}>
+                                <option value="rendah" {{ (old('prioritas') == 'rendah' || (isset($laporan->ranking) && $laporan->ranking > 7)) ? 'selected' : '' }}>
                                     🟢 Rendah
                                 </option>
-                                <option value="sedang" {{ old('prioritas') == 'sedang' ? 'selected' : '' }}>
+                                <option value="sedang" {{ (old('prioritas') == 'sedang' || (isset($laporan->ranking) && $laporan->ranking > 3 && $laporan->ranking <= 7)) ? 'selected' : '' }}>
                                     🟡 Sedang
                                 </option>
-                                <option value="tinggi" {{ old('prioritas') == 'tinggi' ? 'selected' : '' }}>
+                                <option value="tinggi" {{ (old('prioritas') == 'tinggi' || (isset($laporan->ranking) && $laporan->ranking <= 3)) ? 'selected' : '' }}>
                                     🔴 Tinggi
                                 </option>
                             </select>
@@ -208,6 +223,36 @@
                             
                             const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
                             document.getElementById('batas_waktu').min = minDateTime;
+                            
+                            // Default deadline suggestion based on priority
+                            const prioritasSelect = document.getElementById('prioritas');
+                            prioritasSelect.addEventListener('change', function() {
+                                const prioritas = this.value;
+                                const batas = document.getElementById('batas_waktu');
+                                
+                                if (!batas.value) {  // Only suggest if not already set
+                                    const deadline = new Date();
+                                    
+                                    if (prioritas === 'tinggi') {
+                                        deadline.setDate(deadline.getDate() + 1);  // 1 day for high priority
+                                    } else if (prioritas === 'sedang') {
+                                        deadline.setDate(deadline.getDate() + 3);  // 3 days for medium
+                                    } else if (prioritas === 'rendah') {
+                                        deadline.setDate(deadline.getDate() + 7);  // 7 days for low
+                                    }
+                                    
+                                    const y = deadline.getFullYear();
+                                    const m = String(deadline.getMonth() + 1).padStart(2, '0');
+                                    const d = String(deadline.getDate()).padStart(2, '0');
+                                    const h = String(deadline.getHours()).padStart(2, '0');
+                                    const min = String(deadline.getMinutes()).padStart(2, '0');
+                                    
+                                    batas.value = `${y}-${m}-${d}T${h}:${min}`;
+                                }
+                            });
+                            
+                            // Trigger change to set initial value if priority is pre-selected
+                            prioritasSelect.dispatchEvent(new Event('change'));
                         });
                         </script>
 

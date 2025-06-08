@@ -127,7 +127,7 @@ class BatchController extends Controller
             ->update(['status' => 'diproses']);
         
         return redirect()->route('batches.show', $batch->id_batch)
-            ->with('success', 'Batch berhasil diaktifkan dan semua laporan diproses.');
+            ->with('success', 'Batch berhasil diaktifkan. Laporan siap untuk ditugaskan ke teknisi.');
     }
 
     /**
