@@ -68,7 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/laporan/{laporan}/update-sarpras', [LaporanKerusakanController::class, 'update'])->name('laporan.updateSarpras');
 
         Route::get('/tugas', [TugasController::class, 'index'])->name('tugas.index');
-        Route::get('/tugas/create/{id_laporan}', [TugasController::class, 'create'])->name('tugas.create');
+        Route::get('/tugas/create/{laporan}', [TugasController::class, 'create'])->name('tugas.create');
         Route::post('/tugas', [TugasController::class, 'store'])->name('tugas.store');
         Route::get('/tugas/{id}', [TugasController::class, 'show'])->name('tugas.show');
         Route::get('/tugas/{id}/edit', [TugasController::class, 'edit'])->name('tugas.edit');
