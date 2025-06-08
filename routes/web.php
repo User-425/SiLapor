@@ -92,6 +92,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['peran:sarpras,teknisi'])->group(function () {
         Route::post('/laporan/{laporan}/status', [LaporanKerusakanController::class, 'updateStatus'])
             ->name('laporan.updateStatus');
+            Route::get('/tugas/laporan-details/{id}', [TugasController::class, 'getLaporanDetails']);
     });
 
     // Teknisi Routes

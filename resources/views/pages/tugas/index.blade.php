@@ -272,9 +272,14 @@ function openDetailModal(laporanId) {
         </div>
     `;
     
-    // Get laporan details via AJAX
-    fetch(`/api/laporan/${laporanId}`)
-        .then(response => response.json())
+    // Updated URL to match the controller endpoint
+    fetch(`/tugas/laporan-details/${laporanId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data) {
                 setTimeout(() => {
