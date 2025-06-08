@@ -9,15 +9,22 @@
             <p class="text-gray-600 mt-2">Menugaskan teknisi untuk menangani laporan kerusakan</p>
         </div>
 
-        <!-- Alert jika ada error -->
-        @if ($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                <strong>Whoops!</strong> Ada beberapa masalah dengan input Anda:
-                <ul class="mt-2 list-disc list-inside">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+        <!-- Alert Success -->
+        @if(session('success'))
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                {{ session('success') }}
+            </div>
+        @endif
+        
+        @if(session('error'))
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                {{ session('error') }}
             </div>
         @endif
 
@@ -155,15 +162,14 @@
                         <!-- Pilih Teknisi -->
                         <div>
                             <label for="id_pengguna" class="block text-sm font-medium text-gray-700 mb-2">
-                                Pilih Teknisi <span class="text-red-500">*</span>
+                                Pilih Teknisi
                             </label>
                             <select name="id_pengguna" id="id_pengguna" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-                                    required>
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="">-- Pilih Teknisi --</option>
                                 @foreach($teknisi as $tech)
                                     <option value="{{ $tech->id_pengguna }}" {{ old('id_pengguna') == $tech->id_pengguna ? 'selected' : '' }}>
-                                        {{ $tech->nama }} - {{ $tech->email }}
+                                        {{ $tech->nama_pengguna }} - {{ $tech->email }}
                                     </option>
                                 @endforeach
                             </select>
@@ -178,18 +184,23 @@
                                 Prioritas <span class="text-red-500">*</span>
                             </label>
                             <select name="prioritas" id="prioritas" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-                                    required>
-                                <option value="">-- Pilih Prioritas --</option>
-                                <option value="rendah" {{ (old('prioritas') == 'rendah' || (isset($laporan->ranking) && $laporan->ranking > 7)) ? 'selected' : '' }}>
-                                    🟢 Rendah
-                                </option>
-                                <option value="sedang" {{ (old('prioritas') == 'sedang' || (isset($laporan->ranking) && $laporan->ranking > 3 && $laporan->ranking <= 7)) ? 'selected' : '' }}>
-                                    🟡 Sedang
-                                </option>
-                                <option value="tinggi" {{ (old('prioritas') == 'tinggi' || (isset($laporan->ranking) && $laporan->ranking <= 3)) ? 'selected' : '' }}>
-                                    🔴 Tinggi
-                                </option>
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                @php
+                                    $selectedPriority = old('prioritas');
+                                    // Auto-select priority based on ranking if available
+                                    if(!$selectedPriority && isset($laporan->ranking)) {
+                                        if($laporan->ranking <= 3) {
+                                            $selectedPriority = 'tinggi';
+                                        } elseif($laporan->ranking <= 7) {
+                                            $selectedPriority = 'sedang';
+                                        } else {
+                                            $selectedPriority = 'rendah';
+                                        }
+                                    }
+                                @endphp
+                                <option value="rendah" {{ $selectedPriority == 'rendah' ? 'selected' : '' }}>🟢 Rendah</option>
+                                <option value="sedang" {{ $selectedPriority == 'sedang' ? 'selected' : '' }}>🟡 Sedang</option>
+                                <option value="tinggi" {{ $selectedPriority == 'tinggi' ? 'selected' : '' }}>🔴 Tinggi</option>
                             </select>
                             @error('prioritas')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -201,10 +212,7 @@
                             <label for="batas_waktu" class="block text-sm font-medium text-gray-700 mb-2">
                                 Batas Waktu Pengerjaan
                             </label>
-                            <input type="datetime-local"
-                                name="batas_waktu"
-                                id="batas_waktu"
-                                value="{{ old('batas_waktu') }}"
+                            <input type="datetime-local" name="batas_waktu" id="batas_waktu" value="{{ old('batas_waktu') }}"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             @error('batas_waktu')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -212,59 +220,12 @@
                             <p class="mt-1 text-xs text-gray-500">Kosongkan jika tidak ada batas waktu khusus</p>
                         </div>
 
-                        <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const now = new Date();
-                            const year = now.getFullYear();
-                            const month = String(now.getMonth() + 1).padStart(2, '0');
-                            const day = String(now.getDate()).padStart(2, '0');
-                            const hours = String(now.getHours()).padStart(2, '0');
-                            const minutes = String(now.getMinutes()).padStart(2, '0');
-                            
-                            const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-                            document.getElementById('batas_waktu').min = minDateTime;
-                            
-                            // Default deadline suggestion based on priority
-                            const prioritasSelect = document.getElementById('prioritas');
-                            prioritasSelect.addEventListener('change', function() {
-                                const prioritas = this.value;
-                                const batas = document.getElementById('batas_waktu');
-                                
-                                if (!batas.value) {  // Only suggest if not already set
-                                    const deadline = new Date();
-                                    
-                                    if (prioritas === 'tinggi') {
-                                        deadline.setDate(deadline.getDate() + 1);  // 1 day for high priority
-                                    } else if (prioritas === 'sedang') {
-                                        deadline.setDate(deadline.getDate() + 3);  // 3 days for medium
-                                    } else if (prioritas === 'rendah') {
-                                        deadline.setDate(deadline.getDate() + 7);  // 7 days for low
-                                    }
-                                    
-                                    const y = deadline.getFullYear();
-                                    const m = String(deadline.getMonth() + 1).padStart(2, '0');
-                                    const d = String(deadline.getDate()).padStart(2, '0');
-                                    const h = String(deadline.getHours()).padStart(2, '0');
-                                    const min = String(deadline.getMinutes()).padStart(2, '0');
-                                    
-                                    batas.value = `${y}-${m}-${d}T${h}:${min}`;
-                                }
-                            });
-                            
-                            // Trigger change to set initial value if priority is pre-selected
-                            prioritasSelect.dispatchEvent(new Event('change'));
-                        });
-                        </script>
-
                         <!-- Catatan Tambahan -->
                         <div class="md:col-span-2">
                             <label for="catatan" class="block text-sm font-medium text-gray-700 mb-2">
-                                Catatan Tambahan (Opsional)
+                                Catatan Tambahan
                             </label>
-                            <textarea name="catatan" 
-                                      id="catatan" 
-                                      rows="4" 
-                                      placeholder="Contoh: Perlu tangga panjang, koordinasi dengan petugas keamanan, dll."
+                            <textarea name="catatan" id="catatan" rows="4"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">{{ old('catatan') }}</textarea>
                             @error('catatan')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

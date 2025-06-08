@@ -151,10 +151,15 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
                                                 @if(isset($laporan->ranking))
+                                                    @php
+                                                        $totalInBatch = $batch->laporans->count();
+                                                        $highPriority = ceil($totalInBatch * 0.25); // Top 25%
+                                                        $mediumPriority = ceil($totalInBatch * 0.6); // Top 60%
+                                                    @endphp
                                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                        @if($laporan->ranking <= 3)
+                                                        @if($laporan->ranking <= $highPriority)
                                                             bg-red-100 text-red-800 border border-red-200
-                                                        @elseif($laporan->ranking <= 7)
+                                                        @elseif($laporan->ranking <= $mediumPriority)
                                                             bg-amber-100 text-amber-800 border border-amber-200
                                                         @else
                                                             bg-emerald-100 text-emerald-800 border border-emerald-200

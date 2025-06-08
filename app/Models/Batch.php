@@ -10,6 +10,7 @@ class Batch extends Model
     use HasFactory;
 
     protected $primaryKey = 'id_batch';
+    protected $table = 'batches';
     
     protected $fillable = [
         'nama_batch',
@@ -53,12 +54,20 @@ class Batch extends Model
      */
     public function getProgressPercentageAttribute()
     {
-        $counts = $this->report_count_by_status;
+        $totalLaporan = $this->laporans()->count();
         
-        if ($counts['total'] === 0) {
+        if ($totalLaporan === 0) {
             return 0;
         }
         
-        return round(($counts['selesai'] / $counts['total']) * 100);
+        $completedLaporan = $this->laporans()
+            ->whereIn('id_laporan', function($query) {
+                $query->select('id_laporan')
+                      ->from('tugas')
+                      ->where('status', 'selesai');
+            })
+            ->count();
+        
+        return round(($completedLaporan / $totalLaporan) * 100);
     }
 }
