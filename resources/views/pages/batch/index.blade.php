@@ -49,63 +49,81 @@
     </div>
     @endif
     
-    <!-- Batch List -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @forelse($batches as $batch)
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-800">{{ $batch->nama_batch }}</h3>
-                        <span class="px-2 py-1 text-xs rounded-full 
-                            @if($batch->status == 'draft') bg-gray-100 text-gray-800
-                            @elseif($batch->status == 'aktif') bg-blue-100 text-blue-800
-                            @else bg-green-100 text-green-800 @endif
-                        ">
-                            {{ ucfirst($batch->status) }}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="p-6">
-                    <div class="mb-4">
-                        <div class="flex justify-between mb-1 text-sm">
-                            <span>Progress</span>
-                            <span>{{ $batch->progress_percentage }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $batch->progress_percentage }}%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4 grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <span class="text-gray-600">Mulai:</span>
-                            <span>{{ $batch->tanggal_mulai ? date('d/m/Y', strtotime($batch->tanggal_mulai)) : 'Belum dimulai' }}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-600">Selesai:</span>
-                            <span>{{ $batch->tanggal_selesai ? date('d/m/Y', strtotime($batch->tanggal_selesai)) : '-' }}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-600">Total:</span>
-                            <span>{{ $batch->report_count_by_status['total'] }} laporan</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-600">Selesai:</span>
-                            <span>{{ $batch->report_count_by_status['selesai'] }} laporan</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-center">
-                        <a href="{{ route('batches.show', $batch->id_batch) }}" class="text-blue-600 hover:text-blue-800 font-medium">Lihat Detail Batch</a>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="col-span-3 bg-white rounded-lg shadow-md p-6 text-center">
-                <p class="text-gray-500">Belum ada batch perbaikan. Buat batch baru untuk mulai mengelompokkan laporan kerusakan.</p>
-            </div>
-        @endforelse
+    <!-- Batch Table -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Nama Batch</th>
+                        <th class="py-3 px-6 text-center">Status</th>
+                        <th class="py-3 px-6 text-center">Progress</th>
+                        <th class="py-3 px-6 text-center">Tanggal</th>
+                        <th class="py-3 px-6 text-center">Laporan</th>
+                        <th class="py-3 px-6 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm">
+                    @forelse($batches as $batch)
+                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="py-3 px-6 text-left">
+                                <span class="font-medium">{{ $batch->nama_batch }}</span>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <span class="px-2 py-1 text-xs rounded-full 
+                                    @if($batch->status == 'draft') bg-gray-100 text-gray-800
+                                    @elseif($batch->status == 'aktif') bg-blue-100 text-blue-800
+                                    @else bg-green-100 text-green-800 @endif">
+                                    {{ ucfirst($batch->status) }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="flex items-center justify-center">
+                                    <div class="w-full max-w-xs">
+                                        <div class="flex justify-between mb-1 text-xs">
+                                            <span>{{ $batch->progress_percentage }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $batch->progress_percentage }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex flex-col">
+                                    <span class="text-xs">
+                                        <span class="font-medium">Mulai:</span> 
+                                        {{ $batch->tanggal_mulai ? date('d/m/Y', strtotime($batch->tanggal_mulai)) : 'Belum dimulai' }}
+                                    </span>
+                                    <span class="text-xs mt-1">
+                                        <span class="font-medium">Selesai:</span> 
+                                        {{ $batch->tanggal_selesai ? date('d/m/Y', strtotime($batch->tanggal_selesai)) : '-' }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex flex-col items-center">
+                                    <span>{{ $batch->report_count_by_status['total'] }} total</span>
+                                    <span class="text-xs text-green-600 mt-1">{{ $batch->report_count_by_status['selesai'] }} selesai</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <a href="{{ route('batches.show', $batch->id_batch) }}" 
+                                   class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded-md text-xs">
+                                    Lihat Detail
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-gray-500">
+                                Belum ada batch perbaikan. Buat batch baru untuk mulai mengelompokkan laporan kerusakan.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 @endsection
