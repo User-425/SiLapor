@@ -142,7 +142,7 @@
             @endif
             
             @if($batch->status === 'aktif')
-            <a href="{{ route('batches.ranking', $batch->id_batch) }}" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100">
+            <a href="{{ route('batches.gdss', $batch->id_batch) }}" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100">
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path>
                 </svg>
@@ -229,15 +229,5 @@
             </table>
         </div>
     </div>
-
-    <!-- Add this button inside your batch show view where you have other action buttons -->
-    @if($batch->status === 'aktif')
-    <a href="{{ route('batches.gdss', $batch->id_batch) }}" class="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 flex items-center">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-        </svg>
-        Prioritas GDSS
-    </a>
-    @endif
 </div>
 @endsection
