@@ -19,8 +19,11 @@ class DatabaseSeeder extends Seeder
             RuangSeeder::class,
             FasilitasSeeder::class,
             FasRuangSeeder::class,
+            BatchSeeder::class,
             LaporanKerusakanSeeder::class,
             KriteriaLaporanSeeder::class,
+            TugasSeeder::class,
+            UmpanBalikSeeder::class,
         ]);
     }
 }
