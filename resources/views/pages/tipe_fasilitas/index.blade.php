@@ -48,7 +48,7 @@
         <div class="p-6">
             <!-- Search & Add Button in one row -->
             <div class="flex justify-between items-center mb-6">
-                <form id="searchForm" method="GET" action="{{ route('fasilitas.index') }}" class="w-full max-w-md">
+                <form id="searchForm" method="GET" action="{{ route('tipe_fasilitas.index') }}" class="w-full max-w-md">
                     <div class="relative">
                         <input
                             type="text"
@@ -64,7 +64,7 @@
                         </div>
                     </div>
                 </form>
-                <button type="button" onclick="window.location.href='{{ route('fasilitas.create') }}'" 
+                <button type="button" onclick="window.location.href='{{ route('tipe_fasilitas.create') }}'" 
                         class="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -93,14 +93,14 @@
                                     <td class="px-6 py-4 text-sm text-gray-900">{{ $item->deskripsi }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <div class="flex items-center justify-center space-x-2">
-                                            <a href="{{ route('fasilitas.edit', $item->id_fasilitas) }}" 
+                                            <a href="{{ route('tipe_fasilitas.edit', $item->id_fasilitas) }}" 
                                                class="inline-flex items-center p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200" 
                                                title="Edit Tipe Fasilitas">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
                                             </a>
-                                            <form action="{{ route('fasilitas.destroy', $item->id_fasilitas) }}" method="POST" class="inline-block">
+                                            <form action="{{ route('tipe_fasilitas.destroy', $item->id_fasilitas) }}" method="POST" class="inline-block">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" 
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         searchInput.addEventListener('input', function () {
             clearTimeout(timeout);
             timeout = setTimeout(function () {
-                fetch(`{{ route('fasilitas.index') }}?q=${encodeURIComponent(searchInput.value)}`)
+                fetch(`{{ route('tipe_fasilitas.index') }}?q=${encodeURIComponent(searchInput.value)}`)
                     .then(response => response.text())
                     .then(html => {
                         // Ambil tbody dari response HTML
