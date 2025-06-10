@@ -225,6 +225,20 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Modal Management
+    function closeModal() {
+        if (detailModal) detailModal.classList.add('hidden');
+        document.getElementById('detailContent').innerHTML = '';
+        document.body.style.overflow = '';
+    }
+
+    function openModal(modal) {
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Auto-hide flash messages after 5 seconds
         setTimeout(function() {
@@ -260,19 +274,6 @@
             setTimeout(() => alertBox.classList.add('hidden'), type === 'success' ? 2000 : 3000);
         }
 
-        // Modal Management
-        function closeModal() {
-            if (detailModal) detailModal.classList.add('hidden');
-            document.getElementById('detailContent').innerHTML = '';
-            document.body.style.overflow = '';
-        }
-
-        function openModal(modal) {
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
 
         // AJAX for Detail
         window.showDetail = async function(id) {
