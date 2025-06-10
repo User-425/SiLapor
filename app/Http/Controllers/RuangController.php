@@ -8,11 +8,28 @@ use Illuminate\Http\Request;
 
 class RuangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-    $ruangs = Ruang::with('gedung')->paginate(10); // include relasi gedung
-
-    return view('pages.ruang.index', compact('ruangs'));
+        $query = Ruang::with('gedung');
+        
+        if ($request->has('q') && !empty($request->q)) {
+            $searchTerm = $request->q;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('nama_ruang', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('deskripsi_lokasi', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('gedung', function($query) use ($searchTerm) {
+                      $query->where('nama_gedung', 'like', '%' . $searchTerm . '%');
+                  });
+            });
+        }
+        
+        $ruangs = $query->paginate(10);
+        
+        if ($request->ajax()) {
+            return view('pages.ruang.index', compact('ruangs'))->fragment('ruangTableBody');
+        }
+        
+        return view('pages.ruang.index', compact('ruangs'));
     }
 
     public function create()
