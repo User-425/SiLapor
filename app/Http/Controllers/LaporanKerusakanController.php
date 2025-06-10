@@ -20,22 +20,26 @@ class LaporanKerusakanController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('peran:sarpras')->only(['verifikasi', 'batchUpdateStatus', 'export']);
-        $this->middleware('peran:sarpras,teknisi')->only(['updateStatus']);
+        // Hapus middleware peran dari constructor, karena kita handle di routes dan method
     }
 
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
-            ->where('status', '!=', 'selesai');
+        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
 
-        if (!in_array($user->peran, ['sarpras', 'teknisi'])) {
-            $query->where('id_pengguna', $user->id_pengguna);
+        // Logic berdasarkan role
+        if (in_array($user->peran, ['mahasiswa', 'dosen', 'tendik'])) {
+            // User biasa: hanya lihat laporan sendiri yang belum selesai
+            $query->where('id_pengguna', $user->id_pengguna)
+                  ->where('status', '!=', 'selesai');
+
             $laporans = $query->latest()->paginate(10);
             return view('pages.laporan.index', compact('laporans'));
         }
 
+        // Logic untuk sarpras/teknisi (bisa melihat semua laporan)
+        $query->where('status', '!=', 'selesai');
         $status = $request->get('status', 'menunggu_verifikasi');
 
         if ($status !== 'semua') {
@@ -162,8 +166,11 @@ class LaporanKerusakanController extends Controller
 
     public function show(LaporanKerusakan $laporan)
     {
-        if ($laporan->id_pengguna !== Auth::id() && !in_array(Auth::user()->peran, ['sarpras', 'teknisi'])) {
-            abort(403);
+        $user = Auth::user();
+
+        // Cek authorization: pemilik laporan atau sarpras/teknisi
+        if ($laporan->id_pengguna !== $user->id_pengguna && !in_array($user->peran, ['sarpras', 'teknisi'])) {
+            abort(403, 'Anda tidak memiliki akses untuk melihat laporan ini.');
         }
 
         $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
@@ -172,12 +179,15 @@ class LaporanKerusakanController extends Controller
 
     public function edit(LaporanKerusakan $laporan)
     {
+        $user = Auth::user();
+
         if ($laporan->status === 'selesai') {
             return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
         }
 
-        if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
-            abort(403, 'Unauthorized action.');
+        // Cek authorization: pemilik laporan atau sarpras
+        if ($laporan->id_pengguna !== $user->id_pengguna && $user->peran !== 'sarpras') {
+            abort(403, 'Anda tidak memiliki akses untuk mengedit laporan ini.');
         }
 
         $gedungs = \App\Models\Gedung::all();
@@ -233,8 +243,11 @@ class LaporanKerusakanController extends Controller
 
     public function destroy(LaporanKerusakan $laporan)
     {
-        if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
-            abort(403);
+        $user = Auth::user();
+
+        // Cek authorization: pemilik laporan atau sarpras
+        if ($laporan->id_pengguna !== $user->id_pengguna && $user->peran !== 'sarpras') {
+            abort(403, 'Anda tidak memiliki akses untuk menghapus laporan ini.');
         }
 
         if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
@@ -472,41 +485,42 @@ class LaporanKerusakanController extends Controller
     }
 
     public function riwayat(Request $request)
-{
-    $user = Auth::user();
-    $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
-        ->where('status', 'selesai');
+    {
+        $user = Auth::user();
+        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
+            ->where('status', 'selesai');
 
-    if (!in_array($user->peran, ['admin', 'sarpras', 'teknisi'])) {
-        $query->where('id_pengguna', $user->id_pengguna);
-    }
+        // Jika bukan admin/sarpras/teknisi, hanya tampilkan riwayat laporan sendiri
+        if (!in_array($user->peran, ['admin', 'sarpras', 'teknisi'])) {
+            $query->where('id_pengguna', $user->id_pengguna);
+        }
 
-    if ($request->filled('q')) {
-        $query->where(function ($q) use ($request) {
-            $q->whereHas('fasilitasRuang.ruang', function ($r) use ($request) {
-                $r->where('nama_ruang', 'like', '%' . $request->q . '%');
-            })
-            ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($request) {
-                $f->where('nama_fasilitas', 'like', '%' . $request->q . '%');
-            })
-            ->orWhere('fasilitasRuang.kode_fasilitas', 'like', '%' . $request->q . '%');
-        });
-    }
+        if ($request->filled('q')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('fasilitasRuang.ruang', function ($r) use ($request) {
+                    $r->where('nama_ruang', 'like', '%' . $request->q . '%');
+                })
+                ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($request) {
+                    $f->where('nama_fasilitas', 'like', '%' . $request->q . '%');
+                })
+                ->orWhere('fasilitasRuang.kode_fasilitas', 'like', '%' . $request->q . '%');
+            });
+        }
 
-    if ($request->filled('tanggal_dari')) {
-        $query->whereDate('created_at', '>=', $request->tanggal_dari);
-    }
-    if ($request->filled('tanggal_sampai')) {
-        $query->whereDate('created_at', '<=', $request->tanggal_sampai);
-    }
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+        }
 
-    try {
-        $laporans = $query->latest()->paginate(10);
-    } catch (\Exception $e) {
-        \Log::error('Error loading riwayat: ' . $e->getMessage());
-        return view('pages.laporan.riwayat', ['laporans' => collect([])])->with('error', 'Gagal memuat data riwayat');
-    }
+        try {
+            $laporans = $query->latest()->paginate(10);
+        } catch (\Exception $e) {
+            \Log::error('Error loading riwayat: ' . $e->getMessage());
+            return view('pages.laporan.riwayat', ['laporans' => collect([])])->with('error', 'Gagal memuat data riwayat');
+        }
 
-    return view('pages.laporan.riwayat', compact('laporans'));
+        return view('pages.laporan.riwayat', compact('laporans'));
     }
 }
