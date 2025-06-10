@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Exports\LaporanKerusakanExport;
@@ -32,7 +33,7 @@ class LaporanKerusakanController extends Controller
         if (in_array($user->peran, ['mahasiswa', 'dosen', 'tendik'])) {
             // User biasa: hanya lihat laporan sendiri yang belum selesai
             $query->where('id_pengguna', $user->id_pengguna)
-                  ->where('status', '!=', 'selesai');
+                ->where('status', '!=', 'selesai');
 
             $laporans = $query->latest()->paginate(10);
             return view('pages.laporan.index', compact('laporans'));
@@ -139,7 +140,9 @@ class LaporanKerusakanController extends Controller
             $sarprasUsers = Pengguna::where('peran', 'sarpras')->get();
             foreach ($sarprasUsers as $user) {
                 $user->notify(new NewReportNotification($laporan->load([
-                    'fasilitasRuang.fasilitas', 'fasilitasRuang.ruang', 'pengguna'
+                    'fasilitasRuang.fasilitas',
+                    'fasilitasRuang.ruang',
+                    'pengguna'
                 ])));
             }
 
@@ -151,7 +154,6 @@ class LaporanKerusakanController extends Controller
             }
 
             return redirect()->route('laporan.index')->with('success', 'Laporan berhasil disimpan');
-
         } catch (\Exception $e) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -291,11 +293,23 @@ class LaporanKerusakanController extends Controller
 
         $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
 
+        $statusLabel = str_replace('_', ' ', ucwords($laporan->status));
+        $statusBadgeClass = match ($laporan->status) {
+            'menunggu_verifikasi' => 'bg-warning text-dark',
+            'diproses' => 'bg-info text-white',
+            'diperbaiki' => 'bg-primary text-white',
+            'selesai' => 'bg-success text-white',
+            'ditolak' => 'bg-danger text-white',
+            default => 'bg-secondary text-muted',
+        };
+
         return response()->json([
             'id_laporan' => $laporan->id_laporan,
             'deskripsi' => $laporan->deskripsi,
             'url_foto' => $laporan->url_foto ? asset('storage/' . $laporan->url_foto) : null,
             'status' => $laporan->status,
+            'status_label' => $statusLabel,
+            'status_badge_class' => $statusBadgeClass,
             'ranking' => $laporan->ranking,
             'created_at' => $laporan->created_at->format('d/m/Y H:i'),
             'updated_at' => $laporan->updated_at->format('d/m/Y H:i'),
@@ -316,7 +330,7 @@ class LaporanKerusakanController extends Controller
                 ],
             ],
             'pengguna' => [
-                'nama' => $laporan->pengguna->nama_lengkap,
+                'nama_lengkap' => $laporan->pengguna->nama_lengkap ?? 'Tidak diketahui',
                 'email' => $laporan->pengguna->email,
             ],
         ]);
@@ -500,10 +514,10 @@ class LaporanKerusakanController extends Controller
                 $q->whereHas('fasilitasRuang.ruang', function ($r) use ($request) {
                     $r->where('nama_ruang', 'like', '%' . $request->q . '%');
                 })
-                ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($request) {
-                    $f->where('nama_fasilitas', 'like', '%' . $request->q . '%');
-                })
-                ->orWhere('fasilitasRuang.kode_fasilitas', 'like', '%' . $request->q . '%');
+                    ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($request) {
+                        $f->where('nama_fasilitas', 'like', '%' . $request->q . '%');
+                    })
+                    ->orWhere('fasilitasRuang.kode_fasilitas', 'like', '%' . $request->q . '%');
             });
         }
 

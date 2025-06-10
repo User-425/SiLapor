@@ -301,11 +301,11 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600 font-medium">Pelapor:</span>
-                                <span class="text-gray-900 font-semibold">${data.pengguna.nama_lengkap || 'N/A'}</span>
+                                <span class="text-gray-900 font-semibold">${data.pengguna?.nama_lengkap || 'Tidak diketahui'}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600 font-medium">Email:</span>
-                                <span class="text-gray-900 font-semibold">${data.pengguna.email || 'N/A'}</span>
+                                <span class="text-gray-900 font-semibold">${data.pengguna?.email || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600 font-medium">Fasilitas:</span>
@@ -321,8 +321,8 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600 font-medium">Status:</span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.status_badge_class}">
-                                    ${data.status_label}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.status_badge_class || 'bg-secondary text-muted'}">
+                                    ${data.status_label || 'Tidak diketahui'}
                                 </span>
                             </div>
                             <div class="flex justify-between">
