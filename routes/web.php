@@ -17,6 +17,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UmpanBalikController;
 use App\Http\Controllers\EksporSarprasController;
 use App\Http\Controllers\BatchController;
+use App\Http\Controllers\SearchController;
 
 // Authentication Routes
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -112,6 +113,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/teknisi/riwayat', [TeknisiController::class, 'riwayatPerbaikan'])->name('teknisi.riwayat');
         Route::get('/fasilitas/{id}/maintenance', [FasRuangController::class, 'maintenance'])->name('fasilitas.maintenance');
     });
+
+    // Search Routes
+    Route::get('/search', [SearchController::class, 'index'])->name('global.search');
 
     // Notifications Routes (semua user yang login)
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
