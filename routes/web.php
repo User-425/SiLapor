@@ -79,7 +79,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/batches/{batch}/remove-report/{laporan}', [BatchController::class, 'removeReport'])->name('batches.remove-report');
         Route::get('/batches/{batch}/calculations', [BatchController::class, 'showCalculations'])->name('batches.calculations');
 
-        // Laporan Routes - PINDAHKAN KE BAWAH
+    });
+
+        Route::middleware(['peran:mahasiswa,dosen'])->group(function () {
         Route::get('/laporan/riwayat', [LaporanKerusakanController::class, 'riwayat'])->name('laporan.riwayat');
         Route::resource('laporan', LaporanKerusakanController::class);
         Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
@@ -88,8 +90,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/quick/{code}', [LaporanKerusakanController::class, 'quickReport'])->name('laporan.quick');
         Route::get('/umpan-balik/{id_laporan}/create', [UmpanBalikController::class, 'create'])->name('umpan_balik.create');
         Route::post('/umpan-balik', [UmpanBalikController::class, 'store'])->name('umpan_balik.store');
-    });
-
+        });
     // Shared Sarpras & Teknisi Routes
     Route::middleware(['peran:sarpras,teknisi'])->group(function () {
         Route::post('/laporan/{laporan}/status', [LaporanKerusakanController::class, 'updateStatus'])
