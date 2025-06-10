@@ -51,10 +51,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/fasilitas/{id}/show', [FasRuangController::class, 'show'])->name('fasilitas.show');
     });
 
-    // Sarpras Routes - PINDAHKAN KE ATAS SEBELUM RESOURCE LAPORAN
+    // Sarpras Routes
     Route::middleware(['peran:sarpras'])->group(function () {
-        Route::get('/laporan/export', [EksporSarprasController::class, 'form'])->name('laporan.export');
-        Route::post('/laporan/download-export', [EksporSarprasController::class, 'export'])->name('laporan.download-export');
+        Route::get('/laporan/riwayat', [LaporanKerusakanController::class, 'riwayat'])->name('laporan.riwayat');
+        Route::get('/sarpras/export-laporan', [EksporSarprasController::class, 'form'])->name('laporan.export');
+        Route::post('/sarpras/download-export', [EksporSarprasController::class, 'export'])->name('laporan.download-export');
+
+        Route::resource('laporan', LaporanKerusakanController::class);
         Route::post('/laporan/{laporan}/verifikasi', [LaporanKerusakanController::class, 'verifikasi'])->name('laporan.verifikasi');
         Route::post('/laporan/batch-update-status', [LaporanKerusakanController::class, 'batchUpdateStatus'])->name('laporan.batchUpdateStatus');
         Route::put('/laporan/{laporan}/update-sarpras', [LaporanKerusakanController::class, 'update'])->name('laporan.updateSarpras');
@@ -82,8 +85,6 @@ Route::middleware('auth')->group(function () {
     });
 
         Route::middleware(['peran:mahasiswa,dosen'])->group(function () {
-        Route::get('/laporan/riwayat', [LaporanKerusakanController::class, 'riwayat'])->name('laporan.riwayat');
-        Route::resource('laporan', LaporanKerusakanController::class);
         Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
         Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
         Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
@@ -92,7 +93,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/umpan-balik', [UmpanBalikController::class, 'store'])->name('umpan_balik.store');
         });
     // Shared Sarpras & Teknisi Routes
-    Route::middleware(['peran:sarpras,teknisi'])->group(function () {
+        Route::middleware(['peran:sarpras,teknisi'])->group(function () {
         Route::post('/laporan/{laporan}/status', [LaporanKerusakanController::class, 'updateStatus'])
             ->name('laporan.updateStatus');
         Route::get('/tugas/laporan-details/{id}', [TugasController::class, 'getLaporanDetails']);
