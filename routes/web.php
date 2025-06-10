@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/sarpras/export-laporan', [EksporSarprasController::class, 'form'])->name('laporan.export');
         Route::post('/sarpras/download-export', [EksporSarprasController::class, 'export'])->name('laporan.download-export');
 
-        Route::resource('laporan', LaporanKerusakanController::class);
+
         Route::post('/laporan/{laporan}/verifikasi', [LaporanKerusakanController::class, 'verifikasi'])->name('laporan.verifikasi');
         Route::post('/laporan/batch-update-status', [LaporanKerusakanController::class, 'batchUpdateStatus'])->name('laporan.batchUpdateStatus');
         Route::put('/laporan/{laporan}/update-sarpras', [LaporanKerusakanController::class, 'update'])->name('laporan.updateSarpras');
@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function () {
     });
 
         Route::middleware(['peran:mahasiswa,dosen'])->group(function () {
+        Route::resource('laporan', LaporanKerusakanController::class);
         Route::get('/laporan/detail/{laporan}', [LaporanKerusakanController::class, 'getDetail'])->name('laporan.detail');
         Route::get('/laporan/fasilitas-by-ruang/{ruang_id}', [LaporanKerusakanController::class, 'getFasilitasByRuang']);
         Route::get('/laporan/kode-by-ruang-fasilitas/{ruang_id}/{fasilitas_id}', [LaporanKerusakanController::class, 'getKodeByRuangFasilitas']);
