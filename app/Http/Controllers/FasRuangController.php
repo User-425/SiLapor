@@ -12,9 +12,29 @@ use Illuminate\Support\Facades\DB;
 
 class FasRuangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $fasRuangs = FasRuang::with(['fasilitas', 'ruang'])->paginate(10);
+        $query = FasRuang::with(['fasilitas', 'ruang']);
+        
+        if ($request->has('q') && !empty($request->q)) {
+            $searchTerm = $request->q;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('kode_fasilitas', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('fasilitas', function($query) use ($searchTerm) {
+                      $query->where('nama_fasilitas', 'like', '%' . $searchTerm . '%');
+                  })
+                  ->orWhereHas('ruang', function($query) use ($searchTerm) {
+                      $query->where('nama_ruang', 'like', '%' . $searchTerm . '%');
+                  });
+            });
+        }
+        
+        $fasRuangs = $query->paginate(10);
+        
+        if ($request->ajax()) {
+            return view('pages.fasilitas.index', compact('fasRuangs'))->fragment('fasilitasTableBody');
+        }
+        
         return view('pages.fasilitas.index', compact('fasRuangs'));
     }
 
