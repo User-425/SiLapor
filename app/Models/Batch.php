@@ -11,7 +11,7 @@ class Batch extends Model
 
     protected $primaryKey = 'id_batch';
     protected $table = 'batches';
-    
+
     protected $fillable = [
         'nama_batch',
         'status',
@@ -27,7 +27,7 @@ class Batch extends Model
     {
         return $this->hasMany(LaporanKerusakan::class, 'id_batch', 'id_batch');
     }
-    
+
     /**
      * Get count of reports by status
      */
@@ -41,33 +41,29 @@ class Batch extends Model
             'selesai' => 0,
             'ditolak' => 0
         ];
-        
+
         foreach ($this->laporans as $laporan) {
             $counts[$laporan->status]++;
         }
-        
+
         return $counts;
     }
-    
+
     /**
      * Calculate progress percentage
      */
     public function getProgressPercentageAttribute()
     {
         $totalLaporan = $this->laporans()->count();
-        
+
         if ($totalLaporan === 0) {
             return 0;
         }
-        
+
         $completedLaporan = $this->laporans()
-            ->whereIn('id_laporan', function($query) {
-                $query->select('id_laporan')
-                      ->from('tugas')
-                      ->where('status', 'selesai');
-            })
+            ->whereIn('status', ['diperbaiki', 'selesai'])
             ->count();
-        
+
         return round(($completedLaporan / $totalLaporan) * 100);
     }
 }
