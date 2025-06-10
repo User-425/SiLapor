@@ -7,11 +7,26 @@ use Illuminate\Http\Request;
 
 class FasilitasController extends Controller
 {
-    public function index()
-    {
-        $fasilitas = Fasilitas::paginate(10);
-        return view('pages.tipe_fasilitas.index', compact('fasilitas'));
+    public function index(Request $request)
+{
+    $query = Fasilitas::query();
+    
+    if ($request->has('q') && !empty($request->q)) {
+        $searchTerm = $request->q;
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('nama_fasilitas', 'like', '%' . $searchTerm . '%')
+              ->orWhere('deskripsi', 'like', '%' . $searchTerm . '%');
+        });
     }
+    
+    $fasilitas = $query->paginate(10);
+    
+    if ($request->ajax()) {
+        return view('pages.tipe_fasilitas.index', compact('fasilitas'))->fragment('fasilitasTableBody');
+    }
+    
+    return view('pages.tipe_fasilitas.index', compact('fasilitas'));
+}
 
     public function create()
     {
