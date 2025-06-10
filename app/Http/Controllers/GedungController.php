@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Gedung;
@@ -14,13 +15,18 @@ class GedungController extends Controller
     {
         $query = Gedung::query();
 
-        if ($request->has('search') && !empty($request->search)) {
-            $searchTerm = $request->search;
+        if ($request->has('q') && !empty($request->q)) {
+            $searchTerm = $request->q;
             $query->where('nama_gedung', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('deskripsi_lokasi', 'LIKE', "%{$searchTerm}%");
+                ->orWhere('deskripsi_lokasi', 'LIKE', "%{$searchTerm}%");
         }
 
         $gedungs = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        if ($request->ajax()) {
+            return view('pages.gedung.index', compact('gedungs'))->renderSections()['content'];
+        }
+
         return view('pages.gedung.index', compact('gedungs'));
     }
 
