@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('tipe_fasilitas', FasilitasController::class)->names('tipe_fasilitas')->except(['show']);
         Route::resource('fasilitas', FasRuangController::class)->names('fasilitas')->except(['show']);
         Route::resource('ruang', RuangController::class)->except(['show']);
-        Route::resource('gedung', GedungController::class)->except(['show']);
+        Route::resource('gedung', GedungController::class)->names(names: 'gedung')->except(['show']);
         Route::resource('periode', PeriodeController::class);
         Route::get('/fasilitas/{id}/qr', [FasRuangController::class, 'generateQR'])->name('fasilitas.qr');
         Route::get('/fasilitas/{id}/show', [FasRuangController::class, 'show'])->name('fasilitas.show');
