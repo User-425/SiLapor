@@ -31,4 +31,17 @@ class Pengguna extends Authenticatable
     {
         return $this->kata_sandi;
     }
+
+    /**
+     * Get the laporan for the pengguna.
+     */
+    public function laporan()
+    {
+        return $this->hasMany(LaporanKerusakan::class, 'id_pengguna', 'id_pengguna');
+    }
+
+    public function tugas()
+    {
+        return $this->hasMany(Tugas::class, 'id_pengguna');
+    }
 }

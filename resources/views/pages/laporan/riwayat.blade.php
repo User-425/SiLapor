@@ -4,51 +4,49 @@
 
 @section('content')
 @if(session('success'))
-<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-r-lg" role="alert">
+<div class="bg-green-50 border-l-4 border-green-400 text-green-700 p-4 mb-6 relative rounded-r-lg" role="alert">
     <div class="flex items-center">
         <i class="fas fa-check-circle mr-2"></i>
-        <p>{{ session('success') }}</p>
+        <p class="font-medium">{{ session('success') }}</p>
     </div>
+    <button type="button" class="absolute top-2 right-2 text-green-400 hover:text-green-600" onclick="this.parentElement.style.display='none'">
+        <i class="fas fa-times"></i>
+    </button>
 </div>
 @endif
 
 @if(session('error'))
-<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-r-lg" role="alert">
+<div class="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 mb-6 relative rounded-r-lg" role="alert">
     <div class="flex items-center">
         <i class="fas fa-exclamation-circle mr-2"></i>
-        <p>{{ session('error') }}</p>
+        <p class="font-medium">{{ session('error') }}</p>
     </div>
+    <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-600" onclick="this.parentElement.style.display='none'">
+        <i class="fas fa-times"></i>
+    </button>
 </div>
 @endif
 
-<div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6 mb-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 flex items-center">
-            <i class="fas fa-history mr-3 text-blue-600"></i>
-            Daftar Riwayat Laporan Kerusakan
-        </h1>
+        <h1 class="text-xl font-semibold text-gray-800">Daftar Riwayat Laporan Kerusakan</h1>
         <div class="text-sm text-gray-600">
             Total: <span class="font-semibold text-blue-600">{{ $laporans->total() }}</span> laporan
         </div>
     </div>
 
     <form id="searchForm" method="GET" action="{{ route('laporan.riwayat') }}" class="mb-6">
-        <div class="bg-gray-50 p-4 rounded-lg">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="relative">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Pencarian</label>
-                    <input
-                        type="text"
-                        name="q"
-                        value="{{ request('q') }}"
-                        placeholder="Cari laporan, ruang, fasilitas..."
-                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-6">
-                        <i class="fas fa-search text-gray-400"></i>
-                    </div>
-                </div>
-                </div>
+        <div class="relative">
+            <input
+                type="text"
+                name="q"
+                value="{{ request('q') }}"
+                placeholder="Cari laporan, ruang, fasilitas..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            >
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+            </div>
         </div>
     </form>
 
@@ -59,38 +57,14 @@
 
     <div class="overflow-x-auto border rounded-lg shadow-sm">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gradient-to-r from-blue-50 to-indigo-50">
+            <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">
-                        <div class="flex items-center">
-                            <i class="fas fa-door-open mr-2"></i>Ruang
-                        </div>
-                    </th>
-                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">
-                        <div class="flex items-center">
-                            <i class="fas fa-tools mr-2"></i>Fasilitas
-                        </div>
-                    </th>
-                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">
-                        <div class="flex items-center">
-                            <i class="fas fa-qrcode mr-2"></i>Kode
-                        </div>
-                    </th>
-                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
-                        <div class="flex items-center justify-center">
-                            <i class="fas fa-calendar mr-2"></i>Tanggal
-                        </div>
-                    </th>
-                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
-                        <div class="flex items-center justify-center">
-                            <i class="fas fa-info-circle mr-2"></i>Status
-                        </div>
-                    </th>
-                    <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
-                        <div class="flex items-center justify-center">
-                            <i class="fas fa-cogs mr-2"></i>Aksi
-                        </div>
-                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ruang</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fasilitas</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
+                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody id="laporanTableBody" class="bg-white divide-y divide-gray-200">
@@ -98,7 +72,8 @@
                 <tr class="hover:bg-gray-50 transition-colors duration-150">
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-left">
                         <div class="flex items-center">
-                            <div class="ml-0"> <div class="text-sm font-medium text-gray-900">
+                            <div class="ml-0">
+                                <div class="text-sm font-medium text-gray-900">
                                     {{ $laporan->fasilitasRuang->ruang->nama_ruang ?? '-' }}
                                 </div>
                                 <div class="text-xs text-gray-500">
@@ -171,15 +146,15 @@
     </div>
 
     @if($laporans->hasPages())
-    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
-        <div class="text-sm text-gray-700 mb-4 sm:mb-0">
+    <div class="mt-6 flex items-center justify-between">
+        <div class="text-sm text-gray-700">
             @if($laporans->count() > 0)
-                Menampilkan <span class="font-semibold">{{ $laporans->firstItem() }}</span> 
-                sampai <span class="font-semibold">{{ $laporans->lastItem() }}</span> 
-                dari <span class="font-semibold">{{ $laporans->total() }}</span> hasil
+                Menampilkan {{ $laporans->firstItem() }} sampai {{ $laporans->lastItem() }} dari {{ $laporans->total() }} laporan
+            @else
+                Tidak ada data
             @endif
         </div>
-        <div class="flex-1 flex justify-center sm:justify-end">
+        <div>
             {{ $laporans->appends(request()->query())->links() }}
         </div>
     </div>
@@ -188,13 +163,10 @@
 
 <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
-            <h2 class="text-xl font-bold text-white flex items-center">
-                <i class="fas fa-info-circle mr-3"></i>
-                Detail Laporan Kerusakan
-            </h2>
-            <button id="closeDetailModal" class="text-white hover:text-gray-200 transition-colors duration-200" title="Tutup">
-                <i class="fas fa-times text-xl"></i>
+        <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Detail Laporan Kerusakan</h2>
+            <button id="closeDetailModal" class="text-gray-300 hover:text-gray-500 transition-colors duration-200" title="Tutup">
+                <i class="fas fa-times text-lg"></i>
             </button>
         </div>
 
@@ -272,7 +244,7 @@
 
 <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60 p-4">
     <div class="relative max-w-full max-h-full">
-        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl z-10">
+        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl">
             <i class="fas fa-times"></i>
         </button>
         <img id="fullImage" src="" alt="Full Size Image" class="max-w-full max-h-full object-contain">
@@ -287,11 +259,22 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide flash messages after 5 seconds
+    setTimeout(function() {
+        const successMsg = document.querySelector('.bg-green-50');
+        const errorMsg = document.querySelector('.bg-red-50');
+        if (successMsg) successMsg.style.display = 'none';
+        if (errorMsg) errorMsg.style.display = 'none';
+    }, 5000);
+
     // DOM Elements
     const detailModal = document.getElementById('detailModal');
     const addLaporanModal = document.getElementById('addLaporanModal');
-    const editLaporanModal = document.getElementById('editLaporanModal');
+    const editLaporanModal = document.getElementById('editLaporan形態');
     const loadingIndicator = document.getElementById('loadingIndicator');
+    const searchInput = document.querySelector('input[name="q"]');
+    const tableBody = document.getElementById('laporanTableBody');
+    let timeout = null;
 
     // Utility Functions
     function showLoading() {
@@ -303,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showNotification(message, type = 'success') {
-        const bgColor = type === 'success' ? 'bg-green-100 border-green-500 text-green-700' : 'bg-red-100 border-red-500 text-red-700';
+        const bgColor = type === 'success' ? 'bg-green-50 border-green-500 text-green-700' : 'bg-red-50 border-red-500 text-red-700';
         const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
         
         const notification = document.createElement('div');
@@ -314,17 +297,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="fas ${icon} mr-2"></i>
                 <p>${message}</p>
             </div>
+            <button type="button" class="absolute top-2 right-2 text-${type === 'success' ? 'green' : 'red'}-400 hover:text-${type === 'success' ? 'green' : 'red'}-600" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
         `;
 
         const content = document.querySelector('.bg-white.rounded-lg');
         content.parentNode.insertBefore(notification, content);
 
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            notification.style.transition = 'opacity 0.5s ease-out';
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 500);
-        }, 5000);
+        setTimeout(() => notification.remove(), 5000);
     }
 
     // Modal Management
@@ -350,7 +331,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const addForm = document.getElementById('addLaporanForm');
             if (addForm) addForm.reset();
             
-            // Reset form elements
             const elements = [
                 'add_photo_preview',
                 'add_fasilitas_id',
@@ -397,7 +377,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const data = await response.json();
                 
-                // Populate modal content
                 document.getElementById('modalRuang').textContent = 
                     [data.fasilitasRuang?.ruang?.gedung?.nama_gedung, data.fasilitasRuang?.ruang?.nama_ruang]
                     .filter(Boolean).join(' - ') || '-';
@@ -410,7 +389,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 document.getElementById('modalDeskripsi').value = data.deskripsi || '-';
                 
-                // Handle image
                 const modalGambar = document.getElementById('modalGambar');
                 const modalNoImage = document.getElementById('modalNoImage');
                 
@@ -433,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Edit Modal (if exists)
+    // Edit Modal
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -449,7 +427,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (editForm) {
                     editForm.action = `/laporan/${id}`;
                     
-                    // Populate edit form
                     const fields = {
                         'edit_ruang_display': [data.fasilitasRuang?.ruang?.gedung?.nama_gedung, data.fasilitasRuang?.ruang?.nama_ruang].filter(Boolean).join(' - ') || '-',
                         'edit_fasilitas_display': data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-',
@@ -463,7 +440,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (element) element.value = value;
                     });
                     
-                    // Handle photo preview
                     const photoPreview = document.getElementById('edit_photo_preview');
                     const currentPhotoDiv = document.getElementById('current_photo');
                     
@@ -507,8 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                             'Accept': 'application/json'
-                        },
-                        credentials: 'same-origin'
+                        }
                     });
 
                     const result = await response.json();
@@ -531,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Step Navigation (if exists)
+    // Step Navigation
     const nextStepBtn = document.getElementById('nextStepBtn');
     const prevStepBtn = document.getElementById('prevStepBtn');
     
@@ -576,7 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (input) {
             input.addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                const previewId = inputId.replace('url_foto', 'photo_preview'); // Corrected this line
+                const previewId = inputId.replace('url_foto', 'photo_preview');
                 const preview = document.getElementById(previewId);
                 
                 if (file && preview) {
@@ -587,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     reader.readAsDataURL(file);
                 } else if (preview) {
-                    preview.src = '#'; // Clear previous image
+                    preview.src = '';
                     preview.classList.add('hidden');
                 }
             });
@@ -603,13 +578,73 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.closeImageModal = function() {
         document.getElementById('imageModal').classList.add('hidden');
-        if (!detailModal.classList.contains('hidden')) { // Only restore body scroll if detailModal is open
-            // No need to change body.style.overflow here if detailModal is still open, as it handles its own overflow
+        if (!detailModal.classList.contains('hidden')) {
+            // Keep overflow hidden if detailModal is open
         } else {
             document.body.style.overflow = 'auto';
         }
     }
 
+    // Debounce Search
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                showLoading();
+                fetch(`{{ route('laporan.riwayat') }}?q=${encodeURIComponent(searchInput.value)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newTbody = doc.getElementById('laporanTableBody');
+                        if (newTbody) {
+                            tableBody.innerHTML = newTbody.innerHTML;
+                            // Reattach detail button listeners
+                            document.querySelectorAll('.detail-btn').forEach(btn => {
+                                btn.addEventListener('click', async function() {
+                                    const id = this.dataset.id;
+                                    showLoading();
+                                    try {
+                                        const response = await fetch(`/laporan/detail/${id}`);
+                                        if (!response.ok) throw new Error('Gagal memuat data');
+                                        const data = await response.json();
+                                        document.getElementById('modalRuang').textContent = 
+                                            [data.fasilitasRuang?.ruang?.gedung?.nama_gedung, data.fasilitasRuang?.ruang?.nama_ruang]
+                                            .filter(Boolean).join(' - ') || '-';
+                                        document.getElementById('modalFasilitas').textContent = 
+                                            data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
+                                        document.getElementById('modalKode').textContent = 
+                                            data.fasilitasRuang?.kode_fasilitas || '-';
+                                        document.getElementById('modalDeskripsi').value = data.deskripsi || '-';
+                                        const modalGambar = document.getElementById('modalGambar');
+                                        const modalNoImage = document.getElementById('modalNoImage');
+                                        if (data.url_foto) {
+                                            modalGambar.src = data.url_foto;
+                                            modalGambar.classList.remove('hidden');
+                                            modalNoImage.classList.add('hidden');
+                                        } else {
+                                            modalGambar.classList.add('hidden');
+                                            modalNoImage.classList.remove('hidden');
+                                        }
+                                        openModal(detailModal);
+                                    } catch (error) {
+                                        console.error('Error:', error);
+                                        showNotification('Gagal memuat detail laporan', 'error');
+                                    } finally {
+                                        hideLoading();
+                                    }
+                                });
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        showNotification('Gagal memuat data', 'error');
+                    })
+                    .finally(() => hideLoading());
+            }, 500);
+        });
+    }
 });
 </script>
 @endpush

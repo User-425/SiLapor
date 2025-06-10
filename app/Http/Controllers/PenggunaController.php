@@ -31,7 +31,7 @@ class PenggunaController extends Controller
             });
         }
 
-        $users = $query->orderBy('created_at', 'desc')->paginate(10);
+        $users = $query->orderBy('created_at', 'asc')->paginate(10);
 
         return view('pages.users.index', compact('users'));
     }

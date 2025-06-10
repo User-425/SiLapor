@@ -4,48 +4,89 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto">
-    <!-- Alert Success -->
+    <!-- Flash Messages -->
     @if (session('success'))
-        <div class="bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded mb-6 relative">
-            <span class="block sm:inline">{{ session('success') }}</span>
-            <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <title>Close</title>
-                    <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
-                </svg>
-            </span>
+        <div class="bg-green-50 border-l-4 border-green-400 text-green-700 p-4 mb-6 relative rounded-r-lg" role="alert">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <p class="font-medium">{{ session('success') }}</p>
+            </div>
+            <button type="button" class="absolute top-2 right-2 text-green-400 hover:text-green-600" onclick="this.parentElement.style.display='none'">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
     @endif
 
-    <div id="ajax-alert" class="hidden bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded mb-6 relative"></div>
+    @if (session('error'))
+        <div class="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 mb-6 relative rounded-r-lg" role="alert">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <p class="font-medium">{{ session('error') }}</p>
+            </div>
+            <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-600" onclick="this.parentElement.style.display='none'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    @endif
+
+    <div id="ajax-alert" class="hidden bg-green-50 border-l-4 border-green-400 text-green-700 p-4 mb-6 relative rounded-r-lg" role="alert">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <p id="ajax-alert-message" class="font-medium"></p>
+        </div>
+        <button type="button" class="absolute top-2 right-2 text-green-400 hover:text-green-600" onclick="this.parentElement.classList.add('hidden')">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
 
     <!-- Main Content Card -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6 mb-6">
         <!-- Card Header -->
-        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-gray-900">
-                    Daftar Laporan ({{ $laporans->total() ?? $laporans->count() }} total)
-                </h2>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Daftar Laporan Kerusakan</h2>
+            <div class="text-sm text-gray-600">
+                Total: <span class="font-semibold text-blue-600">{{ $laporans->total() ?? $laporans->count() }}</span> laporan
             </div>
         </div>
 
+        <!-- Search Form -->
+        <form id="searchForm" method="GET" action="{{ route('laporan.index') }}" class="mb-6">
+            <div class="relative">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ request('q') }}"
+                    placeholder="Cari laporan, pelapor, fasilitas..."
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+            </div>
+        </form>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden text-center py-4">
+            <i class="fas fa-spinner fa-spin text-blue-500 text-2xl"></i>
+            <p class="text-gray-600 mt-2">Memuat data...</p>
+        </div>
+
         <!-- Table -->
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto border rounded-lg">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelapor</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fasilitas</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ruang</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelapor</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fasilitas</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ruang</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody id="laporanTableBody" class="bg-white divide-y divide-gray-200">
                     @forelse($laporans as $laporan)
                         <tr class="hover:bg-gray-50 transition duration-200">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -78,7 +119,7 @@
                                 @if($laporan->status === 'menunggu_verifikasi' && Auth::user()->peran === 'sarpras')
                                     <form action="{{ route('laporan.verifikasi', $laporan->id_laporan) }}" method="POST" class="inline verify-form">
                                         @csrf
-                                        <select name="status" class="border-gray-300 rounded-md text-sm" onchange="this.form.submit()">
+                                        <select name="status" class="border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
                                             <option value="" disabled selected>Menunggu Verifikasi</option>
                                             <option value="diproses">Diproses</option>
                                             <option value="ditolak">Ditolak</option>
@@ -95,7 +136,6 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
-                                    <!-- Tombol Detail (Mata) -->
                                     <button onclick="showDetail({{ $laporan->id_laporan }})"
                                             class="text-blue-600 hover:text-blue-900 transition duration-200"
                                             title="Detail">
@@ -104,7 +144,6 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                         </svg>
                                     </button>
-                                    <!-- Tombol Edit -->
                                     <button type="button"
                                         class="edit-sarpras-btn text-yellow-600 hover:text-yellow-900 transition duration-200"
                                         data-id="{{ $laporan->id_laporan }}"
@@ -113,11 +152,10 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </button>
-                                    <!-- Tombol Delete -->
                                     <form action="{{ route('laporan.destroy', $laporan->id_laporan) }}"
                                           method="POST"
                                           class="inline"
-                                          onsubmit="return confirm('Yakin hapus laporan ini?')">
+                                          onsubmit="return confirmDelete(event)">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
@@ -134,11 +172,10 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-6 py-12 text-center">
-                                <div class="text-gray-500">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-                                    </svg>
-                                    <p class="text-lg">Tidak ada laporan ditemukan.</p>
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
+                                    <p class="text-gray-500 text-lg font-medium">Tidak ada laporan ditemukan</p>
+                                    <p class="text-gray-400 text-sm mt-1">Belum ada laporan kerusakan</p>
                                 </div>
                             </td>
                         </tr>
@@ -149,21 +186,34 @@
 
         <!-- Pagination -->
         @if(method_exists($laporans, 'hasPages') && $laporans->hasPages())
-            <div class="bg-white px-6 py-3 border-t border-gray-200">
-                {{ $laporans->links() }}
+            <div class="mt-6 flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    @if($laporans->count() > 0)
+                        Menampilkan {{ $laporans->firstItem() }} sampai {{ $laporans->lastItem() }} dari {{ $laporans->total() }} laporan
+                    @else
+                        Tidak ada data
+                    @endif
+                </div>
+                <div>
+                    {{ $laporans->appends(request()->query())->links() }}
+                </div>
             </div>
         @endif
     </div>
 
-    <!-- Modal untuk Detail -->
-    <div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
-            <h2 class="text-lg font-semibold mb-4">Detail Laporan</h2>
-            <div id="detailContent" class="space-y-4 max-h-[80vh] overflow-y-auto">
-                <!-- Konten akan diisi via AJAX -->
+    <!-- Detail Modal -->
+    <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800">Detail Laporan Kerusakan</h2>
+                <button onclick="closeModal()" class="text-gray-300 hover:text-gray-500 transition-colors duration-200" title="Tutup">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
             </div>
-            <div class="mt-6 flex justify-end">
-                <button onclick="closeModal()" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Tutup</button>
+            <div class="p-6 max-h-[calc(90vh-80px)] overflow-y-auto">
+                <div id="detailContent" class="space-y-4">
+                    <!-- Konten akan diisi via AJAX -->
+                </div>
             </div>
         </div>
     </div>
@@ -176,58 +226,204 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // AJAX untuk Detail
-    function showDetail(id) {
-        fetch('{{ url('laporan/detail') }}/' + id, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide flash messages after 5 seconds
+    setTimeout(function() {
+        const successMsg = document.querySelector('.bg-green-50');
+        const errorMsg = document.querySelector('.bg-red-50');
+        if (successMsg) successMsg.style.display = 'none';
+        if (errorMsg) errorMsg.style.display = 'none';
+    }, 5000);
+
+    // DOM Elements
+    const detailModal = document.getElementById('detailModal');
+    const sarprasEditModal = document.getElementById('sarprasEditLaporanModal');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const searchInput = document.querySelector('input[name="q"]');
+    const tableBody = document.getElementById('laporanTableBody');
+    let timeout = null;
+
+    // Utility Functions
+    function showLoading() {
+        if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+    }
+
+    function showNotification(message, type = 'success') {
+        const alertBox = document.getElementById('ajax-alert');
+        const messageEl = document.getElementById('ajax-alert-message');
+        messageEl.textContent = message;
+        alertBox.classList.remove('hidden', 'bg-red-50', 'border-red-400', 'bg-green-50', 'border-green-400');
+        alertBox.classList.add(type === 'success' ? 'bg-green-50' : 'bg-red-50', type === 'success' ? 'border-green-400' : 'border-red-400');
+        setTimeout(() => alertBox.classList.add('hidden'), type === 'success' ? 2000 : 3000);
+    }
+
+    // Modal Management
+    function closeModal() {
+        if (detailModal) detailModal.classList.add('hidden');
+        document.getElementById('detailContent').innerHTML = '';
+        document.body.style.overflow = '';
+    }
+
+    function openModal(modal) {
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // AJAX for Detail
+    window.showDetail = async function(id) {
+        showLoading();
+        try {
+            const response = await fetch(`{{ url('laporan/detail') }}/${id}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            if (!response.ok) throw new Error('Gagal memuat data');
+            const data = await response.json();
             const content = `
-                <div class="space-y-2">
-                    <p><strong>ID Laporan:</strong> ${data.id_laporan}</p>
-                    <p><strong>Pelapor:</strong> ${data.pengguna.nama}</p>
-                    <p><strong>Email:</strong> ${data.pengguna.email}</p>
-                    <p><strong>Fasilitas:</strong> ${data.fasilitasRuang.fasilitas.nama_fasilitas}</p>
-                    <p><strong>Ruang:</strong> ${data.fasilitasRuang.ruang.nama_ruang}</p>
-                    <p><strong>Gedung:</strong> ${data.fasilitasRuang.ruang.gedung.nama_gedung}</p>
-                    <p><strong>Status:</strong> ${data.status.replace('_', ' ').toUpperCase()}</p>
-                    <p><strong>Tanggal Dibuat:</strong> ${data.created_at}</p>
-                    <p class="mt-4"><strong>Deskripsi:</strong></p>
-                    <div class="border border-gray-300 rounded-md p-4 bg-gray-50 text-sm text-gray-900 max-h-40 overflow-y-auto">
-                        ${data.deskripsi}
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-info mr-2 text-blue-600"></i>
+                            Informasi Laporan
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">ID Laporan:</span>
+                                <span class="text-gray-900 font-semibold">${data.id_laporan}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Pelapor:</span>
+                                <span class="text-gray-900 font-semibold">${data.pengguna.nama_lengkap || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Email:</span>
+                                <span class="text-gray-900 font-semibold">${data.pengguna.email || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Fasilitas:</span>
+                                <span class="text-gray-900 font-semibold">${data.fasilitasRuang?.fasilitas?.nama_fasilitas || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Ruang:</span>
+                                <span class="text-gray-900 font-semibold">${data.fasilitasRuang?.ruang?.nama_ruang || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Gedung:</span>
+                                <span class="text-gray-900 font-semibold">${data.fasilitasRuang?.ruang?.gedung?.nama_gedung || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Status:</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.status_badge_class}">
+                                    ${data.status_label}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 font-medium">Tanggal Dibuat:</span>
+                                <span class="text-gray-900 font-semibold">${data.created_at}</span>
+                            </div>
+                        </div>
                     </div>
-                    ${data.url_foto ? `
-                    <p class="mt-4"><strong>Foto:</strong></p>
-                    <img src="${data.url_foto}" alt="Foto Kerusakan" class="max-w-xs max-h-64 mt-2 object-contain">
-                    ` : ''}
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-file-alt mr-2 text-blue-600"></i>
+                            Deskripsi Kerusakan
+                        </h3>
+                        <textarea class="w-full bg-white border border-gray-200 rounded-lg p-3 text-gray-800 resize-none focus:outline-none" rows="6" readonly>${data.deskripsi}</textarea>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-camera mr-2 text-blue-600"></i>
+                            Foto Kerusakan
+                        </h3>
+                        <div class="flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-200 h-80">
+                            ${data.url_foto ? `
+                                <img src="${data.url_foto}" alt="Foto Kerusakan" class="max-h-full max-w-full object-contain rounded-lg shadow-sm cursor-pointer" onclick="openImageModal(this.src)">
+                            ` : `
+                                <div class="text-center text-gray-400">
+                                    <i class="fas fa-image text-4xl mb-2"></i>
+                                    <p>Tidak ada foto tersedia</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
                 </div>
             `;
             document.getElementById('detailContent').innerHTML = content;
-            document.getElementById('detailModal').classList.remove('hidden');
-        })
-        .catch(error => {
+            openModal(detailModal);
+        } catch (error) {
             console.error('Error:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal',
                 text: 'Gagal memuat detail laporan.'
             });
+        } finally {
+            hideLoading();
+        }
+    };
+
+    // Image Modal Functions
+    window.openImageModal = function(src) {
+        const imageModal = document.createElement('div');
+        imageModal.id = 'imageModal';
+        imageModal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60 p-4';
+        imageModal.innerHTML = `
+            <div class="relative max-w-full max-h-full">
+                <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+                <img id="fullImage" src="${src}" alt="Full Size Image" class="max-w-full max-h-full object-contain">
+            </div>
+        `;
+        document.body.appendChild(imageModal);
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeImageModal = function() {
+        const imageModal = document.getElementById('imageModal');
+        if (imageModal) {
+            imageModal.remove();
+            if (!detailModal.classList.contains('hidden')) {
+                // Keep overflow hidden if detailModal is open
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+    };
+
+    // Delete Confirmation
+    window.confirmDelete = function(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Yakin hapus laporan ini?',
+            text: 'Data yang dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                event.target.submit();
+            }
         });
-    }
+        return false;
+    };
 
-    function closeModal() {
-        document.getElementById('detailModal').classList.add('hidden');
-        document.getElementById('detailContent').innerHTML = '';
-    }
-
-    // AJAX untuk Verifikasi
+    // AJAX for Verification
     document.querySelectorAll('.verify-form select[name="status"]').forEach(select => {
         select.onchange = function() {
-            this.form.requestSubmit(); // submit form via JS
+            showLoading();
+            this.form.requestSubmit();
         };
     });
 
@@ -235,53 +431,62 @@
     document.querySelectorAll('.edit-sarpras-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
-            const response = await fetch(`/laporan/detail/${id}`);
-            const data = await response.json();
+            showLoading();
+            try {
+                const response = await fetch(`/laporan/detail/${id}`);
+                if (!response.ok) throw new Error('Gagal memuat data');
+                const data = await response.json();
 
-            // Set action form dengan id laporan
-            document.getElementById('sarprasEditLaporanForm').action = `/laporan/${id}/update-sarpras`;
+                const form = document.getElementById('sarprasEditLaporanForm');
+                form.action = `/laporan/${id}/update-sarpras`;
 
-            // Isi field id_fas_ruang
-            document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
+                document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
+                document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
+                document.getElementById('edit_deskripsi').value = data.deskripsi || '';
+                document.getElementById('tingkat_kerusakan_sarpras').value = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
+                document.getElementById('dampak_akademik_sarpras').value = data.kriteria?.dampak_akademik_sarpras ?? 3;
+                document.getElementById('kebutuhan_sarpras').value = data.kriteria?.kebutuhan_sarpras ?? 3;
 
-            // Isi field lain seperti sebelumnya...
-            document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
-            document.getElementById('edit_deskripsi').value = data.deskripsi || '';
-            document.getElementById('tingkat_kerusakan_sarpras').value = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
-            document.getElementById('dampak_akademik_sarpras').value = data.kriteria?.dampak_akademik_sarpras ?? 3;
-            document.getElementById('kebutuhan_sarpras').value = data.kriteria?.kebutuhan_sarpras ?? 3;
-            // Foto preview
-            if (data.url_foto) {
-                document.getElementById('edit_photo_preview').src = data.url_foto;
-                document.getElementById('current_photo').style.display = 'block';
-            } else {
-                document.getElementById('current_photo').style.display = 'none';
+                const photoPreview = document.getElementById('edit_photo_preview');
+                const currentPhotoDiv = document.getElementById('current_photo');
+                if (data.url_foto && photoPreview) {
+                    photoPreview.src = data.url_foto;
+                    if (currentPhotoDiv) currentPhotoDiv.style.display = 'block';
+                } else if (currentPhotoDiv) {
+                    currentPhotoDiv.style.display = 'none';
+                }
+                document.getElementById('foto_lama').value = data.url_foto || '';
+
+                openModal(sarprasEditModal);
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Gagal memuat data laporan', 'error');
+            } finally {
+                hideLoading();
             }
-            document.getElementById('foto_lama').value = data.url_foto || '';
-
-            // Tampilkan modal
-            document.getElementById('sarprasEditLaporanModal').classList.remove('hidden');
         });
     });
 
-    // Tutup modal
+    // Close Edit Modal
     document.querySelectorAll('#sarprasEditLaporanModal .close-modal').forEach(btn => {
         btn.addEventListener('click', function() {
-            document.getElementById('sarprasEditLaporanModal').classList.add('hidden');
+            sarprasEditModal.classList.add('hidden');
             document.getElementById('sarprasEditLaporanForm').reset();
+            document.body.style.overflow = '';
         });
     });
 
+    // Submit Edit Form
     document.getElementById('sarprasEditLaporanForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-
+        showLoading();
         const form = e.target;
-        const url = form.action;
         const formData = new FormData(form);
+        formData.append('_method', 'PUT');
 
         try {
-            const response = await fetch(url, {
-                method: 'POST', // Laravel expects POST + _method=PUT
+            const response = await fetch(form.action, {
+                method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
@@ -290,37 +495,89 @@
             });
 
             const data = await response.json();
-
             if (data.success) {
-                document.getElementById('sarprasEditLaporanModal').classList.add('hidden');
-                // Tampilkan alert di atas tabel
-                const alertBox = document.getElementById('ajax-alert');
-                alertBox.textContent = data.message || 'Data berhasil diupdate!';
-                alertBox.classList.remove('hidden');
-                alertBox.classList.remove('bg-red-100', 'border-red-400');
-                alertBox.classList.add('bg-green-100', 'border-green-400');
-                // Sembunyikan alert setelah 2 detik
-                setTimeout(() => {
-                    alertBox.classList.add('hidden');
-                }, 2000);
-                // Optional: reload table/list, atau update row secara dinamis
+                sarprasEditModal.classList.add('hidden');
+                showNotification(data.message || 'Data berhasil diupdate!');
+                setTimeout(() => window.location.reload(), 1000);
             } else {
-                const alertBox = document.getElementById('ajax-alert');
-                alertBox.textContent = data.message || 'Gagal mengupdate data.';
-                alertBox.classList.remove('hidden');
-                alertBox.classList.remove('bg-green-100', 'border-green-400');
-                alertBox.classList.add('bg-red-100', 'border-red-400');
-                setTimeout(() => {
-                    alertBox.classList.add('hidden');
-                }, 3000);
+                showNotification(data.message || 'Gagal mengupdate data.', 'error');
             }
-        } catch (err) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Terjadi kesalahan saat mengupdate data.'
-            });
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Terjadi kesalahan saat mengupdate data.', 'error');
+        } finally {
+            hideLoading();
         }
     });
+
+    // Debounce Search
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                showLoading();
+                fetch(`{{ route('laporan.index') }}?q=${encodeURIComponent(searchInput.value)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newTbody = doc.getElementById('laporanTableBody');
+                        if (newTbody) {
+                            tableBody.innerHTML = newTbody.innerHTML;
+                            // Reattach event listeners
+                            document.querySelectorAll('.verify-form select[name="status"]').forEach(select => {
+                                select.onchange = function() {
+                                    showLoading();
+                                    this.form.requestSubmit();
+                                };
+                            });
+                            document.querySelectorAll('.edit-sarpras-btn').forEach(btn => {
+                                btn.addEventListener('click', async function() {
+                                    const id = this.dataset.id;
+                                    showLoading();
+                                    try {
+                                        const response = await fetch(`/laporan/detail/${id}`);
+                                        if (!response.ok) throw new Error('Gagal memuat data');
+                                        const data = await response.json();
+                                        const form = document.getElementById('sarprasEditLaporanForm');
+                                        form.action = `/laporan/${id}/update-sarpras`;
+                                        document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
+                                        document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
+                                        document.getElementById('edit_deskripsi').value = data.deskripsi || '';
+                                        document.getElementById('tingkat_kerusakan_sarpras').value = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
+                                        document.getElementById('dampak_akademik_sarpras').value = data.kriteria?.dampak_akademik_sarpras ?? 3;
+                                        document.getElementById('kebutuhan_sarpras').value = data.kriteria?.kebutuhan_sarpras ?? 3;
+                                        const photoPreview = document.getElementById('edit_photo_preview');
+                                        const currentPhotoDiv = document.getElementById('current_photo');
+                                        if (data.url_foto && photoPreview) {
+                                            photoPreview.src = data.url_foto;
+                                            if (currentPhotoDiv) currentPhotoDiv.style.display = 'block';
+                                        } else if (currentPhotoDiv) {
+                                            currentPhotoDiv.style.display = 'none';
+                                        }
+                                        document.getElementById('foto_lama').value = data.url_foto || '';
+                                        openModal(sarprasEditModal);
+                                    } catch (error) {
+                                        console.error('Error:', error);
+                                        showNotification('Gagal memuat data laporan', 'error');
+                                    } finally {
+                                        hideLoading();
+                                    }
+                                });
+                            });
+                            document.querySelectorAll('form[onsubmit="return confirmDelete(event)"]').forEach(form => {
+                                form.onsubmit = confirmDelete;
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        showNotification('Gagal memuat data', 'error');
+                    })
+                    .finally(() => hideLoading());
+            }, 500);
+        });
+    }
+});
 </script>
 @endpush
