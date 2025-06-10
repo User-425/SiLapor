@@ -116,8 +116,7 @@
                                 <i class="fas fa-eye mr-1"></i>
                                 Detail
                             </button>
-                            
-                            @if($laporan->status == 'selesai' && !$laporan->umpanBaliks()->where('id_pengguna', Auth::id())->exists())
+                            @if(auth()->user()->peran !== 'sarpras' && $laporan->status == 'selesai' && !$laporan->umpanBaliks()->where('id_pengguna', Auth::id())->exists())
                             <a 
                                 href="{{ route('umpan_balik.create', $laporan->id_laporan) }}"
                                 class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-200"
