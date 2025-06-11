@@ -221,7 +221,7 @@ class LaporanKerusakanController extends Controller
             }
             return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
         }
-        
+
         // Then check authorization
         if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
             if ($request->expectsJson() || $request->ajax()) {
@@ -253,7 +253,7 @@ class LaporanKerusakanController extends Controller
 
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
-                    'success' => true, 
+                    'success' => true,
                     'message' => 'Laporan berhasil diupdate.',
                     'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
                 ]);
@@ -267,7 +267,7 @@ class LaporanKerusakanController extends Controller
                     'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
@@ -527,12 +527,19 @@ class LaporanKerusakanController extends Controller
                 ->with('error', 'QR Code tidak valid. Silakan laporkan secara manual.');
         }
     }
-
     public function riwayat(Request $request)
     {
         $user = Auth::user();
-        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
-            ->where('status', 'selesai');
+        $tab = $request->get('tab', 'selesai'); // Default to 'selesai' tab
+
+        $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
+
+        // Filter by tab status
+        if ($tab === 'ditolak') {
+            $query->where('status', 'ditolak');
+        } else {
+            $query->where('status', 'selesai');
+        }
 
         // Jika bukan admin/sarpras/teknisi, hanya tampilkan riwayat laporan sendiri
         if (!in_array($user->peran, ['admin', 'sarpras', 'teknisi'])) {
@@ -564,11 +571,25 @@ class LaporanKerusakanController extends Controller
 
         try {
             $laporans = $query->latest()->paginate(10);
+
+            // Get counts for tabs
+            $countQuery = LaporanKerusakan::query();
+            if (!in_array($user->peran, ['admin', 'sarpras', 'teknisi'])) {
+                $countQuery->where('id_pengguna', $user->id_pengguna);
+            }
+
+            $selesaiCount = (clone $countQuery)->where('status', 'selesai')->count();
+            $ditolakCount = (clone $countQuery)->where('status', 'ditolak')->count();
         } catch (\Exception $e) {
             \Log::error('Error loading riwayat: ' . $e->getMessage());
-            return view('pages.laporan.riwayat', ['laporans' => collect([])])->with('error', 'Gagal memuat data riwayat');
+            return view('pages.laporan.riwayat', [
+                'laporans' => collect([]),
+                'tab' => $tab,
+                'selesaiCount' => 0,
+                'ditolakCount' => 0
+            ])->with('error', 'Gagal memuat data riwayat');
         }
 
-        return view('pages.laporan.riwayat', compact('laporans'));
+        return view('pages.laporan.riwayat', compact('laporans', 'tab', 'selesaiCount', 'ditolakCount'));
     }
 }

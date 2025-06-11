@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Laporan Selesai')
+@section('title', 'Riwayat Laporan')
 
 @section('content')
 @if(session('success'))
@@ -29,23 +29,70 @@
 
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6 mb-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-xl font-semibold text-gray-800">Daftar Riwayat Laporan Kerusakan</h1>
+        <h1 class="text-xl font-semibold text-gray-800">Riwayat Laporan Kerusakan</h1>
         <div class="text-sm text-gray-600">
             Total: <span class="font-semibold text-blue-600">{{ method_exists($laporans, 'total') ? $laporans->total() : $laporans->count() }}</span> laporan
         </div>
     </div>
 
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <a href="{{ route('laporan.riwayat', ['tab' => 'selesai'] + request()->only(['q', 'tanggal_dari', 'tanggal_sampai'])) }}" 
+               class="tab-link {{ $tab === 'selesai' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+                <i class="fas fa-check-circle mr-2"></i>
+                Selesai
+                <span class="ml-2 bg-green-100 text-green-800 py-0.5 px-2 rounded-full text-xs font-medium">{{ $selesaiCount }}</span>
+            </a>
+            <a href="{{ route('laporan.riwayat', ['tab' => 'ditolak'] + request()->only(['q', 'tanggal_dari', 'tanggal_sampai'])) }}" 
+               class="tab-link {{ $tab === 'ditolak' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+                <i class="fas fa-times-circle mr-2"></i>
+                Ditolak
+                <span class="ml-2 bg-red-100 text-red-800 py-0.5 px-2 rounded-full text-xs font-medium">{{ $ditolakCount }}</span>
+            </a>
+        </nav>
+    </div>
+
     <form id="searchForm" method="GET" action="{{ route('laporan.riwayat') }}" class="mb-6">
-        <div class="relative">
-            <input
-                type="search"
-                name="q"
-                value="{{ request()->get('q') }}"
-                placeholder="Cari berdasarkan ruang, fasilitas, atau kode..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="fas fa-search text-gray-400"></i>
+        <input type="hidden" name="tab" value="{{ $tab }}">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="relative">
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ request()->get('q') }}"
+                    placeholder="Cari berdasarkan ruang, fasilitas, atau kode..."
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
             </div>
+            <div>
+                <input
+                    type="date"
+                    name="tanggal_dari"
+                    value="{{ request()->get('tanggal_dari') }}"
+                    placeholder="Tanggal Dari"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <input
+                    type="date"
+                    name="tanggal_sampai"
+                    value="{{ request()->get('tanggal_sampai') }}"
+                    placeholder="Tanggal Sampai"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+        <div class="mt-4 flex space-x-2">
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
+                <i class="fas fa-search mr-2"></i>
+                Cari
+            </button>
+            <a href="{{ route('laporan.riwayat', ['tab' => $tab]) }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors duration-200">
+                <i class="fas fa-undo mr-2"></i>
+                Reset
+            </a>
         </div>
     </form>
 
@@ -100,10 +147,17 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                            <i class="fas fa-check-circle mr-1"></i>
-                            Selesai
-                        </span>
+                        @if($laporan->status === 'selesai')
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Selesai
+                            </span>
+                        @elseif($laporan->status === 'ditolak')
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                                <i class="fas fa-times-circle mr-1"></i>
+                                Ditolak
+                            </span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
                         <div class="flex items-center justify-center space-x-2">
@@ -132,7 +186,13 @@
                         <div class="flex flex-col items-center">
                             <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
                             <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada data laporan</h3>
-                            <p class="text-gray-500">Belum ada laporan kerusakan yang selesai</p>
+                            <p class="text-gray-500">
+                                @if($tab === 'selesai')
+                                    Belum ada laporan kerusakan yang selesai
+                                @else
+                                    Belum ada laporan kerusakan yang ditolak
+                                @endif
+                            </p>
                         </div>
                     </td>
                 </tr>
@@ -153,12 +213,13 @@
             results
         </div>
         <div>
-            {{ $laporans->links() }}
+            {{ $laporans->appends(request()->query())->links() }}
         </div>
     </div>
     @endif
 </div>
 
+<!-- Modal content remains the same -->
 <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
@@ -191,7 +252,7 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-
+        // Auto-hide alerts after 5 seconds
         setTimeout(function() {
             const successMsg = document.querySelector('.bg-green-50');
             const errorMsg = document.querySelector('.bg-red-50');
@@ -200,8 +261,6 @@
         }, 5000);
 
         const detailModal = document.getElementById('detailModal');
-        const addLaporanModal = document.getElementById('addLaporanModal');
-        const editLaporanModal = document.getElementById('editLaporan形態');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const searchInput = document.querySelector('input[name="q"]');
         const tableBody = document.getElementById('laporanTableBody');
@@ -224,12 +283,13 @@
         window.closeImageModal = function() {
             document.getElementById('imageModal').classList.add('hidden');
             if (!detailModal.classList.contains('hidden')) {
-
+                // Keep body overflow hidden if detail modal is still open
             } else {
                 document.body.style.overflow = 'auto';
             }
         }
 
+        // Detail modal functionality
         const detailButtons = document.querySelectorAll('.detail-btn');
         const detailModalContent = document.getElementById('detailModalContent');
         const closeDetailModalBtn = document.getElementById('closeDetailModal');
@@ -241,7 +301,6 @@
                 fetch(`/laporan/detail/${reportId}`)
                     .then(response => response.json())
                     .then(data => {
-
                         detailModalContent.innerHTML = renderDetailContent(data);
                         detailModal.classList.remove('hidden');
                         document.body.style.overflow = 'hidden';
@@ -259,6 +318,8 @@
         }
 
         function renderDetailContent(data) {
+            const statusInfo = getStatusInfo(data.status);
+            
             return `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Left column -->
@@ -271,9 +332,9 @@
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500">Status</p>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                                    <i class="fas fa-check-circle mr-1"></i>
-                                    Selesai
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.class}">
+                                    <i class="${statusInfo.icon} mr-1"></i>
+                                    ${statusInfo.label}
                                 </span>
                             </div>
                             <div>
@@ -281,7 +342,7 @@
                                 <p class="font-medium">${data.created_at || '-'}</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Tanggal Penyelesaian</p>
+                                <p class="text-sm text-gray-500">Tanggal ${data.status === 'selesai' ? 'Penyelesaian' : 'Penolakan'}</p>
                                 <p class="font-medium">${data.updated_at || '-'}</p>
                             </div>
                         </div>
@@ -326,13 +387,44 @@
                     </div>
                 </div>` : ''}
                 
+                ${data.status === 'selesai' ? `
                 <div class="mt-6">
                     <h4 class="font-semibold text-gray-700 mb-3">Catatan Penyelesaian</h4>
                     <p class="text-gray-800">${data.catatan_penyelesaian || '-'}</p>
-                </div>
+                </div>` : ''}
+                
+                ${data.status === 'ditolak' ? `
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-700 mb-3">Alasan Penolakan</h4>
+                    <p class="text-gray-800">${data.alasan_penolakan || '-'}</p>
+                </div>` : ''}
             `;
         }
 
+        function getStatusInfo(status) {
+            switch(status) {
+                case 'selesai':
+                    return {
+                        class: 'bg-green-100 text-green-800',
+                        icon: 'fas fa-check-circle',
+                        label: 'Selesai'
+                    };
+                case 'ditolak':
+                    return {
+                        class: 'bg-red-100 text-red-800',
+                        icon: 'fas fa-times-circle',
+                        label: 'Ditolak'
+                    };
+                default:
+                    return {
+                        class: 'bg-gray-100 text-gray-800',
+                        icon: 'fas fa-question-circle',
+                        label: status
+                    };
+            }
+        }
+
+        // Search functionality with debounce
         if (searchInput && tableBody) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(timeout);
