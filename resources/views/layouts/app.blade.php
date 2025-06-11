@@ -22,7 +22,7 @@
              onclick="toggleSidebar()"></div>
 
         <!-- Sidebar -->
-        <div id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
+        <div class="h-full">
             @include('components.sidebar')
         </div>
 
@@ -62,6 +62,12 @@
                 backdrop.classList.add('opacity-0', 'pointer-events-none');
                 backdrop.classList.remove('opacity-50');
             }
+        });
+
+        // Listen for sidebar resize events to adjust layout if needed
+        window.addEventListener('sidebarResized', function(e) {
+            // You could add additional layout adjustments here if needed
+            console.log('Sidebar resized to:', e.detail.width);
         });
     </script>
 
