@@ -38,10 +38,10 @@ class LaporanKerusakanController extends Controller
                     ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($searchTerm) {
                         $f->where('nama_fasilitas', 'like', '%' . $searchTerm . '%');
                     })
-                    ->orWhere('deskripsi', 'like', '%' . $searchTerm . '%')
                     ->orWhereHas('fasilitasRuang', function ($fr) use ($searchTerm) {
                         $fr->where('kode_fasilitas', 'like', '%' . $searchTerm . '%');
-                    });
+                    })
+                    ->orWhere('deskripsi', 'like', '%' . $searchTerm . '%');
             });
         }
 
@@ -526,14 +526,18 @@ class LaporanKerusakanController extends Controller
         }
 
         if ($request->filled('q')) {
-            $query->where(function ($q) use ($request) {
-                $q->whereHas('fasilitasRuang.ruang', function ($r) use ($request) {
-                    $r->where('nama_ruang', 'like', '%' . $request->q . '%');
+            $searchTerm = $request->q;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->whereHas('fasilitasRuang.ruang', function ($r) use ($searchTerm) {
+                    $r->where('nama_ruang', 'like', '%' . $searchTerm . '%');
                 })
-                    ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($request) {
-                        $f->where('nama_fasilitas', 'like', '%' . $request->q . '%');
+                    ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($searchTerm) {
+                        $f->where('nama_fasilitas', 'like', '%' . $searchTerm . '%');
                     })
-                    ->orWhere('fasilitasRuang.kode_fasilitas', 'like', '%' . $request->q . '%');
+                    ->orWhereHas('fasilitasRuang', function ($fr) use ($searchTerm) {
+                        $fr->where('kode_fasilitas', 'like', '%' . $searchTerm . '%');
+                    })
+                    ->orWhere('deskripsi', 'like', '%' . $searchTerm . '%');
             });
         }
 
