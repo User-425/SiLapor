@@ -45,10 +45,34 @@
                                         {{ $tugas->created_at->format('d M Y, H:i') }}
                                     </td>
                                     <td class="px-4 py-2">
-                                        <span class="{{ $tugas->is_overdue ? 'text-red-600' : 'text-gray-800' }}">
-                                            {{ $tugas->batas_waktu ? $tugas->batas_waktu->format('d M Y, H:i') : '-' }}
-                                        </span>
+                                        @php
+                                        $batasWaktu = $tugas->batas_waktu;
+                                        $now = \Carbon\Carbon::now();
+                                        $label = '';
+                                        $warna = 'text-gray-800';
+                                        
+                                        if ($tugas->is_overdue) {
+                                            $label = 'Terlambat';
+                                            $warna = 'text-red-600';
+                                        } elseif ($batasWaktu && $now->diffInHours($batasWaktu, false) <= 24) {
+                                            $label = 'Segera';
+                                            $warna = 'text-yellow-600';
+                                        } else {
+                                            $label = 'Masih Ada Waktu';
+                                            $warna = 'text-green-600';
+                                        }
+                                        @endphp
+                                        
+                                        <div class="flex flex-col">
+                                            <span class="{{ $warna }}">
+                                                {{ $batasWaktu ? $batasWaktu->format('d M Y, H:i') : '-' }}
+                                            </span>
+                                            @if($batasWaktu)
+                                            <span class="text-xs {{ $warna }}">{{ $label }}</span>
+                                            @endif
+                                        </div>
                                     </td>
+
                                     <td class="px-4 py-2">
                                         <span class="px-2 py-1 text-xs rounded-full
                                             @if($tugas->status === 'ditugaskan') bg-blue-100 text-blue-800

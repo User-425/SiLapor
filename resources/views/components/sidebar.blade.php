@@ -308,9 +308,27 @@
                         <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
                     </svg>
                 </div>
+
+                @php
+                $prioritasTertinggi = auth()->user()->tugas()
+                ->whereIn('status', ['ditugaskan'])
+                ->orderByRaw("FIELD(prioritas, 'tinggi', 'sedang', 'rendah')")
+                ->first()?->prioritas;
+                @endphp
+
                 <span>Daftar Tugas</span>
-                <div class="ml-auto">
-                    <span class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">{{ auth()->user()->tugas()->where('status', 'pending')->count() }}</span>
+                <div class="ml-auto flex items-center relative h-5 w-5">
+                    @if($prioritasTertinggi === 'tinggi')
+                    <!-- Ping Tinggi -->
+                    <span class="absolute inline-flex h-3 w-3 rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                    <span class="absolute inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                    @elseif($prioritasTertinggi === 'sedang')
+                    <!-- Titik kuning -->
+                    <span class="absolute inline-flex h-3 w-3 rounded-full bg-yellow-500"></span>
+                    @elseif($prioritasTertinggi === 'rendah')
+                    <!-- Titik hijau -->
+                    <span class="absolute inline-flex h-3 w-3 rounded-full bg-green-500"></span>
+                    @endif
                 </div>
             </a>
 

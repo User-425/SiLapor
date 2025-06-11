@@ -38,7 +38,7 @@
                                 {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d M Y, H:i') }}
                             </td>
                             <td class="px-4 py-3 text-gray-700">
-                                {{ $item->catatan_perbaikan ?: '-' }}
+                                {{ $item->catatan ?: '-' }}
                             </td>
                             <td class="px-4 py-3">
                                 <span class="px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
