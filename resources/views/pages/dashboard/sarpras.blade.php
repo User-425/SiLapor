@@ -138,7 +138,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelapor</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -161,8 +161,8 @@
                                     <div class="text-sm text-gray-900">{{ $report->created_at->format('d M Y') }}</div>
                                     <div class="text-xs text-gray-500">{{ $report->created_at->format('H:i') }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-right">
-                                    <a href="{{ route('laporan.show', $report) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <td class="px-4 py-3 text-left">
+                                    <a href="{{ route('laporan.show', $report) }}" class="text-blue-600 hover:text-blue-900">
                                         Detail
                                     </a>
                                 </td>
