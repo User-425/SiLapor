@@ -47,6 +47,8 @@ Route::middleware('auth')->group(function () {
     // Admin Routes
     Route::middleware(['peran:admin'])->group(function () {
         Route::resource('pengguna', PenggunaController::class)->names('users')->except(['show']);
+        Route::patch('/users/{id}/restore', [PenggunaController::class, 'restore'])->name('users.restore');
+        Route::delete('/users/{id}/force-delete', [PenggunaController::class, 'forceDelete'])->name('users.force-delete');
         Route::resource('tipe_fasilitas', FasilitasController::class)->names('tipe_fasilitas')->except(['show']);
         Route::resource('fasilitas', FasRuangController::class)->names('fasilitas')->except(['show']);
         Route::resource('ruang', RuangController::class)->except(['show']);

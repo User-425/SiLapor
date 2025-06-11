@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class Pengguna extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes ;
 
     protected $table = 'pengguna';
     protected $primaryKey = 'id_pengguna';
@@ -26,6 +27,8 @@ class Pengguna extends Authenticatable
     protected $hidden = [
         'kata_sandi',
     ];
+
+    protected $dates = ['deleted_at'];
 
     public function getAuthPassword()
     {

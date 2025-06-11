@@ -21,6 +21,11 @@ class PenggunaController extends Controller
     {
         $query = Pengguna::query();
 
+        // Show trashed users if requested
+        if ($request->has('show_deleted') && $request->show_deleted == 'true') {
+            $query->onlyTrashed();
+        }
+
         // Search functionality
         if ($request->has('search') && !empty($request->search)) {
             $searchTerm = $request->search;
@@ -123,7 +128,7 @@ class PenggunaController extends Controller
     }
 
     /**
-     * Remove the specified user from storage.
+     * Remove the specified user from storage (soft delete).
      *
      * @param  \App\Models\Pengguna  $pengguna
      * @return \Illuminate\Http\Response
@@ -132,6 +137,38 @@ class PenggunaController extends Controller
     {
         $pengguna->delete();
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus!');
+    }
+
+    /**
+     * Restore the specified user from soft delete.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        $pengguna = Pengguna::withTrashed()->findOrFail($id);
+        $pengguna->restore();
+        return redirect()->route('users.index')->with('success', 'Pengguna berhasil dipulihkan!');
+    }
+
+    /**
+     * Permanently delete the specified user.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function forceDelete($id)
+    {
+        $pengguna = Pengguna::withTrashed()->findOrFail($id);
+        
+        // Delete profile photo if exists
+        if ($pengguna->img_url && Storage::disk('public')->exists($pengguna->img_url)) {
+            Storage::disk('public')->delete($pengguna->img_url);
+        }
+        
+        $pengguna->forceDelete();
+        return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus permanen!');
     }
 
     public function profile()
