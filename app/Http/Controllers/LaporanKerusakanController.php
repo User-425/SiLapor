@@ -29,6 +29,22 @@ class LaporanKerusakanController extends Controller
         $user = Auth::user();
         $query = LaporanKerusakan::with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
 
+        if ($request->filled('q')) {
+            $searchTerm = $request->q;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->whereHas('fasilitasRuang.ruang', function ($r) use ($searchTerm) {
+                    $r->where('nama_ruang', 'like', '%' . $searchTerm . '%');
+                })
+                    ->orWhereHas('fasilitasRuang.fasilitas', function ($f) use ($searchTerm) {
+                        $f->where('nama_fasilitas', 'like', '%' . $searchTerm . '%');
+                    })
+                    ->orWhere('deskripsi', 'like', '%' . $searchTerm . '%')
+                    ->orWhereHas('fasilitasRuang', function ($fr) use ($searchTerm) {
+                        $fr->where('kode_fasilitas', 'like', '%' . $searchTerm . '%');
+                    });
+            });
+        }
+
         // Logic berdasarkan role
         if (in_array($user->peran, ['mahasiswa', 'dosen', 'tendik'])) {
             // User biasa: hanya lihat laporan sendiri yang belum selesai
