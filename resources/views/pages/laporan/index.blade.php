@@ -14,7 +14,7 @@
 
     <!-- Search & Add Button in one row -->
     <div class="flex justify-between items-center mb-4">
-        <form id="searchForm" method="GET" action="{{ route('periode.index') }}" class="w-full max-w-xs">
+        <form id="searchForm" method="GET" action="{{ route('laporan.index') }}" class="w-full max-w-xs">
             <div class="relative">
                 <input
                     type="text"
@@ -34,9 +34,6 @@
             Tambah Laporan
         </button>
     </div>
-
-
-
 
     <div class="overflow-x-auto border rounded-lg">
         <table class="min-w-full divide-y divide-gray-200">
