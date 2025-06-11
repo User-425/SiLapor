@@ -24,6 +24,14 @@ class PenggunaController extends Controller
         // Show trashed users if requested
         if ($request->has('show_deleted') && $request->show_deleted == 'true') {
             $query->onlyTrashed();
+            
+            if ($request->ajax()) {
+                $deletedUsers = $query->orderBy('deleted_at', 'desc')->get();
+                return response()->json([
+                    'success' => true,
+                    'users' => $deletedUsers
+                ]);
+            }
         }
 
         // Search functionality
@@ -149,6 +157,14 @@ class PenggunaController extends Controller
     {
         $pengguna = Pengguna::withTrashed()->findOrFail($id);
         $pengguna->restore();
+        
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengguna berhasil dipulihkan!'
+            ]);
+        }
+        
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dipulihkan!');
     }
 
@@ -168,6 +184,14 @@ class PenggunaController extends Controller
         }
         
         $pengguna->forceDelete();
+        
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengguna berhasil dihapus permanen!'
+            ]);
+        }
+        
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus permanen!');
     }
 
