@@ -264,7 +264,7 @@
             const data = await response.json();
 
             const form = document.getElementById('sarprasEditLaporanForm');
-            form.action = `/laporan/${id}/update-sarpras`;
+            form.action = `/sarpras/laporan/${id}`;
 
             document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
             document.getElementById('sarprasEditLaporanId').value = data.id_laporan;

@@ -214,14 +214,19 @@ class LaporanKerusakanController extends Controller
 
     public function update(Request $request, LaporanKerusakan $laporan)
     {
+        // First check if report is completed
         if ($laporan->status === 'selesai') {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Laporan yang sudah selesai tidak dapat diubah.'], 403);
             }
             return redirect()->back()->with('error', 'Laporan yang sudah selesai tidak dapat diubah.');
         }
-
+        
+        // Then check authorization
         if ($laporan->id_pengguna !== Auth::id() && Auth::user()->peran !== 'sarpras') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk mengubah laporan ini.'], 403);
+            }
             abort(403, 'Unauthorized action.');
         }
 
@@ -246,16 +251,24 @@ class LaporanKerusakanController extends Controller
 
             $laporan->update($data);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Laporan berhasil diupdate.',
-                'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
-            ]);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Laporan berhasil diupdate.',
+                    'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung'])
+                ]);
+            }
+
+            return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diupdate.');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
-            ], 500);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Exports\LaporanKerusakanExport;
@@ -40,7 +41,7 @@ class SarprasLaporanController extends Controller
         $laporans = $query->latest()->paginate(15);
 
         $laporans->getCollection()->transform(function ($laporan) {
-            $laporan->status_badge_class = match($laporan->status) {
+            $laporan->status_badge_class = match ($laporan->status) {
                 'menunggu_verifikasi' => 'bg-warning text-dark',
                 'diproses' => 'bg-info text-white',
                 'diperbaiki' => 'bg-primary text-white',
@@ -177,5 +178,64 @@ class SarprasLaporanController extends Controller
         }
 
         return Excel::download(new LaporanKerusakanExport($query->get()), 'laporan_kerusakan_' . now()->format('Ymd_His') . '.xlsx');
+    }
+
+    public function update(Request $request, LaporanKerusakan $laporan)
+    {
+        $request->validate([
+            'deskripsi' => 'required|string|max:255',
+            'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'tingkat_kerusakan_sarpras' => 'required|integer|min:1|max:5',
+            'dampak_akademik_sarpras' => 'required|integer|min:1|max:5',
+            'kebutuhan_sarpras' => 'required|integer|min:1|max:5',
+        ]);
+
+        try {
+            $data = [
+                'id_fas_ruang' => $request->id_fas_ruang,
+                'deskripsi' => $request->deskripsi,
+            ];
+
+            if ($request->hasFile('url_foto')) {
+                if ($laporan->url_foto && Storage::disk('public')->exists($laporan->url_foto)) {
+                    Storage::disk('public')->delete($laporan->url_foto);
+                }
+                $path = $request->file('url_foto')->store('laporan_foto', 'public');
+                $data['url_foto'] = $path;
+            }
+
+            $laporan->update($data);
+
+            // Update or create kriteria record
+            $laporan->kriteria()->updateOrCreate(
+                ['id_laporan' => $laporan->id_laporan],
+                [
+                    'tingkat_kerusakan_sarpras' => $request->tingkat_kerusakan_sarpras,
+                    'dampak_akademik_sarpras' => $request->dampak_akademik_sarpras,
+                    'kebutuhan_sarpras' => $request->kebutuhan_sarpras,
+                    'updated_at' => now(),
+                ]
+            );
+
+            $message = "Laporan berhasil diupdate.";
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => $laporan->fresh()->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
+                ]);
+            }
+
+            return redirect()->route('sarpras.laporan.index')->with('success', $message);
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengupdate laporan: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
     }
 }
