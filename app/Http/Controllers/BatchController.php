@@ -26,12 +26,12 @@ class BatchController extends Controller
     public function index()
     {
         $batches = Batch::orderBy('created_at', 'desc')->get();
-        
+
         // Get count of unbatched reports for display
         $unbatchedReportsCount = LaporanKerusakan::whereNull('id_batch')
             ->where('status', 'menunggu_verifikasi')
             ->count();
-        
+
         return view('pages.batch.index', compact('batches', 'unbatchedReportsCount'));
     }
 
@@ -45,7 +45,7 @@ class BatchController extends Controller
             ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
             ->get();
-        
+
         return view('pages.batch.create', compact('availableReports'));
     }
 
@@ -64,7 +64,7 @@ class BatchController extends Controller
         ]);
 
         DB::beginTransaction();
-        
+
         try {
             // Create the batch
             $batch = Batch::create([
@@ -74,16 +74,15 @@ class BatchController extends Controller
                 'tanggal_selesai' => $request->tanggal_selesai,
                 'catatan' => $request->catatan,
             ]);
-            
+
             // Assign selected reports to this batch
             LaporanKerusakan::whereIn('id_laporan', $request->selected_reports)
                 ->update(['id_batch' => $batch->id_batch]);
-                
+
             DB::commit();
-            
+
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('success', 'Batch berhasil dibuat dengan ' . count($request->selected_reports) . ' laporan.');
-                
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Gagal membuat batch: ' . $e->getMessage());
@@ -96,15 +95,15 @@ class BatchController extends Controller
     public function show(Batch $batch)
     {
         $batch->load(['laporans.fasilitasRuang.fasilitas', 'laporans.fasilitasRuang.ruang.gedung', 'laporans.pengguna', 'laporans.kriteria']);
-        
+
         // Group reports by status
         $laporansByStatus = $batch->laporans->groupBy('status');
-        
+
         // Get available reports that could be added to this batch
         $availableReports = LaporanKerusakan::whereNull('id_batch')
             ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
             ->count();
-        
+
         return view('pages.batch.show', compact('batch', 'laporansByStatus', 'availableReports'));
     }
 
@@ -116,18 +115,45 @@ class BatchController extends Controller
         if ($batch->status !== 'draft') {
             return redirect()->back()->with('error', 'Hanya batch dengan status draft yang dapat diaktifkan.');
         }
-        
-        $batch->status = 'aktif';
-        $batch->tanggal_mulai = $batch->tanggal_mulai ?? Carbon::today();
-        $batch->save();
-        
-        // Update all reports in this batch to 'diproses' if they're still in 'menunggu_verifikasi'
-        LaporanKerusakan::where('id_batch', $batch->id_batch)
-            ->where('status', 'menunggu_verifikasi')
-            ->update(['status' => 'diproses']);
-        
-        return redirect()->route('batches.show', $batch->id_batch)
-            ->with('success', 'Batch berhasil diaktifkan. Laporan siap untuk ditugaskan ke teknisi.');
+
+        DB::beginTransaction();
+
+        try {
+            // Load reports with criteria for MABAC calculation
+            $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
+                ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
+                ->get();
+
+            // Calculate priorities using MABAC with GDSS (default to Copeland method)
+            if ($reports->count() > 0) {
+                $result = $this->mabacService->calculatePrioritiesWithGDSS($reports, 'copeland');
+                $rankedReports = $result['reports'];
+
+                // Save the rankings to database
+                foreach ($rankedReports as $rankedReport) {
+                    LaporanKerusakan::where('id_laporan', $rankedReport->id_laporan)
+                        ->update(['ranking' => $rankedReport->final_rank]);
+                }
+            }
+
+            // Activate the batch
+            $batch->status = 'aktif';
+            $batch->tanggal_mulai = $batch->tanggal_mulai ?? Carbon::today();
+            $batch->save();
+
+            // Update all reports in this batch to 'diproses' if they're still in 'menunggu_verifikasi'
+            LaporanKerusakan::where('id_batch', $batch->id_batch)
+                ->where('status', 'menunggu_verifikasi')
+                ->update(['status' => 'diproses']);
+
+            DB::commit();
+
+            return redirect()->route('batches.show', $batch->id_batch)
+                ->with('success', 'Batch berhasil diaktifkan dan prioritas laporan telah dihitung menggunakan metode MABAC-GDSS. Laporan siap untuk ditugaskan ke teknisi.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', 'Gagal mengaktifkan batch: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -138,11 +164,11 @@ class BatchController extends Controller
         if ($batch->status !== 'aktif') {
             return redirect()->back()->with('error', 'Hanya batch dengan status aktif yang dapat diselesaikan.');
         }
-        
+
         $batch->status = 'selesai';
         $batch->tanggal_selesai = Carbon::today();
         $batch->save();
-        
+
         return redirect()->route('batches.index')
             ->with('success', 'Batch berhasil diselesaikan.');
     }
@@ -156,14 +182,14 @@ class BatchController extends Controller
             'selected_reports' => 'required|array',
             'selected_reports.*' => 'exists:laporan_kerusakan,id_laporan',
         ]);
-        
+
         if ($batch->status === 'selesai') {
             return redirect()->back()->with('error', 'Tidak dapat menambahkan laporan ke batch yang sudah selesai.');
         }
-        
+
         LaporanKerusakan::whereIn('id_laporan', $request->selected_reports)
             ->update(['id_batch' => $batch->id_batch]);
-        
+
         return redirect()->route('batches.show', $batch->id_batch)
             ->with('success', 'Berhasil menambahkan ' . count($request->selected_reports) . ' laporan ke batch.');
     }
@@ -177,15 +203,15 @@ class BatchController extends Controller
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('error', 'Tidak dapat menambahkan laporan ke batch yang sudah selesai.');
         }
-        
+
         $availableReports = LaporanKerusakan::whereNull('id_batch')
             ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
             ->get();
-        
+
         return view('pages.batch.add-reports', compact('batch', 'availableReports'));
     }
-    
+
     /**
      * Remove a report from a batch
      */
@@ -194,14 +220,14 @@ class BatchController extends Controller
         if ($batch->status === 'selesai') {
             return redirect()->back()->with('error', 'Tidak dapat mengubah batch yang sudah selesai.');
         }
-        
+
         if ($laporan->id_batch !== $batch->id_batch) {
             return redirect()->back()->with('error', 'Laporan tidak termasuk dalam batch ini.');
         }
-        
+
         $laporan->id_batch = null;
         $laporan->save();
-        
+
         return redirect()->route('batches.show', $batch->id_batch)
             ->with('success', 'Laporan berhasil dikeluarkan dari batch.');
     }
@@ -215,17 +241,17 @@ class BatchController extends Controller
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('error', 'Batch yang sudah selesai tidak dapat diubah prioritasnya.');
         }
-        
+
         // Load reports with criteria
         $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
             ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
             ->get();
-        
+
         // Calculate priorities using MABAC
         $result = $this->mabacService->calculatePriorities($reports);
         $rankedReports = $result['reports'];
-        
+
         return view('pages.batch.ranking', compact('batch', 'rankedReports'));
     }
 
@@ -238,15 +264,15 @@ class BatchController extends Controller
             'rankings' => 'required|array',
             'rankings.*' => 'required|numeric',
         ]);
-        
+
         DB::beginTransaction();
-        
+
         try {
             foreach ($request->rankings as $laporan_id => $ranking) {
                 LaporanKerusakan::where('id_laporan', $laporan_id)
                     ->update(['ranking' => $ranking]);
             }
-            
+
             DB::commit();
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('success', 'Prioritas laporan berhasil disimpan.');
@@ -265,30 +291,30 @@ class BatchController extends Controller
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('error', 'Batch yang sudah selesai tidak dapat diubah prioritasnya.');
         }
-        
+
         // Load reports with criteria
         $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
             ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
             ->get();
-        
+
         // If no reports found
         if ($reports->count() == 0) {
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('error', 'Tidak ada laporan yang dapat diproses dalam batch ini.');
         }
-        
+
         // Calculate priorities using MABAC
         $result = $this->mabacService->calculatePriorities($reports);
         $rankedReports = $result['reports'];
         $calculationSteps = $result['steps'];
-        
+
         // Map report IDs to report objects for display
         $reportsById = [];
         foreach ($reports as $report) {
             $reportsById[$report->id_laporan] = $report;
         }
-        
+
         return view('pages.batch.calculations', compact('batch', 'rankedReports', 'calculationSteps', 'reportsById'));
     }
 
@@ -301,29 +327,29 @@ class BatchController extends Controller
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('error', 'Batch yang sudah selesai tidak dapat diubah prioritasnya.');
         }
-        
+
         // Get the GDSS method from the request or default to Copeland
         $gdssMethod = $request->get('method', 'copeland');
         if (!in_array($gdssMethod, ['copeland', 'borda'])) {
             $gdssMethod = 'copeland';
         }
-        
+
         // Load reports with criteria
         $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
             ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
             ->get();
-        
+
         if ($reports->count() == 0) {
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('error', 'Tidak ada laporan yang dapat diproses dalam batch ini.');
         }
-        
+
         // Calculate priorities using MABAC with GDSS
         $result = $this->mabacService->calculatePrioritiesWithGDSS($reports, $gdssMethod);
         $rankedReports = $result['reports'];
         $calculationSteps = $result['steps'];
-        
+
         return view('pages.batch.gdss-ranking', compact('batch', 'rankedReports', 'calculationSteps', 'gdssMethod'));
     }
 
@@ -336,35 +362,35 @@ class BatchController extends Controller
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('error', 'Batch yang sudah selesai tidak dapat diubah prioritasnya.');
         }
-        
+
         // Get the GDSS method from the request or default to Copeland
         $gdssMethod = $request->get('method', 'copeland');
         if (!in_array($gdssMethod, ['copeland', 'borda'])) {
             $gdssMethod = 'copeland';
         }
-        
+
         // Load reports with criteria
         $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
             ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
             ->get();
-        
+
         if ($reports->count() == 0) {
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('error', 'Tidak ada laporan yang dapat diproses dalam batch ini.');
         }
-        
+
         // Calculate priorities using MABAC with GDSS
         $result = $this->mabacService->calculatePrioritiesWithGDSS($reports, $gdssMethod);
         $rankedReports = $result['reports'];
         $calculationSteps = $result['steps'];
-        
+
         // Map report IDs to report objects for display
         $reportsById = [];
         foreach ($reports as $report) {
             $reportsById[$report->id_laporan] = $report;
         }
-        
+
         return view('pages.batch.gdss-calculations', compact('batch', 'rankedReports', 'calculationSteps', 'reportsById', 'gdssMethod'));
     }
 
@@ -377,15 +403,15 @@ class BatchController extends Controller
             'rankings' => 'required|array',
             'rankings.*' => 'required|numeric',
         ]);
-        
+
         DB::beginTransaction();
-        
+
         try {
             foreach ($request->rankings as $laporan_id => $ranking) {
                 LaporanKerusakan::where('id_laporan', $laporan_id)
                     ->update(['ranking' => $ranking]);
             }
-            
+
             DB::commit();
             return redirect()->route('batches.show', $batch->id_batch)
                 ->with('success', 'Prioritas laporan berhasil disimpan dengan metode GDSS.');
