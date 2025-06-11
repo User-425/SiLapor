@@ -239,6 +239,47 @@
         }
     }
 
+    async function loadEditDataAndOpenModal(id) {
+        showLoading();
+        try {
+            const response = await fetch(`/laporan/detail/${id}`);
+            if (!response.ok) throw new Error('Gagal memuat data');
+            const data = await response.json();
+            
+            const form = document.getElementById('sarprasEditLaporanForm');
+            form.action = `/laporan/${id}/update-sarpras`;
+            
+            document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
+            document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
+            document.getElementById('edit_deskripsi').value = data.deskripsi || '';
+            document.getElementById('tingkat_kerusakan_sarpras').value = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
+            document.getElementById('dampak_akademik_sarpras').value = data.kriteria?.dampak_akademik_sarpras ?? 3;
+            document.getElementById('kebutuhan_sarpras').value = data.kriteria?.kebutuhan_sarpras ?? 3;
+            document.getElementById('sarpras_edit_ruang').textContent = 
+                data.fasilitasRuang?.ruang?.nama_ruang ?
+                `${data.fasilitasRuang.ruang.nama_ruang} - ${data.fasilitasRuang.ruang.gedung?.nama_gedung || ''}` : '-';
+            document.getElementById('sarpras_edit_fasilitas').textContent = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
+            document.getElementById('sarpras_edit_kode').textContent = data.fasilitasRuang?.kode_fasilitas || '-';
+            
+            const photoPreview = document.getElementById('edit_photo_preview');
+            const currentPhotoDiv = document.getElementById('current_photo');
+            if (data.url_foto && photoPreview) {
+                photoPreview.src = data.url_foto;
+                if (currentPhotoDiv) currentPhotoDiv.style.display = 'block';
+            } else if (currentPhotoDiv) {
+                currentPhotoDiv.style.display = 'none';
+            }
+            document.getElementById('foto_lama').value = data.url_foto || '';
+            
+            openModal(document.getElementById('sarprasEditLaporanModal'));
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Gagal memuat data laporan', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Auto-hide flash messages after 5 seconds
         setTimeout(function() {
@@ -431,44 +472,7 @@
         document.querySelectorAll('.edit-sarpras-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
                 const id = this.dataset.id;
-                showLoading();
-                try {
-                    const response = await fetch(`/laporan/detail/${id}`);
-                    if (!response.ok) throw new Error('Gagal memuat data');
-                    const data = await response.json();
-
-                    const form = document.getElementById('sarprasEditLaporanForm');
-                    form.action = `/laporan/${id}/update-sarpras`;
-
-                    document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
-                    document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
-                    document.getElementById('edit_deskripsi').value = data.deskripsi || '';
-                    document.getElementById('tingkat_kerusakan_sarpras').value = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
-                    document.getElementById('dampak_akademik_sarpras').value = data.kriteria?.dampak_akademik_sarpras ?? 3;
-                    document.getElementById('kebutuhan_sarpras').value = data.kriteria?.kebutuhan_sarpras ?? 3;
-                    document.getElementById('sarpras_edit_ruang').textContent =
-                        data.fasilitasRuang?.ruang?.nama_ruang ?
-                        `${data.fasilitasRuang.ruang.nama_ruang} - ${data.fasilitasRuang.ruang.gedung?.nama_gedung || ''}` : '-';
-                    document.getElementById('sarpras_edit_fasilitas').textContent = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
-                    document.getElementById('sarpras_edit_kode').textContent = data.fasilitasRuang?.kode_fasilitas || '-';
-
-                    const photoPreview = document.getElementById('edit_photo_preview');
-                    const currentPhotoDiv = document.getElementById('current_photo');
-                    if (data.url_foto && photoPreview) {
-                        photoPreview.src = data.url_foto;
-                        if (currentPhotoDiv) currentPhotoDiv.style.display = 'block';
-                    } else if (currentPhotoDiv) {
-                        currentPhotoDiv.style.display = 'none';
-                    }
-                    document.getElementById('foto_lama').value = data.url_foto || '';
-
-                    openModal(sarprasEditModal);
-                } catch (error) {
-                    console.error('Error:', error);
-                    showNotification('Gagal memuat data laporan', 'error');
-                } finally {
-                    hideLoading();
-                }
+                await loadEditDataAndOpenModal(id);
             });
         });
 
@@ -529,55 +533,38 @@
                             const newTbody = doc.getElementById('laporanTableBody');
                             if (newTbody) {
                                 tableBody.innerHTML = newTbody.innerHTML;
-                                // Reattach event listeners
+                                
+                                // Reattach verification form handlers
                                 document.querySelectorAll('.verify-form select[name="status"]').forEach(select => {
                                     select.onchange = function() {
                                         showLoading();
                                         this.form.requestSubmit();
                                     };
                                 });
+                                
+                                // Reattach edit button handlers
                                 document.querySelectorAll('.edit-sarpras-btn').forEach(btn => {
                                     btn.addEventListener('click', async function() {
                                         const id = this.dataset.id;
-                                        showLoading();
-                                        try {
-                                            const response = await fetch(`/laporan/detail/${id}`);
-                                            if (!response.ok) throw new Error('Gagal memuat data');
-                                            const data = await response.json();
-                                            const form = document.getElementById('sarprasEditLaporanForm');
-                                            form.action = `/laporan/${id}/update-sarpras`;
-                                            document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
-                                            document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
-                                            document.getElementById('edit_deskripsi').value = data.deskripsi || '';
-                                            document.getElementById('tingkat_kerusakan_sarpras').value = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
-                                            document.getElementById('dampak_akademik_sarpras').value = data.kriteria?.dampak_akademik_sarpras ?? 3;
-                                            document.getElementById('kebutuhan_sarpras').value = data.kriteria?.kebutuhan_sarpras ?? 3;
-                                            document.getElementById('sarpras_edit_ruang').textContent =
-                                                data.fasilitasRuang?.ruang?.nama_ruang ?
-                                                `${data.fasilitasRuang.ruang.nama_ruang} - ${data.fasilitasRuang.ruang.gedung?.nama_gedung || ''}` : '-';
-                                            document.getElementById('sarpras_edit_fasilitas').textContent = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
-                                            document.getElementById('sarpras_edit_kode').textContent = data.fasilitasRuang?.kode_fasilitas || '-';
-                                            const photoPreview = document.getElementById('edit_photo_preview');
-                                            const currentPhotoDiv = document.getElementById('current_photo');
-                                            if (data.url_foto && photoPreview) {
-                                                photoPreview.src = data.url_foto;
-                                                if (currentPhotoDiv) currentPhotoDiv.style.display = 'block';
-                                            } else if (currentPhotoDiv) {
-                                                currentPhotoDiv.style.display = 'none';
-                                            }
-                                            document.getElementById('foto_lama').value = data.url_foto || '';
-                                            openModal(sarprasEditModal);
-                                        } catch (error) {
-                                            console.error('Error:', error);
-                                            showNotification('Gagal memuat data laporan', 'error');
-                                        } finally {
-                                            hideLoading();
-                                        }
+                                        await loadEditDataAndOpenModal(id);
                                     });
                                 });
+                                
+                                // Reattach delete form handlers
                                 document.querySelectorAll('form[onsubmit="return confirmDelete(event)"]').forEach(form => {
-                                    form.onsubmit = confirmDelete;
+                                    form.onsubmit = function(event) {
+                                        return confirmDelete(event);
+                                    };
                                 });
+                            }
+                            
+                            // Also update pagination if present
+                            const paginationContainer = document.querySelector('.mt-6.flex.items-center.justify-between');
+                            if (paginationContainer) {
+                                const newPagination = doc.querySelector('.mt-6.flex.items-center.justify-between');
+                                if (newPagination) {
+                                    paginationContainer.innerHTML = newPagination.innerHTML;
+                                }
                             }
                         })
                         .catch(error => {
