@@ -16,7 +16,7 @@ class TugasSeeder extends Seeder
         $tugas = [
             [
                 'id_laporan' => 2, // AC berisik dan tidak dingin
-                'id_pengguna' => 4, // Teknisi user
+                'id_pengguna' => 5, // Teknisi user
                 'catatan' => 'AC perlu dibersihkan filter dan pengecekan freon',
                 'status' => 'dikerjakan',
                 'tanggal_selesai' => null,
@@ -25,7 +25,7 @@ class TugasSeeder extends Seeder
             ],
             [
                 'id_laporan' => 3, // AC bocor
-                'id_pengguna' => 4,
+                'id_pengguna' => 5,
                 'catatan' => 'Kebocoran pada pipa pembuangan, perlu penggantian selang',
                 'status' => 'selesai',
                 'tanggal_selesai' => Carbon::now()->subDays(12),
@@ -34,7 +34,7 @@ class TugasSeeder extends Seeder
             ],
             [
                 'id_laporan' => 4, // Lampu proyektor redup
-                'id_pengguna' => 4,
+                'id_pengguna' => 5,
                 'catatan' => 'Lampu sudah diganti dengan yang baru',
                 'status' => 'selesai',
                 'tanggal_selesai' => Carbon::now()->subDays(18),
