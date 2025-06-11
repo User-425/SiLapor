@@ -78,8 +78,7 @@ class SearchController extends Controller
         // Search in tugas (tasks) - with permission filtering
         if ($user->peran === 'sarpras' || $user->peran === 'teknisi') {
             $tugasQuery = Tugas::where(function($q) use ($query) {
-                $q->where('judul', 'like', "%{$query}%")
-                  ->orWhere('deskripsi', 'like', "%{$query}%")
+                $q->where('catatan', 'like', "%{$query}%")
                   ->orWhere('prioritas', 'like', "%{$query}%");
             });
             
