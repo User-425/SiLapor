@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/laporan/{laporan}/verifikasi', [LaporanKerusakanController::class, 'verifikasi'])->name('laporan.verifikasi');
         Route::post('/laporan/batch-update-status', [LaporanKerusakanController::class, 'batchUpdateStatus'])->name('laporan.batchUpdateStatus');
         Route::put('/laporan/{laporan}/update-sarpras', [LaporanKerusakanController::class, 'update'])->name('laporan.updateSarpras');
-
+        Route::put('/sarpras/laporan/{laporan}', [SarprasLaporanController::class, 'update'])->name('sarpras.laporan.update');
         // Export
         Route::get('/sarpras/export-laporan', [EksporSarprasController::class, 'form'])->name('laporan.export');
         Route::post('/sarpras/download-export', [EksporSarprasController::class, 'export'])->name('laporan.download-export');

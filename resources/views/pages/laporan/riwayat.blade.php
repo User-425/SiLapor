@@ -40,10 +40,9 @@
             <input
                 type="search"
                 name="q"
-                value="{{ request()->get('q') }}" 
+                value="{{ request()->get('q') }}"
                 placeholder="Cari berdasarkan ruang, fasilitas, atau kode..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            >
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <i class="fas fa-search text-gray-400"></i>
             </div>
@@ -108,20 +107,18 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap align-middle text-center">
                         <div class="flex items-center justify-center space-x-2">
-                            <button 
-                                class="detail-btn inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200" 
+                            <button
+                                class="detail-btn inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                                 data-id="{{ $laporan->id_laporan }}"
-                                title="Lihat Detail"
-                            >
+                                title="Lihat Detail">
                                 <i class="fas fa-eye mr-1"></i>
                                 Detail
                             </button>
                             @if(auth()->user()->peran !== 'sarpras' && $laporan->status == 'selesai' && !$laporan->umpanBaliks()->where('id_pengguna', Auth::id())->exists())
-                            <a 
+                            <a
                                 href="{{ route('umpan_balik.create', $laporan->id_laporan) }}"
                                 class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-200"
-                                title="Beri Umpan Balik"
-                            >
+                                title="Beri Umpan Balik">
                                 <i class="fas fa-star mr-1"></i>
                                 Umpan Balik
                             </a>
@@ -147,7 +144,7 @@
     @if(method_exists($laporans, 'hasPages') && $laporans->hasPages())
     <div class="mt-6 flex items-center justify-between">
         <div class="text-sm text-gray-700">
-            Showing 
+            Showing
             <span class="font-medium">{{ $laporans->firstItem() }}</span>
             to
             <span class="font-medium">{{ $laporans->lastItem() }}</span>
@@ -193,58 +190,157 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-hide flash messages after 5 seconds
-    setTimeout(function() {
-        const successMsg = document.querySelector('.bg-green-50');
-        const errorMsg = document.querySelector('.bg-red-50');
-        if (successMsg) successMsg.style.display = 'none';
-        if (errorMsg) errorMsg.style.display = 'none';
-    }, 5000);
+    document.addEventListener('DOMContentLoaded', function() {
 
-    // DOM Elements
-    const detailModal = document.getElementById('detailModal');
-    const addLaporanModal = document.getElementById('addLaporanModal');
-    const editLaporanModal = document.getElementById('editLaporan形態');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const searchInput = document.querySelector('input[name="q"]');
-    const tableBody = document.getElementById('laporanTableBody');
-    let timeout = null;
+        setTimeout(function() {
+            const successMsg = document.querySelector('.bg-green-50');
+            const errorMsg = document.querySelector('.bg-red-50');
+            if (successMsg) successMsg.style.display = 'none';
+            if (errorMsg) errorMsg.style.display = 'none';
+        }, 5000);
 
-    // Utility Functions
-    function showLoading() {
-        if (loadingIndicator) loadingIndicator.classList.remove('hidden');
-    }
+        const detailModal = document.getElementById('detailModal');
+        const addLaporanModal = document.getElementById('addLaporanModal');
+        const editLaporanModal = document.getElementById('editLaporan形態');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const searchInput = document.querySelector('input[name="q"]');
+        const tableBody = document.getElementById('laporanTableBody');
+        let timeout = null;
 
-    function hideLoading() {
-        if (loadingIndicator) loadingIndicator.classList.add('hidden');
-    }
-
-    // Image Modal Functions
-    window.openImageModal = function(src) {
-        document.getElementById('fullImage').src = src;
-        document.getElementById('imageModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    window.closeImageModal = function() {
-        document.getElementById('imageModal').classList.add('hidden');
-        if (!detailModal.classList.contains('hidden')) {
-            // Keep overflow hidden if detailModal is open
-        } else {
-            document.body.style.overflow = 'auto';
+        function showLoading() {
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
         }
-    }
 
-    // Debounce Search
-    if (searchInput && tableBody) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                document.getElementById('searchForm').submit();
-            }, 500);
+        function hideLoading() {
+            if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        }
+
+        window.openImageModal = function(src) {
+            document.getElementById('fullImage').src = src;
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        window.closeImageModal = function() {
+            document.getElementById('imageModal').classList.add('hidden');
+            if (!detailModal.classList.contains('hidden')) {
+
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        const detailButtons = document.querySelectorAll('.detail-btn');
+        const detailModalContent = document.getElementById('detailModalContent');
+        const closeDetailModalBtn = document.getElementById('closeDetailModal');
+
+        detailButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const reportId = this.getAttribute('data-id');
+                showLoading();
+                fetch(`/laporan/detail/${reportId}`)
+                    .then(response => response.json())
+                    .then(data => {
+
+                        detailModalContent.innerHTML = renderDetailContent(data);
+                        detailModal.classList.remove('hidden');
+                        document.body.style.overflow = 'hidden';
+                    })
+                    .catch(error => console.error('Error fetching report details:', error))
+                    .finally(() => hideLoading());
+            });
         });
-    }
-});
+
+        if (closeDetailModalBtn) {
+            closeDetailModalBtn.addEventListener('click', function() {
+                detailModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            });
+        }
+
+        function renderDetailContent(data) {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left column -->
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3">Informasi Laporan</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm text-gray-500">Kode Laporan</p>
+                                <p class="font-medium">${data.id_laporan || '-'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Status</p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Selesai
+                                </span>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Tanggal Laporan</p>
+                                <p class="font-medium">${data.created_at || '-'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Tanggal Penyelesaian</p>
+                                <p class="font-medium">${data.updated_at || '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right column -->
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3">Detail Fasilitas</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm text-gray-500">Ruang</p>
+                                <p class="font-medium">${data.fasilitasRuang?.ruang?.nama_ruang || '-'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Gedung</p>
+                                <p class="font-medium">${data.fasilitasRuang?.ruang?.gedung?.nama_gedung || '-'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Fasilitas</p>
+                                <p class="font-medium">${data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Kode Fasilitas</p>
+                                <p class="font-medium">${data.fasilitasRuang?.kode_fasilitas || '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-700 mb-3">Deskripsi Kerusakan</h4>
+                    <p class="text-gray-800">${data.deskripsi || '-'}</p>
+                </div>
+                
+                ${data.url_foto ? `
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-700 mb-3">Foto Kerusakan</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <img src="${data.url_foto}" alt="Foto Kerusakan" 
+                            class="cursor-pointer rounded-lg border border-gray-200 hover:opacity-90 transition-opacity"
+                            onclick="openImageModal('${data.url_foto}')">
+                    </div>
+                </div>` : ''}
+                
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-700 mb-3">Catatan Penyelesaian</h4>
+                    <p class="text-gray-800">${data.catatan_penyelesaian || '-'}</p>
+                </div>
+            `;
+        }
+
+        if (searchInput && tableBody) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    document.getElementById('searchForm').submit();
+                }, 500);
+            });
+        }
+    });
 </script>
 @endpush
