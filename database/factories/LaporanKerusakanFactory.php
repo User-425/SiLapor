@@ -26,7 +26,7 @@ class LaporanKerusakanFactory extends Factory
     public function definition(): array
     {
         $statuses = ['menunggu_verifikasi', 'diproses', 'diperbaiki', 'selesai', 'ditolak'];
-        $createdAt = $this->faker->dateTimeBetween('-30 days', 'now');
+        $createdAt = $this->faker->dateTimeBetween('-400 days', 'now');
         $updatedAt = $this->faker->dateTimeBetween($createdAt, 'now');
         
         // First determine the facility room

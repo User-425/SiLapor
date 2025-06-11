@@ -183,5 +183,8 @@ class LaporanKerusakanSeeder extends Seeder
         ];
 
         DB::table('laporan_kerusakan')->insert($laporanKerusakan);
+        LaporanKerusakan::factory()->count(500)->create();
+        LaporanKerusakan::factory()->count(150)->prioritasTinggi()->menungguVerifikasi()->create();
+        LaporanKerusakan::factory()->count(50)->diproses()->create();
     }
 }
