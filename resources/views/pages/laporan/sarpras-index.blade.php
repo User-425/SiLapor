@@ -225,6 +225,24 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Utility Functions
+    function showLoading() {
+        if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+    }
+
+    function showNotification(message, type = 'success') {
+        const alertBox = document.getElementById('ajax-alert');
+        const messageEl = document.getElementById('ajax-alert-message');
+        messageEl.textContent = message;
+        alertBox.classList.remove('hidden', 'bg-red-50', 'border-red-400', 'bg-green-50', 'border-green-400');
+        alertBox.classList.add(type === 'success' ? 'bg-green-50' : 'bg-red-50', type === 'success' ? 'border-green-400' : 'border-red-400');
+        setTimeout(() => alertBox.classList.add('hidden'), type === 'success' ? 2000 : 3000);
+    }
+
     // Modal Management
     function closeModal() {
         if (detailModal) detailModal.classList.add('hidden');
@@ -238,29 +256,52 @@
             document.body.style.overflow = 'hidden';
         }
     }
-
     async function loadEditDataAndOpenModal(id) {
         showLoading();
         try {
             const response = await fetch(`/laporan/detail/${id}`);
             if (!response.ok) throw new Error('Gagal memuat data');
             const data = await response.json();
-            
+
             const form = document.getElementById('sarprasEditLaporanForm');
             form.action = `/laporan/${id}/update-sarpras`;
-            
+
             document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
             document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
             document.getElementById('edit_deskripsi').value = data.deskripsi || '';
-            document.getElementById('tingkat_kerusakan_sarpras').value = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
-            document.getElementById('dampak_akademik_sarpras').value = data.kriteria?.dampak_akademik_sarpras ?? 3;
-            document.getElementById('kebutuhan_sarpras').value = data.kriteria?.kebutuhan_sarpras ?? 3;
-            document.getElementById('sarpras_edit_ruang').textContent = 
+
+            // Set slider values and update their displays
+            const kerusakanValue = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
+            const dampakValue = data.kriteria?.dampak_akademik_sarpras ?? 3;
+            const kebutuhanValue = data.kriteria?.kebutuhan_sarpras ?? 3;
+
+            // Update main slider values
+            document.getElementById('tingkat_kerusakan_sarpras').value = kerusakanValue;
+            document.getElementById('dampak_akademik_sarpras').value = dampakValue;
+            document.getElementById('kebutuhan_sarpras').value = kebutuhanValue;
+
+            // Update the displayed values
+            document.getElementById('kerusakan_value').textContent = kerusakanValue + '/5';
+            document.getElementById('dampak_value').textContent = dampakValue + '/5';
+            document.getElementById('jumlah_value').textContent = kebutuhanValue + '/5';
+
+            // Update mobile slider values and displays if they exist
+            if (document.getElementById('tingkat_kerusakan_sarpras_mobile')) {
+                document.getElementById('tingkat_kerusakan_sarpras_mobile').value = kerusakanValue;
+                document.getElementById('dampak_akademik_sarpras_mobile').value = dampakValue;
+                document.getElementById('kebutuhan_sarpras_mobile').value = kebutuhanValue;
+
+                document.getElementById('kerusakan_value_mobile').textContent = kerusakanValue + '/5';
+                document.getElementById('dampak_value_mobile').textContent = dampakValue + '/5';
+                document.getElementById('jumlah_value_mobile').textContent = kebutuhanValue + '/5';
+            }
+
+            document.getElementById('sarpras_edit_ruang').textContent =
                 data.fasilitasRuang?.ruang?.nama_ruang ?
                 `${data.fasilitasRuang.ruang.nama_ruang} - ${data.fasilitasRuang.ruang.gedung?.nama_gedung || ''}` : '-';
             document.getElementById('sarpras_edit_fasilitas').textContent = data.fasilitasRuang?.fasilitas?.nama_fasilitas || '-';
             document.getElementById('sarpras_edit_kode').textContent = data.fasilitasRuang?.kode_fasilitas || '-';
-            
+
             const photoPreview = document.getElementById('edit_photo_preview');
             const currentPhotoDiv = document.getElementById('current_photo');
             if (data.url_foto && photoPreview) {
@@ -270,7 +311,7 @@
                 currentPhotoDiv.style.display = 'none';
             }
             document.getElementById('foto_lama').value = data.url_foto || '';
-            
+
             openModal(document.getElementById('sarprasEditLaporanModal'));
         } catch (error) {
             console.error('Error:', error);
@@ -279,7 +320,6 @@
             hideLoading();
         }
     }
-
     document.addEventListener('DOMContentLoaded', function() {
         // Auto-hide flash messages after 5 seconds
         setTimeout(function() {
@@ -296,25 +336,6 @@
         const searchInput = document.querySelector('input[name="q"]');
         const tableBody = document.getElementById('laporanTableBody');
         let timeout = null;
-
-        // Utility Functions
-        function showLoading() {
-            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            if (loadingIndicator) loadingIndicator.classList.add('hidden');
-        }
-
-        function showNotification(message, type = 'success') {
-            const alertBox = document.getElementById('ajax-alert');
-            const messageEl = document.getElementById('ajax-alert-message');
-            messageEl.textContent = message;
-            alertBox.classList.remove('hidden', 'bg-red-50', 'border-red-400', 'bg-green-50', 'border-green-400');
-            alertBox.classList.add(type === 'success' ? 'bg-green-50' : 'bg-red-50', type === 'success' ? 'border-green-400' : 'border-red-400');
-            setTimeout(() => alertBox.classList.add('hidden'), type === 'success' ? 2000 : 3000);
-        }
-
 
         // AJAX for Detail
         window.showDetail = async function(id) {
@@ -533,7 +554,7 @@
                             const newTbody = doc.getElementById('laporanTableBody');
                             if (newTbody) {
                                 tableBody.innerHTML = newTbody.innerHTML;
-                                
+
                                 // Reattach verification form handlers
                                 document.querySelectorAll('.verify-form select[name="status"]').forEach(select => {
                                     select.onchange = function() {
@@ -541,7 +562,7 @@
                                         this.form.requestSubmit();
                                     };
                                 });
-                                
+
                                 // Reattach edit button handlers
                                 document.querySelectorAll('.edit-sarpras-btn').forEach(btn => {
                                     btn.addEventListener('click', async function() {
@@ -549,7 +570,7 @@
                                         await loadEditDataAndOpenModal(id);
                                     });
                                 });
-                                
+
                                 // Reattach delete form handlers
                                 document.querySelectorAll('form[onsubmit="return confirmDelete(event)"]').forEach(form => {
                                     form.onsubmit = function(event) {
@@ -557,7 +578,7 @@
                                     };
                                 });
                             }
-                            
+
                             // Also update pagination if present
                             const paginationContainer = document.querySelector('.mt-6.flex.items-center.justify-between');
                             if (paginationContainer) {

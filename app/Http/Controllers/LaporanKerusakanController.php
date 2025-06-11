@@ -307,7 +307,7 @@ class LaporanKerusakanController extends Controller
             abort(403);
         }
 
-        $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna']);
+        $laporan->load(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna', 'kriteria']);
 
         $statusLabel = str_replace('_', ' ', ucwords($laporan->status));
         $statusBadgeClass = match ($laporan->status) {
@@ -329,6 +329,7 @@ class LaporanKerusakanController extends Controller
             'ranking' => $laporan->ranking,
             'created_at' => $laporan->created_at->format('d/m/Y H:i'),
             'updated_at' => $laporan->updated_at->format('d/m/Y H:i'),
+            'kriteria' => $laporan->kriteria, // Add criteria data to response
             'fasilitasRuang' => [
                 'id_fas_ruang' => $laporan->fasilitasRuang->id_fas_ruang,
                 'kode_fasilitas' => $laporan->fasilitasRuang->kode_fasilitas,
