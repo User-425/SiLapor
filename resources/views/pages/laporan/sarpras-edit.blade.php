@@ -1,4 +1,3 @@
-<!-- filepath: resources/views/pages/laporan/sarpras-edit.blade.php -->
 <div id="sarprasEditLaporanModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
     <div class="relative mx-auto my-4 sm:my-8 w-11/12 max-w-4xl shadow-xl rounded-xl bg-white modal-content">
         <div class="p-4 sm:p-6">
@@ -42,6 +41,27 @@
                                 <div class="col-span-2">
                                     <label class="block text-xs font-medium text-gray-500 mb-1">Kode Fasilitas</label>
                                     <div id="sarpras_edit_kode" class="font-mono bg-white px-2 py-1 rounded border inline-block text-xs sm:text-sm">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 p-3 sm:p-4 rounded-lg">
+                            <div class="flex items-center text-xs sm:text-sm text-yellow-700 mb-2">
+                                <i class="fas fa-tasks mr-2"></i>
+                                <span>Status Laporan</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 gap-3 text-sm">
+                                <div>
+                                    <label for="edit_status" class="block text-xs font-medium text-gray-500 mb-1">Status</label>
+                                    <select id="edit_status" name="status" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm" required>
+                                        <option value="menunggu_verifikasi">Menunggu Verifikasi</option>
+                                        <option value="diproses">Diproses</option>
+                                        <option value="ditolak">Ditolak</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-info-circle mr-1"></i> Mengubah status ke "Diproses" mengharuskan pengisian kriteria penilaian.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -104,7 +124,7 @@
                                 <!-- Jumlah yang Membutuhkan -->
                                 <div>
                                     <div class="flex justify-between items-center mb-1.5">
-                                        <label class="text-xs sm:text-sm font-medium text-gray-700">Jumlah Membutuhkan</label>
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">Jumlah Membutuhkan</label>
                                         <span id="jumlah_value_mobile" class="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">3/5</span>
                                     </div>
                                     <div class="flex items-center space-x-2">
@@ -166,7 +186,7 @@
                                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
                                         oninput="document.getElementById('kerusakan_value').textContent = this.value + '/5';
                                                 document.getElementById('kerusakan_value_mobile').textContent = this.value + '/5';
-                                                document.getElementById('tingkat_kerusakan_sarpras_mobile').value = this.value;">
+                                                document.getElementById('tingkat_kerusakan_mobile').value = this.value;">
                                     <i class="fas fa-tools text-orange-500"></i>
                                 </div>
                                 <div class="text-xs flex justify-between text-gray-500 mt-1 px-1">
@@ -187,7 +207,7 @@
                                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-500"
                                         oninput="document.getElementById('dampak_value').textContent = this.value + '/5';
                                                 document.getElementById('dampak_value_mobile').textContent = this.value + '/5';
-                                                document.getElementById('dampak_akademik_sarpras_mobile').value = this.value;">
+                                                document.getElementById('dampak_akademik_mobile').value = this.value;">
                                     <i class="fas fa-book-open text-red-500"></i>
                                 </div>
                                 <div class="text-xs flex justify-between text-gray-500 mt-1 px-1">
@@ -208,7 +228,7 @@
                                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
                                         oninput="document.getElementById('jumlah_value').textContent = this.value + '/5';
                                                 document.getElementById('jumlah_value_mobile').textContent = this.value + '/5';
-                                                document.getElementById('kebutuhan_sarpras_mobile').value = this.value;">
+                                                document.getElementById('kebutuhan_mobile').value = this.value;">
                                     <i class="fas fa-users text-blue-500"></i>
                                 </div>
                                 <div class="text-xs flex justify-between text-gray-500 mt-1 px-1">
@@ -309,5 +329,76 @@
         }, { passive: true });
     });
 
-    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Status-based criteria validation
+        const statusSelect = document.getElementById('edit_status');
+        const criteriaContainers = document.querySelectorAll('.criteria-container');
+        const criteriaInputs = document.querySelectorAll('.criteria-input');
+        
+        // Add criteria-container class to the parent divs containing criteria sliders
+        document.querySelectorAll('#tingkat_kerusakan_sarpras, #dampak_akademik_sarpras, #kebutuhan_sarpras')
+            .forEach(el => {
+                el.classList.add('criteria-input');
+                el.closest('div.mb-4, div:not(.mb-4):has(> div > .criteria-input)').classList.add('criteria-container');
+            });
+
+        if(document.getElementById('tingkat_kerusakan_sarpras_mobile')) {
+            document.querySelectorAll('#tingkat_kerusakan_sarpras_mobile, #dampak_akademik_sarpras_mobile, #kebutuhan_sarpras_mobile')
+                .forEach(el => {
+                    el.classList.add('criteria-input');
+                    el.closest('.grid.grid-cols-1.sm\\:grid-cols-3.gap-4 > div').classList.add('criteria-container');
+                });
+        }
+        
+        // Function to toggle criteria requirement based on status
+        function toggleCriteriaRequirement() {
+            const isRequired = statusSelect.value === 'diproses';
+            
+            // Update the criteria section visibility and required attribute
+            criteriaContainers.forEach(container => {
+                container.style.opacity = isRequired ? '1' : '0.5';
+            });
+            
+            criteriaInputs.forEach(input => {
+                if(isRequired) {
+                    input.setAttribute('required', 'required');
+                } else {
+                    input.removeAttribute('required');
+                }
+            });
+            
+            // Update message
+            const criteriaMessage = document.getElementById('criteria-message');
+            if(criteriaMessage) {
+                criteriaMessage.style.display = isRequired ? 'block' : 'none';
+            }
+        }
+        
+        // Initial check on page load
+        toggleCriteriaRequirement();
+        
+        // Listen for status changes
+        statusSelect.addEventListener('change', toggleCriteriaRequirement);
+        
+        // Form validation before submit
+        document.getElementById('sarprasEditLaporanForm').addEventListener('submit', function(e) {
+            if(statusSelect.value === 'diproses') {
+                // Check if all criteria fields have values
+                let isValid = true;
+                criteriaInputs.forEach(input => {
+                    if(!input.value || input.value < 1) {
+                        isValid = false;
+                    }
+                });
+                
+                if(!isValid) {
+                    e.preventDefault();
+                    alert('Kriteria penilaian wajib diisi untuk status "Diproses"');
+                    return false;
+                }
+            }
+            
+            // Continue with existing submit handler...
+        });
+    });
 </script>

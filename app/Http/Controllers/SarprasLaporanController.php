@@ -182,18 +182,25 @@ class SarprasLaporanController extends Controller
 
     public function update(Request $request, LaporanKerusakan $laporan)
     {
-        $request->validate([
+        $validationRules = [
             'deskripsi' => 'required|string|max:255',
             'url_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'tingkat_kerusakan_sarpras' => 'required|integer|min:1|max:5',
-            'dampak_akademik_sarpras' => 'required|integer|min:1|max:5',
-            'kebutuhan_sarpras' => 'required|integer|min:1|max:5',
-        ]);
+            'status' => 'required|in:menunggu_verifikasi,diproses,diperbaiki,selesai,ditolak',
+        ];
+
+        if ($request->status === 'diproses') {
+            $validationRules['tingkat_kerusakan_sarpras'] = 'required|integer|min:1|max:5';
+            $validationRules['dampak_akademik_sarpras'] = 'required|integer|min:1|max:5';
+            $validationRules['kebutuhan_sarpras'] = 'required|integer|min:1|max:5';
+        }
+
+        $request->validate($validationRules);
 
         try {
             $data = [
                 'id_fas_ruang' => $request->id_fas_ruang,
                 'deskripsi' => $request->deskripsi,
+                'status' => $request->status,
             ];
 
             if ($request->hasFile('url_foto')) {
@@ -206,7 +213,6 @@ class SarprasLaporanController extends Controller
 
             $laporan->update($data);
 
-            // Update or create kriteria record
             $laporan->kriteria()->updateOrCreate(
                 ['id_laporan' => $laporan->id_laporan],
                 [

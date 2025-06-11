@@ -80,7 +80,6 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fasilitas</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ruang</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
@@ -113,22 +112,6 @@
                             <div class="text-sm text-gray-900 max-w-xs overflow-hidden whitespace-nowrap text-ellipsis" title="{{ $laporan->deskripsi }}">
                                 {{ Str::limit($laporan->deskripsi, 15, '...') }}
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($laporan->status === 'menunggu_verifikasi' && Auth::user()->peran === 'sarpras')
-                            <form action="{{ route('laporan.verifikasi', $laporan->id_laporan) }}" method="POST" class="inline verify-form">
-                                @csrf
-                                <select name="status" class="border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
-                                    <option value="" disabled selected>Menunggu Verifikasi</option>
-                                    <option value="diproses">Diproses</option>
-                                    <option value="ditolak">Ditolak</option>
-                                </select>
-                            </form>
-                            @else
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $laporan->status_badge_class }}">
-                                {{ $laporan->status_label }}
-                            </span>
-                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ $laporan->created_at->format('d/m/Y H:i') }}
@@ -269,7 +252,7 @@
             document.getElementById('edit_id_fas_ruang').value = data.fasilitasRuang?.id_fas_ruang || '';
             document.getElementById('sarprasEditLaporanId').value = data.id_laporan;
             document.getElementById('edit_deskripsi').value = data.deskripsi || '';
-
+      
             // Set slider values and update their displays
             const kerusakanValue = data.kriteria?.tingkat_kerusakan_sarpras ?? 3;
             const dampakValue = data.kriteria?.dampak_akademik_sarpras ?? 3;
