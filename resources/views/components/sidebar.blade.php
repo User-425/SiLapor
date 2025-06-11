@@ -167,7 +167,7 @@
                 </div>
                 <span>Laporan Kerusakan</span>
                 <div class="ml-auto">
-                    <span class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">{{ auth()->user()->laporan()->where('status', 'menunggu_verifikasi')->count() }}</span>
+                    <span class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full group-[.active]:bg-white/20 group-[.active]:text-white">{{ auth()->user()->laporan()->where('status', 'menunggu_verifikasi')->count() }}</span>
                 </div>
             </a>
 
@@ -207,24 +207,26 @@
                 </div>
                 <span>Verifikasi Laporan</span>
                 <div class="ml-auto">
-                    <span class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">{{ \App\Models\LaporanKerusakan::where('status', 'menunggu_verifikasi')->count() }}</span>
+                    <span class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full group-[.active]:bg-white/20 group-[.active]:text-white">{{ \App\Models\LaporanKerusakan::where('status', 'menunggu_verifikasi')->count() }}</span>
                 </div>
             </a>
 
-            <a href="{{ route('laporan.riwayat') }}"
-                class="nav-item flex items-center py-3 px-4 text-sm font-medium rounded-xl text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 transition-all group {{ request()->routeIs('laporan.riwayat') ? 'active' : '' }}">
+            <a href="{{ route('batches.index') }}"
+                class="nav-item flex items-center py-3 px-4 text-sm font-medium rounded-xl text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 transition-all group {{ request()->routeIs('batches.*') ? 'active' : '' }}"
+                role="menuitem">
                 <div class="flex-shrink-0 mr-3">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 100 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                     </svg>
                 </div>
-                <span>Riwayat Laporan</span>
+                <span>Batch Perbaikan</span>
                 <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </div>
             </a>
+
 
             <a href="{{ route('tugas.index') }}"
                 class="nav-item flex items-center py-3 px-4 text-sm font-medium rounded-xl text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 transition-all group {{ request()->routeIs('tugas.*') ? 'active' : '' }}"
@@ -242,15 +244,14 @@
                 </div>
             </a>
 
-            <a href="{{ route('batches.index') }}"
-                class="nav-item flex items-center py-3 px-4 text-sm font-medium rounded-xl text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 transition-all group {{ request()->routeIs('batches.*') ? 'active' : '' }}"
-                role="menuitem">
+            <a href="{{ route('laporan.riwayat') }}"
+                class="nav-item flex items-center py-3 px-4 text-sm font-medium rounded-xl text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 transition-all group {{ request()->routeIs('laporan.riwayat') ? 'active' : '' }}">
                 <div class="flex-shrink-0 mr-3">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 100 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                     </svg>
                 </div>
-                <span>Batch Perbaikan</span>
+                <span>Riwayat Laporan</span>
                 <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

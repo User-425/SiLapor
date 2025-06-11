@@ -81,6 +81,13 @@
             transform: translateY(-1px);
             box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
         }
+
+        /* Error message styling */
+        .error-message {
+            color: #dc2626;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -130,6 +137,9 @@
                         <input id="nama_pengguna" name="nama_pengguna" type="text" required
                             class="input-focus w-full px-4 py-3 sm:px-5 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                             placeholder="Enter your username">
+                        @error('nama_pengguna')
+                            <p class="error-message">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="space-y-1">
@@ -137,6 +147,9 @@
                         <input id="kata_sandi" name="kata_sandi" type="password" required
                             class="input-focus w-full px-4 py-3 sm:px-5 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                             placeholder="Enter your password">
+                        @error('kata_sandi')
+                            <p class="error-message">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="pt-2">

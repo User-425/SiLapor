@@ -242,10 +242,10 @@
 
                 <!-- Footer Buttons -->
                 <div class="flex flex-wrap sm:flex-nowrap justify-end gap-2 sm:space-x-3 pt-4 mt-4 border-t">
-                    <button type="button" class="close-modal w-full sm:w-auto order-2 sm:order-1 btn-secondary">
+                    <button type="button" class="close-modal w-full sm:w-auto order-2 sm:order-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium shadow-md border border-gray-300">
                         <i class="fas fa-times mr-2"></i> Batal
                     </button>
-                    <button type="submit" class="w-full sm:w-auto order-1 sm:order-2 btn-primary">
+                    <button type="submit" class="w-full sm:w-auto order-1 sm:order-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium shadow-md border border-blue-700">
                         <i class="fas fa-save mr-2"></i> Simpan
                     </button>
                 </div>

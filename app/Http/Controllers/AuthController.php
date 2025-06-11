@@ -20,19 +20,27 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'nama_pengguna' => 'required',
+            'nama_pengguna' => 'required|string',
             'kata_sandi' => 'required',
         ]);
 
-        $pengguna = Pengguna::where('nama_pengguna', $credentials['nama_pengguna'])->first();
-
-        if ($pengguna && Hash::check($credentials['kata_sandi'], $pengguna->kata_sandi)) {
-            Auth::login($pengguna);
-            return $this->redirectBasedOnRole($pengguna);
+        // Coba autentikasi dengan Auth::attempt
+        if (Auth::attempt(['nama_pengguna' => $credentials['nama_pengguna'], 'password' => $credentials['kata_sandi']])) {
+            $request->session()->regenerate();
+            return $this->redirectBasedOnRole(Auth::user());
         }
 
+        // Cek apakah nama pengguna ada
+        $pengguna = Pengguna::where('nama_pengguna', $credentials['nama_pengguna'])->first();
+        if (!$pengguna) {
+            return back()->withErrors([
+                'nama_pengguna' => 'Nama pengguna tidak ditemukan.',
+            ])->withInput($request->except('kata_sandi'));
+        }
+
+        // Kalau nama pengguna ada tapi password salah
         return back()->withErrors([
-            'login_error' => 'Nama pengguna atau kata sandi tidak valid.',
+            'kata_sandi' => 'Kata sandi salah.',
         ])->withInput($request->except('kata_sandi'));
     }
 
