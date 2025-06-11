@@ -18,11 +18,10 @@
 <body class="bg-gray-100">
     <div class="flex h-screen overflow-hidden">
         <!-- Mobile sidebar backdrop -->
-        <div id="sidebar-backdrop" class="fixed inset-0 z-20 transition-opacity bg-gray-600 opacity-0 pointer-events-none lg:hidden" 
-             onclick="toggleSidebar()"></div>
-
+        <div id="sidebar-backdrop" class="fixed inset-0 z-20 transition-opacity bg-gray-600 opacity-0 pointer-events-none lg:hidden"
+            onclick="toggleSidebar()"></div>
         <!-- Sidebar -->
-        <div class="h-full">
+        <div id="sidebar-container" class="h-full lg:block" style="display: none;">
             @include('components.sidebar')
         </div>
 
@@ -41,26 +40,45 @@
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const sidebarContainer = document.getElementById('sidebar-container');
             const backdrop = document.getElementById('sidebar-backdrop');
-            
+
             sidebar.classList.toggle('-translate-x-full');
             
-            if (sidebar.classList.contains('-translate-x-full')) {
-                backdrop.classList.add('opacity-0', 'pointer-events-none');
-                backdrop.classList.remove('opacity-50');
-            } else {
-                backdrop.classList.remove('opacity-0', 'pointer-events-none');
-                backdrop.classList.add('opacity-50');
+            // Toggle sidebar container visibility
+            if (window.innerWidth < 1024) { // Only for mobile
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    sidebarContainer.style.display = 'none';
+                    backdrop.classList.add('opacity-0', 'pointer-events-none');
+                    backdrop.classList.remove('opacity-50');
+                } else {
+                    sidebarContainer.style.display = 'block';
+                    backdrop.classList.remove('opacity-0', 'pointer-events-none');
+                    backdrop.classList.add('opacity-50');
+                }
             }
         }
 
+        // Initialize sidebar visibility on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarContainer = document.getElementById('sidebar-container');
+            if (window.innerWidth >= 1024) { // lg breakpoint
+                sidebarContainer.style.display = 'block';
+            }
+        });
+
         // Close sidebar on resize if we're on desktop
         window.addEventListener('resize', () => {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarContainer = document.getElementById('sidebar-container');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            
             if (window.innerWidth >= 1024) { // lg breakpoint
-                const sidebar = document.getElementById('sidebar');
-                const backdrop = document.getElementById('sidebar-backdrop');
+                sidebarContainer.style.display = 'block';
                 backdrop.classList.add('opacity-0', 'pointer-events-none');
                 backdrop.classList.remove('opacity-50');
+            } else if (sidebar.classList.contains('-translate-x-full')) {
+                sidebarContainer.style.display = 'none';
             }
         });
 

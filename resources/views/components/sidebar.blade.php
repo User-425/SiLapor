@@ -1,6 +1,6 @@
-<div class="flex flex-col h-screen sidebar-gradient border-r border-gray-200 shadow-lg relative" id="sidebar">
-    <div id="sidebar-resizer" class="absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-indigo-500 hover:w-1.5 transition-all z-50" aria-label="Resize sidebar" role="separator" tabindex="0"></div>
-    
+<div class="flex flex-col h-screen sidebar-gradient border-r border-gray-200 shadow-lg relative transform transition-transform duration-300 lg:translate-x-0 -translate-x-full lg:static fixed z-30" id="sidebar">
+    <div id="sidebar-resizer" class="absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-indigo-500 hover:w-1.5 transition-all z-50 hidden lg:block" aria-label="Resize sidebar" role="separator" tabindex="0"></div>
+
     <!-- Header -->
     <div class="flex items-center justify-between p-4 border-b border-gray-100">
         <div class="flex items-center">
@@ -411,8 +411,23 @@
             min-width: 150px;
             max-width: 400px;
             transition: width 0.1s ease-in-out;
-            resize: horizontal;
-            overflow: auto;
+            width: 280px; /* Default width */
+        }
+        
+        /* Only enable resize on large screens */
+        @media (min-width: 1024px) {
+            #sidebar {
+                resize: horizontal;
+                overflow: auto;
+            }
+        }
+
+        /* On mobile, take full available width minus a small margin */
+        @media (max-width: 1023px) {
+            #sidebar {
+                width: calc(vw) !important;
+                max-width: 320px;
+            }
         }
 
         .resizing {
@@ -423,8 +438,18 @@
 
     <script>
         function toggleSidebar() {
-            // Mobile sidebar toggle functionality
-            console.log('Sidebar toggled');
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+
+            sidebar.classList.toggle('-translate-x-full');
+
+            if (sidebar.classList.contains('-translate-x-full')) {
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+                backdrop.classList.remove('opacity-50');
+            } else {
+                backdrop.classList.remove('opacity-0', 'pointer-events-none');
+                backdrop.classList.add('opacity-50');
+            }
         }
 
         // Add click handlers for navigation items
@@ -479,88 +504,91 @@
             const resizer = document.getElementById('sidebar-resizer');
             let isResizing = false;
             let initialX, initialWidth;
-            
-            // Set initial width from localStorage or default to 16rem
-            const savedWidth = localStorage.getItem('sidebarWidth');
-            if (savedWidth) {
-                sidebar.style.width = savedWidth;
-            }
-            
-            // Add keyboard accessibility
-            resizer.addEventListener('keydown', function(e) {
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    const currentWidth = parseInt(getComputedStyle(sidebar).width);
-                    const newWidth = e.key === 'ArrowLeft' 
-                        ? Math.max(150, currentWidth - 10) 
-                        : Math.min(400, currentWidth + 10);
+
+            // Only enable resizing on desktop
+            function enableResizing() {
+                if (window.innerWidth >= 1024) { // lg breakpoint
+                    // Set initial width from localStorage or default to 16rem
+                    const savedWidth = localStorage.getItem('sidebarWidth');
+                    if (savedWidth) {
+                        sidebar.style.width = savedWidth + 'px';
+                    }
                     
-                    sidebar.style.width = newWidth + 'px';
-                    localStorage.setItem('sidebarWidth', newWidth + 'px');
+                    // Add event listeners for resizing
+                    resizer.addEventListener('mousedown', initResize);
+                    resizer.addEventListener('touchstart', initResize, { passive: false });
+                } else {
+                    // Remove event listeners on mobile
+                    resizer.removeEventListener('mousedown', initResize);
+                    resizer.removeEventListener('touchstart', initResize);
                 }
-            });
-            
-            // Mouse events with requestAnimationFrame for performance
-            resizer.addEventListener('mousedown', initResize);
-            resizer.addEventListener('touchstart', initResize, { passive: false });
-            
+            }
+
+            // Call initially and on resize
+            enableResizing();
+            window.addEventListener('resize', enableResizing);
+
             function initResize(e) {
                 isResizing = true;
                 initialX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
                 initialWidth = parseInt(getComputedStyle(sidebar).width);
-                
+
                 // Add visual indicator when resizing begins
                 resizer.classList.add('bg-indigo-500', 'w-1.5');
                 document.body.classList.add('select-none');
                 sidebar.classList.add('resizing');
-                
+
                 // Add temporary event listeners
                 if (e.type === 'touchstart') {
-                    document.addEventListener('touchmove', resize, { passive: false });
+                    document.addEventListener('touchmove', resize, {
+                        passive: false
+                    });
                     document.addEventListener('touchend', stopResize);
                 } else {
                     document.addEventListener('mousemove', resize);
                     document.addEventListener('mouseup', stopResize);
                 }
-                
+
                 e.preventDefault();
             }
-            
+
             function resize(e) {
                 if (!isResizing) return;
-                
+
                 // Use requestAnimationFrame for smooth performance
                 requestAnimationFrame(() => {
                     const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
                     const deltaX = clientX - initialX;
                     const newWidth = Math.max(150, Math.min(400, initialWidth + deltaX));
-                    
+
                     sidebar.style.width = newWidth + 'px';
                 });
-                
+
                 if (e.type === 'touchmove') e.preventDefault();
             }
-            
+
             function stopResize() {
                 if (isResizing) {
                     // Save final width to localStorage
                     localStorage.setItem('sidebarWidth', sidebar.style.width);
-                    
+
                     // Clean up
                     isResizing = false;
                     resizer.classList.remove('bg-indigo-500', 'w-1.5');
                     document.body.classList.remove('select-none');
                     sidebar.classList.remove('resizing');
-                    
+
                     // Remove temporary event listeners
                     document.removeEventListener('mousemove', resize);
                     document.removeEventListener('mouseup', stopResize);
                     document.removeEventListener('touchmove', resize);
                     document.removeEventListener('touchend', stopResize);
-                    
+
                     // Dispatch event for other components that might need to adjust
                     window.dispatchEvent(new CustomEvent('sidebarResized', {
-                        detail: { width: sidebar.style.width }
+                        detail: {
+                            width: sidebar.style.width
+                        }
                     }));
                 }
             }
