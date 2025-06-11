@@ -30,14 +30,14 @@
             }
         }
         
-        @keyframes float {
+        /* @keyframes float {
             0%, 100% {
                 transform: translateY(0px);
             }
             50% {
                 transform: translateY(-10px);
             }
-        }
+        } */
         
         .logo-pulse {
             animation: logo-pulse 2s infinite;
@@ -47,9 +47,9 @@
             animation: icon-bounce 2s infinite;
         }
         
-        .float-animation {
+        /* .float-animation {
             animation: float 6s ease-in-out infinite;
-        }
+        } */
         
         /* Improved image display */
         @media (max-width: 767px) {
@@ -98,7 +98,7 @@
             <div class="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
             <div class="absolute bottom-20 right-16 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
             
-            <div class="image-container w-full relative float-animation">
+            <div class="image-container w-full relative">
                 <img src="{{ asset('img/Frame 1.png') }}" alt="SiLapor Illustration"
                      class="w-full h-full object-contain sm:object-cover object-center drop-shadow-lg">
             </div>
