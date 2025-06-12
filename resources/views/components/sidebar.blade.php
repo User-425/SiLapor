@@ -3,7 +3,7 @@
 
     <!-- Header -->
     <div class="flex items-center justify-between p-4 border-b border-gray-100">
-        <div class="flex items-center">
+        <a href="{{ route('dashboard') }}" class="flex items-center hover:opacity-80 transition-opacity">
             <div class="relative">
                 <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md logo-pulse">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 icon-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -13,7 +13,7 @@
                 <div class="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"></div>
             </div>
             <span class="ml-3 text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">SiLapor</span>
-        </div>
+        </a>
         <!-- Close button for mobile -->
         <button class="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors lg:hidden"
             onclick="toggleSidebar()"
