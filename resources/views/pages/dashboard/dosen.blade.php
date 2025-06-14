@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Mahasiswa')
+@section('title', 'Dashboard Dosen')
 
 @section('content')
 <div class="container mx-auto px-4">
@@ -48,7 +48,7 @@
         </div>
 
         <div class="bg-white rounded-lg shadow-sm p-6">
-            <a href="{{ route('laporan.create') }}" class="flex items-center justify-center h-full">
+            <a href="{{ route('laporan.index', ['open_modal' => 'create']) }}" class="flex items-center justify-center h-full">
                 <div class="text-center">
                     <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mx-auto inline-block">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">

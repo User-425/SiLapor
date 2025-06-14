@@ -148,6 +148,23 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('open_modal') === 'create') {
+        const addLaporanModal = document.getElementById('addLaporanModal');
+        if (addLaporanModal) {
+            addLaporanModal.classList.remove('hidden');
+            const addForm = document.getElementById('addLaporanForm');
+            if (addForm) addForm.reset();
+            document.getElementById('add_photo_preview').classList.add('hidden');
+            document.getElementById('add_fasilitas_id').innerHTML = '<option value="">Pilih Fasilitas</option>';
+            document.getElementById('add_id_fas_ruang').innerHTML = '<option value="">Pilih Kode Fasilitas</option>';
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+
     // Modal Elements
     const detailModal = document.getElementById('detailModal');
     const addLaporanModal = document.getElementById('addLaporanModal');
