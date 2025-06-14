@@ -18,6 +18,8 @@ use App\Http\Controllers\UmpanBalikController;
 use App\Http\Controllers\EksporSarprasController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+
 
 // Authentication Routes
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -25,6 +27,8 @@ Route::post('/', [AuthController::class, 'login']);
 Route::get('/login', [AuthController::class, 'showLoginForm']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

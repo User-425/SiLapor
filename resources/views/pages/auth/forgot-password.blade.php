@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiLapor - Login</title>
+    <title>SiLapor - Forgot Password</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom animations */
@@ -30,15 +30,6 @@
             }
         }
         
-        /* @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        } */
-        
         .logo-pulse {
             animation: logo-pulse 2s infinite;
         }
@@ -46,10 +37,6 @@
         .icon-bounce {
             animation: icon-bounce 2s infinite;
         }
-        
-        /* .float-animation {
-            animation: float 6s ease-in-out infinite;
-        } */
         
         /* Improved image display */
         @media (max-width: 767px) {
@@ -104,7 +91,7 @@
             </div>
         </div>
 
-        <!-- Right side with login form -->
+        <!-- Right side with forgot password form -->
         <div class="w-full md:w-1/2 flex items-center justify-center py-8 px-4 sm:p-6 md:p-8 lg:p-12 bg-white">
             <div class="w-full max-w-sm sm:max-w-md">
                 <!-- Logo with new icon -->
@@ -119,56 +106,47 @@
                     </div>
                 </div>
 
-                <!-- Welcome text -->
+                <!-- Forgot password text -->
                 <div class="text-center mb-8 sm:mb-10">
                     <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-2 sm:mb-3">
-                        Welcome
+                        Forgot Password
                     </h1>
                     <p class="text-sm sm:text-base text-gray-600 leading-relaxed px-2 sm:px-0">
-                        Sign in to your account to access SiLapor and manage your reports seamlessly.
+                        Enter your email address to receive a password reset link.
                     </p>
                 </div>
 
-                <!-- Login form -->
-                <form method="POST" action="" class="space-y-6 sm:space-y-7">
+                <!-- Forgot password form -->
+                <form method="POST" action="{{ route('password.email') }}" class="space-y-6 sm:space-y-7">
                     @csrf
                     <div class="space-y-1">
-                        <label for="nama_pengguna" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                        <input id="nama_pengguna" name="nama_pengguna" type="text" required
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input id="email" name="email" type="email" required
                             class="input-focus w-full px-4 py-3 sm:px-5 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                            placeholder="Enter your username">
-                        @error('nama_pengguna')
+                            placeholder="Enter your email">
+                        @error('email')
                             <p class="error-message">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    <div class="space-y-1">
-                        <label for="kata_sandi" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input id="kata_sandi" name="kata_sandi" type="password" required
-                            class="input-focus w-full px-4 py-3 sm:px-5 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                            placeholder="Enter your password">
-                        @error('kata_sandi')
-                            <p class="error-message">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-8 text-right">
-                        <a href="{{ route('password.request') }}" class="text-sm text-indigo-600 hover:text-indigo-700 transition-colors duration-200">
-                            Forgot password?
-                        </a>
-                </div>
 
                     <div class="pt-2">
                         <button type="submit" class="btn-hover w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm sm:text-base transition-all duration-200 shadow-lg">
-                            Sign in to SiLapor
+                            Send Reset Link
                         </button>
                     </div>
                 </form>
 
+                <!-- Back to login link -->
+                <div class="mt-6 text-center">
+                    <a href="{{ route('login') }}" class="text-sm text-indigo-600 hover:text-indigo-700 transition-colors duration-200">
+                        Back to Login
+                    </a>
+                </div>
+
                 <!-- Footer text -->
                 <div class="mt-8 text-center">
                     <p class="text-xs sm:text-sm text-gray-500">
-                        Secure login protected by encryption
+                        Secure password reset process
                     </p>
                 </div>
             </div>
