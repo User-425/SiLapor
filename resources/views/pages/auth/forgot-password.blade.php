@@ -75,6 +75,17 @@
             font-size: 0.75rem;
             margin-top: 0.25rem;
         }
+
+        /* Success message styling */
+        .success-message {
+            background-color: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -116,6 +127,21 @@
                     </p>
                 </div>
 
+                <!-- Success message -->
+                @if (session('status'))
+                    <div class="success-message">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <strong>Email Sent Successfully!</strong><br>
+                                We have sent a password reset link to your email address. Please check your inbox (and spam folder) and click the link to reset your password.
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Forgot password form -->
                 <form method="POST" action="{{ route('password.email') }}" class="space-y-6 sm:space-y-7">
                     @csrf
@@ -123,7 +149,7 @@
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                         <input id="email" name="email" type="email" required
                             class="input-focus w-full px-4 py-3 sm:px-5 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                            placeholder="Enter your email">
+                            placeholder="Enter your email" value="{{ old('email') }}">
                         @error('email')
                             <p class="error-message">{{ $message }}</p>
                         @enderror
@@ -131,7 +157,7 @@
 
                     <div class="pt-2">
                         <button type="submit" class="btn-hover w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm sm:text-base transition-all duration-200 shadow-lg">
-                            Send Reset Link
+                            {{ session('status') ? 'Resend Reset Link' : 'Send Reset Link' }}
                         </button>
                     </div>
                 </form>
