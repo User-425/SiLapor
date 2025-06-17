@@ -29,7 +29,8 @@ class BatchController extends Controller
 
         // Get count of unbatched reports for display
         $unbatchedReportsCount = LaporanKerusakan::whereNull('id_batch')
-            ->where('status', 'menunggu_verifikasi')
+            ->Where('status', 'diproses')
+            ->whereNull('id_batch')
             ->count();
 
         return view('pages.batch.index', compact('batches', 'unbatchedReportsCount'));
@@ -42,7 +43,7 @@ class BatchController extends Controller
     {
         // Get all reports that aren't assigned to a batch and aren't completed/rejected
         $availableReports = LaporanKerusakan::whereNull('id_batch')
-            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->whereIn('status', ['diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
             ->get();
 
@@ -101,7 +102,7 @@ class BatchController extends Controller
 
         // Get available reports that could be added to this batch
         $availableReports = LaporanKerusakan::whereNull('id_batch')
-            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->whereIn('status', ['diproses'])
             ->count();
 
         return view('pages.batch.show', compact('batch', 'laporansByStatus', 'availableReports'));
@@ -205,7 +206,7 @@ class BatchController extends Controller
         }
 
         $availableReports = LaporanKerusakan::whereNull('id_batch')
-            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->whereIn('status', ['diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'pengguna'])
             ->get();
 
@@ -244,7 +245,7 @@ class BatchController extends Controller
 
         // Load reports with criteria
         $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
-            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->whereIn('status', ['diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
             ->get();
 
@@ -294,7 +295,7 @@ class BatchController extends Controller
 
         // Load reports with criteria
         $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
-            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->whereIn('status', ['diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
             ->get();
 
@@ -336,7 +337,7 @@ class BatchController extends Controller
 
         // Load reports with criteria
         $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
-            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->whereIn('status', ['diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
             ->get();
 
@@ -371,7 +372,7 @@ class BatchController extends Controller
 
         // Load reports with criteria
         $reports = LaporanKerusakan::where('id_batch', $batch->id_batch)
-            ->whereIn('status', ['menunggu_verifikasi', 'diproses'])
+            ->whereIn('status', ['diproses'])
             ->with(['fasilitasRuang.fasilitas', 'fasilitasRuang.ruang.gedung', 'kriteria'])
             ->get();
 
