@@ -164,6 +164,17 @@ document.addEventListener('DOMContentLoaded', function() {
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     }
+    const reportId = urlParams.get('open_report');
+    if (reportId) {
+        setTimeout(() => {
+            const detailBtn = document.querySelector(`.detail-btn[data-id="${reportId}"]`);
+            if (detailBtn) {
+                detailBtn.click();
+            }
+        }, 500);
+        const newUrl = window.location.pathname + (urlParams.toString().replace(`open_report=${reportId}`, '').replace(/^&/, '?').replace(/^\?$/, ''));
+        window.history.replaceState({}, document.title, newUrl || window.location.pathname);
+    }
 
     // Modal Elements
     const detailModal = document.getElementById('detailModal');

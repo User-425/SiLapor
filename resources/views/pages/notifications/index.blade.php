@@ -72,9 +72,15 @@
                         
                         <div class="mt-3 flex">
                             @if(isset($notification->data['id_laporan']))
-                                <a href="{{ route('laporan.show', $notification->data['id_laporan']) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
-                                    Lihat Laporan
-                                </a>
+                                @if(auth()->user()->peran === 'sarpras')
+                                    <a href="{{ route('laporan.index', ['open_report' => $notification->data['id_laporan']]) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                                        Lihat Laporan
+                                    </a>
+                                @else
+                                    <a href="{{ route('laporan.show', $notification->data['id_laporan']) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                                        Lihat Laporan
+                                    </a>
+                                @endif
                             @elseif(isset($notification->data['id_tugas']))
                                 <a href="{{ route('teknisi.index') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
                                     Lihat Tugas

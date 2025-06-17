@@ -311,6 +311,15 @@
             if (successMsg) successMsg.style.display = 'none';
             if (errorMsg) errorMsg.style.display = 'none';
         }, 5000);
+        const urlParams = new URLSearchParams(window.location.search);
+        const reportId = urlParams.get('open_report');
+        if (reportId) {
+            setTimeout(() => {
+                showDetail(reportId);
+            }, 500);
+            const newUrl = window.location.pathname + (urlParams.toString().replace(`open_report=${reportId}`, '').replace(/^&/, '?').replace(/^\?$/, ''));
+            window.history.replaceState({}, document.title, newUrl || window.location.pathname);
+        }
 
         // DOM Elements
         const detailModal = document.getElementById('detailModal');
