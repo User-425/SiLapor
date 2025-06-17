@@ -22,6 +22,7 @@ class Pengguna extends Authenticatable
         'email',
         'nomor_telepon',
         'img_url',
+        'remember_token',
     ];
 
     protected $hidden = [
